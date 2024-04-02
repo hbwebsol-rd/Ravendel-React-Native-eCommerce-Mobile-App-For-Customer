@@ -32,10 +32,11 @@ export const checkoutDetailsAction =
 
         const cartData = { id: cartId, products: [] };
         dispatch(updateCartAction(cartData, checkoutDetailsData.customer_id));
-
-        navigation.navigate(NavigationConstants.STRIPE_PAYMENT, {
-          url: response.data.addOrder.redirectUrl,
-        });
+        checkoutDetailsData.billing.paymentMethod === 'Cash On Delivery'
+          ? navigation.navigate(NavigationConstants.THANK_YOU_SCREEN)
+          : navigation.navigate(NavigationConstants.STRIPE_PAYMENT, {
+              url: response.data.addOrder.redirectUrl,
+            });
       } else {
         dispatch({ type: CHECKOUT_LOADING_STOP });
         dispatch({

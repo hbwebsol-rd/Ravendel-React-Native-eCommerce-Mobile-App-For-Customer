@@ -1,7 +1,13 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { AText, AButton, AppLoader, BackHeader } from '../../theme-components';
 import styled from 'styled-components/native';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { formatCurrency, isEmpty } from '../../utils/helper';
 import { useIsFocused } from '@react-navigation/native';
@@ -194,17 +200,7 @@ const CheckoutScreen = ({ navigation, route }) => {
             <View style={styles.container2}>
               <View style={styles.step}>
                 <View style={styles.circle} />
-                <View
-                  style={{
-                    top: 5,
-                    left: 5,
-                    position: 'absolute',
-                    width: 10,
-                    height: 10,
-                    borderRadius: 10,
-                    backgroundColor: APP_PRIMARY_COLOR,
-                  }}
-                />
+                <View style={styles.activeDot} />
                 <View style={styles.line} />
                 <View
                   style={{
@@ -286,11 +282,13 @@ const CheckoutScreen = ({ navigation, route }) => {
               <AText large fonts={FontStyle.semiBold} color="black">
                 Select Delivery Address
               </AText>
-              <View style={styles.addaddresscard}>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => {
+                  setAddressForm(true);
+                }}
+                style={styles.addaddresscard}>
                 <AIcon
-                  onPress={() => {
-                    setAddressForm(true);
-                  }}
                   style={{
                     height: 26,
                     width: 26,
@@ -304,7 +302,7 @@ const CheckoutScreen = ({ navigation, route }) => {
                 <AText ml="20px" color="black" fonts={FontStyle.semiBold}>
                   Add a new address
                 </AText>
-              </View>
+              </TouchableOpacity>
               <AButton
                 ml="50px"
                 mr="50px"
@@ -340,7 +338,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingBottom: 20,
+    paddingBottom: 30,
+    marginTop: 30,
   },
   step: {
     position: 'relative',
@@ -398,6 +397,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  activeDot: {
+    top: 5,
+    left: 5,
+    position: 'absolute',
+    width: 10,
+    height: 10,
+    borderRadius: 10,
+    backgroundColor: APP_PRIMARY_COLOR,
   },
 });
 

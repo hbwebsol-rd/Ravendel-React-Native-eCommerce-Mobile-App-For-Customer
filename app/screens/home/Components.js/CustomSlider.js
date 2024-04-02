@@ -25,7 +25,7 @@ const windowWidth = Dimensions.get('window').width;
 const itemWidth = windowWidth * 0.4; // visible item width
 const itemHeight = itemWidth * 1.5; // visible item height
 
-function ImageSlider({ dataItems, navigatetonext }) {
+function ImageSlider({ dataItems, navigatetonext, title }) {
   const [selectedId, setSelectedId] = useState(null);
   const { currencySymbol, currencyOptions } = useSelector(
     (state) => state.settings,
@@ -107,7 +107,7 @@ function ImageSlider({ dataItems, navigatetonext }) {
   return (
     <View style={styles.container}>
       <AText ml="30px" mb={'10px'} large fonts={FontStyle.fontBold}>
-        New Arrivals
+        {title}
       </AText>
       <FlatList
         data={dataItems}

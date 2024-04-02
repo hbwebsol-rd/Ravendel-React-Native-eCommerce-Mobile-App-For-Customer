@@ -55,7 +55,7 @@ const CheckoutScreen = ({ navigation, route }) => {
   const [deliveryCharges, setDeliveryCharges] = useState(0);
   const [taxAmount, setTaxAmount] = useState(0);
   const [productArr, setProductArr] = useState([]);
-  const [checked, setChecked] = React.useState('Cod');
+  const [checked, setChecked] = React.useState('Cash On Delivery');
   const { couponDiscount } = useSelector((state) => state.cart);
   const { currencyOptions, currencySymbol } = useSelector(
     (state) => state.settings,
@@ -268,11 +268,13 @@ const CheckoutScreen = ({ navigation, route }) => {
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <RadioButton
                 color={APP_PRIMARY_COLOR}
-                value="Cod"
-                status={checked === 'Cod' ? 'checked' : 'unchecked'}
-                onPress={() => setChecked('Cod')}
+                value="Cash On Delivery"
+                status={
+                  checked === 'Cash On Delivery' ? 'checked' : 'unchecked'
+                }
+                onPress={() => setChecked('Cash On Delivery')}
               />
-              <AText style={{ color: 'black' }}>Cash on Delivery</AText>
+              <AText style={{ color: 'black' }}>Cash On Delivery</AText>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <RadioButton
@@ -283,6 +285,16 @@ const CheckoutScreen = ({ navigation, route }) => {
               />
               <AText style={{ color: 'black' }}>Stripe</AText>
             </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <RadioButton
+                color={APP_PRIMARY_COLOR}
+                value="Paypal"
+                status={checked === 'Paypal' ? 'checked' : 'unchecked'}
+                onPress={() => setChecked('Paypal')}
+              />
+              <AText style={{ color: 'black' }}>Paypal</AText>
+            </View>
+
             {/* <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <RadioButton
                 color={APP_PRIMARY_COLOR}
@@ -490,7 +502,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingBottom: 20,
+    paddingBottom: 30,
+    marginTop: 30,
   },
   step: {
     position: 'relative',

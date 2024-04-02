@@ -4,7 +4,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   productsAction,
   removeFromCartAction,
-  updateCartAction,
   applyCouponAction,
   checkStorageAction,
 } from '../../store/action';
@@ -50,7 +49,6 @@ const CartScreen = ({ navigation }) => {
     (state) => state.cart,
   );
   const { Loading, products } = useSelector((state) => state.products);
-  const loadingproduct = useSelector((state) => state.products.loading);
   const { currencySymbol, currencyOptions } = useSelector(
     (state) => state.settings,
   );
@@ -63,8 +61,6 @@ const CartScreen = ({ navigation }) => {
   // Custom Function
   const fetchCart = () => {
     if (isEmpty(userDetails)) {
-      console.log(userDetails._id, 'pppp');
-
       dispatch(checkStorageAction());
     } else {
       console.log(userDetails._id);
@@ -89,8 +85,8 @@ const CartScreen = ({ navigation }) => {
       if (cartProducts.length > 1) {
         if (isLoggin) {
           const cartData = {
-            id: cartId,
-            product_id: removedItem._id,
+            userId: userDetails._id,
+            productId: removedItem.productId,
           };
           dispatch(removeFromCartAction(cartData, userDetails._id));
         } else {
@@ -117,7 +113,6 @@ const CartScreen = ({ navigation }) => {
   const increaseItemQty = async (item) => {
     var cartitem = [];
     var outOfStock = false;
-    // console.log(JSON.stringify(cartItems), ' cartitem', JSON.stringify(item));
     cartItems.map((cart) => {
       if (cart.productId === item.productId) {
         console.log(
@@ -227,9 +222,6 @@ const CartScreen = ({ navigation }) => {
       cartItems: cartpro,
       userId: userDetails._id,
     };
-    console.log(payload, ' cart coupon');
-    // return;
-    // setCouponModal(false);
     dispatch(applyCouponAction(payload, setCouponApplied));
   };
 
@@ -245,7 +237,6 @@ const CartScreen = ({ navigation }) => {
 
   // Use Effect Call
   useEffect(() => {
-    dispatch(productsAction());
     fetchCart();
   }, [isFocused]);
 
@@ -254,7 +245,7 @@ const CartScreen = ({ navigation }) => {
   }, [products, cartItems]);
   return (
     <>
-      {loadingproduct || loading ? <AppLoader /> : null}
+      {loading ? <AppLoader /> : null}
       <Header navigation={navigation} title={'My Cart'} />
       <View style={styles.container}>
         <>
@@ -296,7 +287,11 @@ const CartScreen = ({ navigation }) => {
                           fonts={FontStyle.semiBold}
                           medium
                           color={Colors.blackColor}>
-                          ${product.productPrice + '.00'}
+                          {formatCurrency(
+                            product.productPrice,
+                            currencyOptions,
+                            currencySymbol,
+                          )}
                           <Text
                             style={{
                               marginLeft: 15,
@@ -305,7 +300,11 @@ const CartScreen = ({ navigation }) => {
                               textDecorationLine: 'line-through',
                             }}>
                             {' '}
-                            ${product.mrpAmount + '.00'}
+                            {formatCurrency(
+                              product.mrpAmount,
+                              currencyOptions,
+                              currencySymbol,
+                            )}
                           </Text>
                           <Text
                             style={{
@@ -457,6 +456,20 @@ const CartScreen = ({ navigation }) => {
                       )}
                     </AText>
                   </View>
+                  {couponApplied && (
+                    <View style={styles.summary}>
+                      <AText fonts={FontStyle.semiBold}>
+                        Discount By Coupon
+                      </AText>
+                      <AText color={Colors.green}>
+                        {formatCurrency(
+                          couponDiscount,
+                          currencyOptions,
+                          currencySymbol,
+                        )}
+                      </AText>
+                    </View>
+                  )}
                   <View
                     style={{
                       ...styles.summary,
@@ -528,7 +541,7 @@ const CartScreen = ({ navigation }) => {
                   round
                   mb="30px"
                   onPress={() => {
-                    !isEmpty(isLoggin)
+                    isLoggin
                       ? navigation.navigate(
                           NavigationConstants.SHIPPING_SCREEN,
                           {
