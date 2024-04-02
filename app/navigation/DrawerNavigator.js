@@ -36,6 +36,7 @@ import {
   Shop,
   SubcategoriesOption,
   CheckoutDetails,
+  ContactUs,
 } from '../screens';
 import { AText } from '../theme-components';
 import ShippingMethodScreen from '../screens/checkout/ShippingMethodScreen';
@@ -323,7 +324,7 @@ const DrawerNavigator = () => {
       />
       <Drawer.Screen
         name={'Contact us'}
-        component={ShippingScreen}
+        component={ContactUs}
         options={{
           drawerItemStyle: {
             borderBottomColor: '#ABA7A7',

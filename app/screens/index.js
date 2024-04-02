@@ -27,6 +27,7 @@ import UserEntry from './account/loginsignup';
 import Splash from './splash';
 import Shop from './shop';
 import ThankYou from './checkout/thankYou';
+import { ContactUs } from './mics';
 export {
   HomeScreen,
   CartScreen,
@@ -57,4 +58,5 @@ export {
   CheckoutDetails,
   StripePayment,
   ThankYou,
+  ContactUs,
 };
