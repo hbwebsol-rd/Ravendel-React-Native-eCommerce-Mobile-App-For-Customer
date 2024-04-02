@@ -146,6 +146,7 @@ const Navigation = () => {
           name={NVC.HOME_SCREEN}
           options={{
             tabBarLabel: 'Home',
+            unmountOnBlur: false,
           }}
           component={HomeScreen}
         />

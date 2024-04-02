@@ -15,6 +15,7 @@ import {
   getValue,
   isEmpty,
   unflatten,
+  wait,
 } from '../../utils/helper';
 import { useIsFocused } from '@react-navigation/native';
 import { useState } from 'react';
@@ -72,6 +73,7 @@ const HomeScreen = ({ navigation }) => {
   const userDetails = useSelector((state) => state.customer.userDetails);
   const catLoading = useSelector((state) => state.products.loading);
   const loginState = useSelector((state) => state.login);
+  const [refreshing, setRefreshing] = useState(false);
   const {
     homeData,
     featureData,
@@ -182,6 +184,12 @@ const HomeScreen = ({ navigation }) => {
     return cat;
   };
 
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    dispatch(AppSettingAction());
+    dispatch(categoriesAction());
+    wait(2000).then(() => setRefreshing(false));
+  }, []);
   // Use Effect Call
 
   useEffect(() => {
@@ -285,7 +293,11 @@ const HomeScreen = ({ navigation }) => {
         </ARow>
       </View>
       <View style={{ padding: 10, backgroundColor: Colors.whiteColor }}></View>
-      <AContainer withoutPadding nestedScrollEnabled={true}>
+      <AContainer
+        onRefresh={onRefresh}
+        refreshing={refreshing}
+        withoutPadding
+        nestedScrollEnabled={true}>
         <Categories
           navigation
           navigateNextScreen={(item) => {
@@ -308,6 +320,7 @@ const HomeScreen = ({ navigation }) => {
               </ACol>
             </ARow>
             <ImageSlider
+              title={'New Arrival'}
               dataItems={recentAddedProduct}
               navigatetonext={(item) => {
                 navigation.navigate(NavigationConstants.SINGLE_PRODUCT_SCREEN, {
@@ -353,15 +366,8 @@ const HomeScreen = ({ navigation }) => {
               </ACol>
             </ARow>
             <SectionView>
-              <AText
-                ml="30px"
-                mb={'10px'}
-                mt={'15px'}
-                large
-                fonts={FontStyle.fontBold}>
-                Featured Collection
-              </AText>
-              <HomeComponentShowViews
+              <ImageSlider
+                title={'Featured Collection'}
                 dataItems={featureData}
                 navigatetonext={(item) => {
                   navigation.navigate(
@@ -391,15 +397,8 @@ const HomeScreen = ({ navigation }) => {
               </ACol>
             </ARow>
             <SectionView>
-              <AText
-                ml="30px"
-                mb={'10px'}
-                mt={'15px'}
-                large
-                fonts={FontStyle.fontBold}>
-                Latest Collection
-              </AText>
-              <HomeComponentShowViews
+              <ImageSlider
+                title={'Latest Collection'}
                 dataItems={recentAddedProduct}
                 navigatetonext={(item) => {
                   navigation.navigate(
