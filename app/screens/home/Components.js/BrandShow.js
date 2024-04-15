@@ -53,7 +53,7 @@ const CategoriesListingWrapper = styled.TouchableOpacity`
 const CategoriesImageWrapper = styled.View`
   width: 100px;
   height: 100px;
-  border-radius: 100px;
+  // border-radius: 100px;
   overflow: hidden;
   margin: 2px auto;
 `;

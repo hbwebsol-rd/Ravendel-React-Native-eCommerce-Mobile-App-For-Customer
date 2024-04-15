@@ -238,7 +238,7 @@ const CartScreen = ({ navigation }) => {
   // Use Effect Call
   useEffect(() => {
     fetchCart();
-  }, [isFocused]);
+  }, []);
 
   useEffect(() => {
     ListProducts();
@@ -252,13 +252,13 @@ const CartScreen = ({ navigation }) => {
           {cartProducts && cartProducts.length ? (
             <>
               <ScrollView
-                keyboardShouldPersistTaps={true}
+                keyboardShouldPersistTaps={'always'}
                 style={{ width: '100%' }}
                 showsVerticalScrollIndicator={false}>
-                {cartProducts.map((product) => (
+                {cartProducts.map((product, index) => (
                   <TouchableOpacity
                     style={styles.productitem}
-                    key={product.id}
+                    key={index}
                     onPress={() => {
                       console.log(product);
                       navigation.navigate(

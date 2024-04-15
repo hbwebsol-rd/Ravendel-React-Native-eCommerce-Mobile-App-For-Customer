@@ -4,6 +4,7 @@ import { Formik, useFormik } from 'formik';
 import styled from 'styled-components/native';
 import { Appbar, Checkbox, TextInput } from 'react-native-paper';
 import {
+  KeyboardAvoidingView,
   Modal,
   Platform,
   StyleSheet,
@@ -112,21 +113,6 @@ const AdressForm = ({
 
               <TextInput
                 style={styles.textinputstyle}
-                label="Pincode"
-                value={formik.values.pincode}
-                onChangeText={formik.handleChange('pincode')}
-                onBlur={() => formik.setFieldTouched('pincode')}
-                keyboardType={'number-pad'}
-                returnKeyType="done"
-              />
-              {formik.touched.pincode && formik.errors.pincode && (
-                <AText color="red" xtrasmall>
-                  {formik.errors.pincode}
-                </AText>
-              )}
-
-              <TextInput
-                style={styles.textinputstyle}
                 label="Address"
                 value={formik.values.address}
                 onChangeText={formik.handleChange('address')}
@@ -200,6 +186,20 @@ const AdressForm = ({
               {formik.touched.city && formik.errors.city && (
                 <AText color="red" xtrasmall>
                   {formik.errors.city}
+                </AText>
+              )}
+              <TextInput
+                style={styles.textinputstyle}
+                label="Pincode"
+                value={formik.values.pincode}
+                onChangeText={formik.handleChange('pincode')}
+                onBlur={() => formik.setFieldTouched('pincode')}
+                keyboardType={'number-pad'}
+                returnKeyType="done"
+              />
+              {formik.touched.pincode && formik.errors.pincode && (
+                <AText color="red" xtrasmall>
+                  {formik.errors.pincode}
                 </AText>
               )}
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>

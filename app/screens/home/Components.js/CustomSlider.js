@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     height: itemHeight,
     resizeMode: 'contain',
     borderRadius: 10,
-    marginHorizontal: (windowWidth * 0.1) / 2,
+    marginHorizontal: 8,
   },
   sideItemImage: {
     width: itemWidth * 0.8,

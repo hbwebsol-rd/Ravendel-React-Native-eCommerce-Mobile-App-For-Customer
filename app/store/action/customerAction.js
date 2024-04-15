@@ -26,6 +26,10 @@ export const editCustomerAction = (payload, navigation) => async (dispatch) => {
       navigation.navigate(NavigationConstants.ACCOUNT_SCREEN, {
         initial: false,
       });
+      dispatch({
+        type: ALERT_SUCCESS,
+        payload: 'Profile Update Successfully',
+      });
       dispatch({ type: CUSTOMER_LOADING_FAIL });
     } else {
       dispatch({ type: CUSTOMER_LOADING_FAIL });
@@ -95,6 +99,10 @@ export const userDetailsfetch = (id) => async (dispatch) => {
       const customerOldData = await getValue('userDetails');
       const cold = JSON.parse(customerOldData);
       cold.addressBook = _.get(response, 'data.customer.data.addressBook', []);
+      cold.firstName = _.get(response, 'data.customer.data.firstName', '');
+      cold.lastName = _.get(response, 'data.customer.data.lastName', '');
+      cold.email = _.get(response, 'data.customer.data.email', '');
+      cold.phone = _.get(response, 'data.customer.data.phone', '');
 
       storeData('userDetails', JSON.stringify(cold));
       dispatch({ type: USER, payload: cold });

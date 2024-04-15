@@ -67,6 +67,8 @@ const Textinputs = ({
   sc,
   onSubmit,
   pt,
+  onfocus,
+  textInputRef,
 }) => {
   const { passwordVisibility, rightIcon, handlePasswordVisibility } =
     useTogglePasswordVisibility();
@@ -109,6 +111,8 @@ const Textinputs = ({
       </ARow>
       <View style={styles.inputviewstyle}>
         <TextInput
+          ref={textInputRef}
+          onFocus={onfocus}
           onSubmitEditing={onSubmit}
           pointerEvents={pe ?? 'auto'}
           editable={editable ?? true}
@@ -139,7 +143,7 @@ const Textinputs = ({
               paddingBottom: pb ?? 0,
               paddingTop: pt ?? 0,
               color: color ?? '#ABA7A7',
-              fontFamily: FontStyle.fontBoldItalic,
+              fontFamily: FontStyle.fontBold,
               fontSize: fs ?? 12,
               marginTop: mt ?? 0,
             },

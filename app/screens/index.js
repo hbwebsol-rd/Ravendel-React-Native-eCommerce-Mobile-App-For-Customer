@@ -28,6 +28,9 @@ import Splash from './splash';
 import Shop from './shop';
 import ThankYou from './checkout/thankYou';
 import { ContactUs } from './mics';
+import WishList from './account/wishlist';
+import Notification from './account/notification';
+import PaypalPayment from './checkout/PaypalPayment';
 export {
   HomeScreen,
   CartScreen,
@@ -59,4 +62,7 @@ export {
   StripePayment,
   ThankYou,
   ContactUs,
+  WishList,
+  Notification,
+  PaypalPayment,
 };

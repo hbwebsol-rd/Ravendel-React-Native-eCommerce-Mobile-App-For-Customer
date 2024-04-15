@@ -16,7 +16,7 @@ function CategoryItem({ category, navigateNextScreen }) {
   return (
     <TouchableOpacity
       onPress={() => navigateNextScreen(category)}
-      activeOpacity={0.5}
+      activeOpacity={0.9}
       style={styles.categoryItem}>
       {/* {console.log(URL + category.image, 'imm')} */}
       <Image
@@ -25,9 +25,9 @@ function CategoryItem({ category, navigateNextScreen }) {
             ? URL + category.image
             : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
         }}
-        style={{ width: 50, height: 50, borderRadius: 30 }}
+        style={{ width: 60, height: 60, borderRadius: 30 }}
       />
-      <AText color={GREYTEXT} fonts={FontStyle.fontBold}>
+      <AText center small color={GREYTEXT} fonts={FontStyle.fontBold}>
         {category.name}
       </AText>
     </TouchableOpacity>

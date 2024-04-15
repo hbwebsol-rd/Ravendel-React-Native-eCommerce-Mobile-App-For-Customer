@@ -65,12 +65,14 @@ const CategoriesScreen = ({ navigation }) => {
     });
   };
 
+  //List of categories
   const menuListing = (Categories) => {
     return Categories.map((category) => {
       if (category.parentId === null) {
         return (
           <ACol mt={'60px'} col={2} key={category.id}>
             <CategoriesListingWrapper
+              activeOpacity={0.9}
               onPress={() => navigateNextScreen(category)}>
               <ARow height="100%" padding={0}>
                 <ACol col={1}>
@@ -116,7 +118,7 @@ const CategoriesScreen = ({ navigation }) => {
 
 const CategoriesListingWrapper = styled.TouchableOpacity`
   margin: 10px 0 20px 0;
-  height: 140px;
+  height: 120px;
   border-radius: 15px;
   background-color: #f7f7f7;
   elevation: 1;

@@ -61,13 +61,15 @@ const Shop = ({ navigation, route }) => {
   const dispatch = useDispatch();
   const [amountRange, setAmountRange] = useState([0, 10000]);
 
+  //Slider Value Setter
   const multiSliderValuesChange = (values) => {
     setAmountRange(values);
   };
+
   const bottomSheetModalRef = useRef(null);
 
   // variables
-  const snapPoints = useMemo(() => ['60%'], []);
+  const snapPoints = useMemo(() => ['60%'], []); // For Bottomsheet Modal
   const { currencyOptions, currencySymbol } = useSelector(
     (state) => state.settings,
   );
@@ -76,9 +78,11 @@ const Shop = ({ navigation, route }) => {
     console.log('pressing', bottomSheetModalRef.current);
     bottomSheetModalRef.current?.present();
   }, []);
+
   const handleSheetChanges = useCallback((index) => {
     console.log('handleSheetChanges', index);
   }, []);
+
   const [starCount, setStarCount] = useState(5);
   const [ActiveBrand, setActiveBrand] = useState('');
   const onStarRatingPress = (rating) => {
@@ -87,7 +91,7 @@ const Shop = ({ navigation, route }) => {
   const { brands } = useSelector((state) => state.settings);
   const [selectedCat, setSelectedCat] = useState('All');
   const [selectedCatId, setSelectedCatId] = useState('');
-  const searchWord = route?.params?.searchTerm;
+  const searchWord = route?.params?.searchTerm ?? '';
 
   const loading = useSelector((state) => state.products.loading);
   const singleCateogry = useSelector(
@@ -102,8 +106,7 @@ const Shop = ({ navigation, route }) => {
     setsearchTerm(e);
   };
 
-  // Custom Call
-
+  // Search Products
   useEffect(() => {
     let array;
     if (
@@ -167,6 +170,7 @@ const Shop = ({ navigation, route }) => {
       },
       search: searchTerm,
     };
+    console.log(filter, 'filterapi');
     dispatch(catProductAction(filter, true));
   };
 

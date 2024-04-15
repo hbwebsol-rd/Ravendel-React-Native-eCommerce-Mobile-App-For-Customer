@@ -129,6 +129,7 @@ const ShippingMethodScreen = ({ navigation, route }) => {
                 style={{
                   ...styles.label,
                   alignItems: 'flex-start',
+                  marginLeft: -15,
                 }}>
                 <AText fonts={FontStyle.semiBold} color="black">
                   Address
@@ -150,7 +151,12 @@ const ShippingMethodScreen = ({ navigation, route }) => {
               <View style={styles.line} />
 
               <View style={styles.circle} />
-              <View style={{ ...styles.label, alignItems: 'flex-end' }}>
+              <View
+                style={{
+                  ...styles.label,
+                  alignItems: 'flex-end',
+                  marginLeft: 24,
+                }}>
                 <AText fonts={FontStyle.semiBold} color="black">
                   Order Detail
                 </AText>

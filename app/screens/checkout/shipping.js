@@ -33,9 +33,9 @@ const CheckoutScreen = ({ navigation, route }) => {
   const { couponDiscount } = useSelector((state) => state.cart);
   const [addressDefault, setaddressDefault] = useState(0);
   const [initialFormValues, setInitialFormValues] = useState({
-    firstname: '',
-    lastname: '',
-    phone: '',
+    firstname: userDetails.firstName,
+    lastname: userDetails.lastName,
+    phone: userDetails.phone,
     address: '',
     landmark: '',
     city: '',
@@ -206,6 +206,7 @@ const CheckoutScreen = ({ navigation, route }) => {
                   style={{
                     ...styles.label,
                     alignItems: 'flex-start',
+                    marginLeft: -15,
                   }}>
                   <AText fonts={FontStyle.semiBold} color="black">
                     Address
@@ -226,7 +227,12 @@ const CheckoutScreen = ({ navigation, route }) => {
                 <View style={styles.line} />
 
                 <View style={styles.circle} />
-                <View style={{ ...styles.label, alignItems: 'flex-end' }}>
+                <View
+                  style={{
+                    ...styles.label,
+                    alignItems: 'flex-end',
+                    marginLeft: 24,
+                  }}>
                   <AText fonts={FontStyle.semiBold} color="black">
                     Order Detail
                   </AText>
