@@ -49,8 +49,8 @@ const SavedAddressScreen = ({ navigation, route }) => {
   });
 
   useEffect(() => {
-    if (!isEmpty(userDetails.address_book)) {
-      let address = userDetails.address_book;
+    if (!isEmpty(userDetails.addressBook)) {
+      let address = userDetails.addressBook;
       setAddressBook(address);
       setAddressForm(false);
       var found = address.find((item) => {
@@ -121,11 +121,11 @@ const SavedAddressScreen = ({ navigation, route }) => {
   };
   const editFormValues = (values) => {
     setInitialFormValues({
-      firstname: values.first_name,
-      lastname: values.last_name,
+      firstname: values.firstName,
+      lastname: values.lastName,
       phone: values.phone,
-      address: values.address_line1,
-      landmark: values.address_line2,
+      address: values.addressLine1,
+      landmark: values.addressLine2,
       city: values.city,
       state: values.state,
       country: values.country,
@@ -162,7 +162,7 @@ const SavedAddressScreen = ({ navigation, route }) => {
   return (
     <>
       {loading ? <AppLoader /> : null}
-      {(isEmpty(userDetails) && isEmpty(userDetails.address_book)) ||
+      {(isEmpty(userDetails) && isEmpty(userDetails.addressBook)) ||
       addressForm ? (
         <AdressForm
           navigation={navigation}
@@ -194,14 +194,14 @@ const SavedAddressScreen = ({ navigation, route }) => {
                 title="+ Add new address"
               />
               <AddressWrapper>
-                {userDetails.address_book.map((item, index) => (
+                {userDetails.addressBook.map((item, index) => (
                   <AddressContentWrapper>
                     <RadioButtonWrapper
                       onPress={() => {
                         updatedefaultaddress(item);
                       }}>
                       <AText heavy large>
-                        {item.first_name}
+                        {item.firstName}
                       </AText>
                       <Icon
                         name={'star'}
@@ -212,7 +212,7 @@ const SavedAddressScreen = ({ navigation, route }) => {
                       />
                     </RadioButtonWrapper>
                     <AText color={GREYTEXT} medium>
-                      {item.address_line1}, {item.address_line2}, {item.city}
+                      {item.addressLine1}, {item.addressLine2}, {item.city}
                     </AText>
                     <AText color={GREYTEXT} medium>
                       {item.state}, {item.pincode}
