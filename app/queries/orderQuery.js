@@ -254,22 +254,17 @@ const ORDER_HISTORY = gql`
   query ($id: ID!) {
     orderbyUser(userId: $id) {
       data {
-        billing
-        userId
-        date
-        couponCode
-        discountAmount
-        grandTotal
         id
-        products
-        shipping
-        shippingAmount
-        shippingStatus
+        orderNumber
+        userId
         paymentStatus
-        cartTotal
-        taxAmount
-        discountGrandTotal
-
+        shippingStatus
+        shipping
+        billing
+        products
+        couponCard
+        totalSummary
+        date
         updated
       }
       message {
