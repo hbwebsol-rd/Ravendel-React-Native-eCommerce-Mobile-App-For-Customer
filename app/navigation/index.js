@@ -30,6 +30,8 @@ import {
   CheckoutDetails,
   StripePayment,
   ThankYou,
+  WishList,
+  PaypalPayment,
 } from '../screens';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
@@ -82,7 +84,7 @@ const Navigation = () => {
               position: 'absolute',
               right: -6,
               top: -3,
-              backgroundColor: '#000',
+              backgroundColor: APP_PRIMARY_COLOR,
               borderRadius: 10,
               width: 15,
               height: 15,
@@ -109,7 +111,9 @@ const Navigation = () => {
         screenOptions={({ route }) => ({
           tabBarStyle: {
             backgroundColor: Colors.lightestPrimaryColor,
-            paddingBottom: 4,
+            paddingBottom: 10,
+            paddingTop: 10,
+            height: 60,
           },
           tabBarLabelStyle: {
             fontSize: 14,
@@ -213,13 +217,30 @@ const Navigation = () => {
         />
         <Stack.Screen
           name={NVC.CHECKOUT_SCREEN}
-          options={{ headerShown: false, tabBarButton: () => null }}
+          options={{
+            headerShown: false,
+            tabBarButton: () => null,
+            tabBarStyle: { display: 'none' },
+          }}
           component={CheckoutScreen}
         />
         <Stack.Screen
           name={NVC.STRIPE_PAYMENT}
-          options={{ headerShown: false, tabBarButton: () => null }}
+          options={{
+            headerShown: false,
+            tabBarButton: () => null,
+            tabBarStyle: { display: 'none' },
+          }}
           component={StripePayment}
+        />
+        <Stack.Screen
+          name={NVC.PAYPAL_PAYMENT}
+          options={{
+            headerShown: false,
+            tabBarButton: () => null,
+            tabBarStyle: { display: 'none' },
+          }}
+          component={PaypalPayment}
         />
         <Stack.Screen
           name={NVC.CHECKOUT_DETAILS_SCREEN}
@@ -287,6 +308,15 @@ const Navigation = () => {
             tabBarStyle: { display: 'none' },
           }}
           component={UserEntry}
+        />
+        <Stack.Screen
+          name={NVC.WISHLIST}
+          options={{
+            headerShown: false,
+            tabBarButton: () => null,
+            tabBarStyle: { display: 'none' },
+          }}
+          component={WishList}
         />
         <Stack.Screen
           name={NVC.FORGOT_PASSWORD_SCREEN}

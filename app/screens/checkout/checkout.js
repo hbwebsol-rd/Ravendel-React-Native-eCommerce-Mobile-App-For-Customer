@@ -20,7 +20,6 @@ import Colors from '../../constants/Colors';
 import PropTypes from 'prop-types';
 
 const CheckoutScreen = ({ navigation, route }) => {
-  console.log(route.params, 'route');
   var shippingValue = route.params.shippingValue;
   var cartAmount = route.params.cartAmount;
   var cartProducts = route.params.cartProducts;
@@ -142,7 +141,11 @@ const CheckoutScreen = ({ navigation, route }) => {
     };
     console.log(JSON.stringify(payload), 'payyyyl check');
     // return;
-    dispatch(checkoutDetailsAction(payload, cartId, navigation));
+    if (checked !== 'Paypal') {
+      dispatch(checkoutDetailsAction(payload, cartId, navigation));
+    } else {
+      navigation.navigate('PaypalPayment', { orderData: payload });
+    }
     // } else {
     //   navigation.navigate('StripePayment');
     // }
@@ -160,6 +163,7 @@ const CheckoutScreen = ({ navigation, route }) => {
                 style={{
                   ...styles.label,
                   alignItems: 'flex-start',
+                  marginLeft: -15,
                 }}>
                 <AText fonts={FontStyle.semiBold} color="black">
                   Address
@@ -180,7 +184,12 @@ const CheckoutScreen = ({ navigation, route }) => {
               <View style={styles.line} />
               <View style={styles.activedot} />
               <View style={styles.circle} />
-              <View style={{ ...styles.label, alignItems: 'flex-end' }}>
+              <View
+                style={{
+                  ...styles.label,
+                  alignItems: 'flex-end',
+                  marginLeft: 24,
+                }}>
                 <AText fonts={FontStyle.semiBold} color="black">
                   Order Detail
                 </AText>
@@ -213,11 +222,20 @@ const CheckoutScreen = ({ navigation, route }) => {
             <View style={styles.addresscard}>
               <RadioButtonWrapper>
                 <AText mr="8px" color="black" fonts={FontStyle.semiBold} large>
-                  Free Shipping
+                  {cartSummary?.totalShipping === 0
+                    ? 'FREE SHIPPING'
+                    : 'SHIPPING'}
                 </AText>
               </RadioButtonWrapper>
               <AText color={GREYTEXT} fonts={FontStyle.semiBold}>
-                $0.00 (3-10 Business Days)
+                {cartSummary?.totalShipping === 0
+                  ? formatCurrency(0, currencyOptions, currencySymbol)
+                  : formatCurrency(
+                      cartSummary?.totalShipping,
+                      currencyOptions,
+                      currencySymbol,
+                    )}
+                (3-10 Business Days)
               </AText>
             </View>
           </AddressWrapper>
@@ -228,8 +246,8 @@ const CheckoutScreen = ({ navigation, route }) => {
             <ItemWrapper key={product.id}>
               <ItemImage
                 source={{
-                  uri: !isEmpty(product.feature_image)
-                    ? URL + product.feature_image
+                  uri: !isEmpty(product.productImage)
+                    ? URL + product.productImage
                     : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
                 }}
               />

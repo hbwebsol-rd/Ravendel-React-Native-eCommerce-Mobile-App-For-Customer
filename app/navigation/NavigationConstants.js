@@ -26,4 +26,7 @@ export default {
   CHANGE_PASSWORD_SCREEN: 'ChangePassword',
   STRIPE_PAYMENT: 'StripePayment',
   THANK_YOU_SCREEN: 'ThankYouScreen',
+  WISHLIST: 'WishList',
+  NOTIFICATION: 'Notification',
+  PAYPAL_PAYMENT: 'PaypalPayment',
 };

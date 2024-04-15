@@ -37,6 +37,9 @@ import {
   SubcategoriesOption,
   CheckoutDetails,
   ContactUs,
+  WishList,
+  Notification,
+  PaypalPayment,
 } from '../screens';
 import { AText } from '../theme-components';
 import ShippingMethodScreen from '../screens/checkout/ShippingMethodScreen';
@@ -248,6 +251,22 @@ const DrawerNavigator = () => {
         }}
       />
       <Drawer.Screen
+        name={NavigationConstants.WISHLIST}
+        component={WishList}
+        options={{
+          unmountOnBlur: true,
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
+      <Drawer.Screen
+        name={NavigationConstants.PAYPAL_PAYMENT}
+        component={PaypalPayment}
+        options={{
+          unmountOnBlur: true,
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
+      <Drawer.Screen
         name={NavigationConstants.SAVED_ADDRESS_SCREEN}
         component={SavedAddressScreen}
         options={{
@@ -313,8 +332,8 @@ const DrawerNavigator = () => {
       />
       {/* Account End */}
       <Drawer.Screen
-        name={'Notification'}
-        component={CartScreen}
+        name={NavigationConstants.NOTIFICATION}
+        component={Notification}
         options={{
           drawerLabel: 'Notification',
           drawerIcon: ({ focused, size, color }) => (
