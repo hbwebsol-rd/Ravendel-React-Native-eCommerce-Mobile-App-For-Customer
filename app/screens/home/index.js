@@ -113,6 +113,7 @@ const HomeScreen = ({ navigation }) => {
     setSearchTerm(e);
   };
 
+  // Create a cart if user added products in cart before login
   const UpdateCart = async () => {
     var cartProduct = await getValue('cartproducts');
     if (!isEmpty(cartProduct)) {
@@ -169,6 +170,7 @@ const HomeScreen = ({ navigation }) => {
     navigation.navigate('Shop', { searchTerm: searchTerm });
   };
 
+  //Get URL of banners
   const getCategoryImage = (name) => {
     const cat =
       URL +
@@ -202,6 +204,7 @@ const HomeScreen = ({ navigation }) => {
   }, [isFocused]);
 
   useEffect(() => {
+    // Filter data as per categories
     dispatch(brandAction());
     if (!isEmpty(homeData)) {
       const featuredProduct = homeData.filter(
@@ -492,7 +495,7 @@ const PopularPicksWrapper = styled.TouchableOpacity`
 const PopularPicksImage = styled.Image`
   width: 100%;
   height: 100%;
-  resize-mode: stretch;
+  resize-mode: cover;
 `;
 
 const styles = StyleSheet.create({
