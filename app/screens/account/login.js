@@ -4,7 +4,7 @@ import { useFormik } from 'formik';
 import { loginValidationSchema } from '../checkout/validationSchema';
 import { useDispatch, useSelector } from 'react-redux';
 import { LoginAction } from '../../store/action';
-import { TouchableOpacity, View } from 'react-native';
+import { Keyboard, TouchableOpacity, View } from 'react-native';
 const LoginScreen = ({ navigation }) => {
   // States and Variables
   const dispatch = useDispatch();
@@ -24,6 +24,7 @@ const LoginScreen = ({ navigation }) => {
 
   // Custom Function
   const sendValues = (values) => {
+    Keyboard.dismiss();
     dispatch(LoginAction(values.email, values.password, navigation));
   };
 

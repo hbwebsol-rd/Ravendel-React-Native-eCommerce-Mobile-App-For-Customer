@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { AText, AButton, TextInput } from '../../theme-components';
 import { useFormik } from 'formik';
 import { signupValidationSchema } from '../checkout/validationSchema';
@@ -8,9 +8,13 @@ import { Checkbox } from 'react-native-paper';
 import { Linking, TouchableOpacity, View } from 'react-native';
 import Styles from '../../Theme';
 import PropTypes from 'prop-types';
+import { CountryPicker } from 'react-native-country-codes-picker';
+
 const SignupScreen = ({ navigation, handleActiveTab }) => {
   // States and Variables
   const dispatch = useDispatch();
+  const textInputRef = useRef(null);
+
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
@@ -30,7 +34,9 @@ const SignupScreen = ({ navigation, handleActiveTab }) => {
       resetForm({ values: '' });
     },
   });
-
+  const [show, setShow] = useState(false);
+  const [countryCode, setCountryCode] = useState('');
+  console.log(countryCode, ' ccd');
   // Custom Function
   const openLink = () => {
     const url = 'https://demo1-ravendel.hbwebsol.com/abouts/terms&condition';
@@ -111,27 +117,49 @@ const SignupScreen = ({ navigation, handleActiveTab }) => {
           {formik.errors.email}
         </AText>
       )}
+      <View style={{ flexDirection: 'row' }}>
+        <CountryPicker
+          show={show}
+          style={{ height: 500 }}
+          // when picker button press you will get the country object with dial code
+          pickerButtonOnPress={(item) => {
+            setCountryCode(item.dial_code);
+            formik.setFieldValue('mobile', item.dial_code);
+            setShow(false);
+            if (textInputRef.current) {
+              // Focus on the input field if editable state changes to true
+              setTimeout(() => {
+                textInputRef.current.focus();
+              }, 100);
+            }
+          }}
+          showOnly={['UA', 'EN', 'IN', 'US', 'UA']}
+        />
 
-      <TextInput
-        color={'#000'}
-        mt={10}
-        padding={0}
-        keyboardtype={'numeric'}
-        onchange={formik.handleChange('mobile')}
-        bw={0}
-        pb={10}
-        onerror={false}
-        placeholder={'Enter Phone No.'}
-        value={formik.values.mobile}
-        placeholdercolor={'#ABA7A7'}
-        inputBgColor="transparent"
-      />
+        <TextInput
+          textInputRef={textInputRef}
+          onfocus={() => {
+            setShow(true);
+          }}
+          color={'#000'}
+          mt={10}
+          padding={0}
+          keyboardtype={'numeric'}
+          onchange={formik.handleChange('mobile')}
+          bw={0}
+          pb={10}
+          onerror={false}
+          placeholder={'Enter Phone No.'}
+          value={formik.values.mobile}
+          placeholdercolor={'#ABA7A7'}
+          inputBgColor="transparent"
+        />
+      </View>
       {formik.touched.mobile && formik.errors.mobile && (
         <AText color="red" xtrasmall>
           {formik.errors.mobile}
         </AText>
       )}
-
       <TextInput
         color={'#000'}
         mt={10}
@@ -152,6 +180,10 @@ const SignupScreen = ({ navigation, handleActiveTab }) => {
       )}
 
       <TextInput
+        secureTextEntry={true}
+        hookuse
+        iconColor={'#9F9F9F'}
+        icon={'eye-off'}
         color={'#000'}
         mt={10}
         padding={0}
@@ -171,6 +203,10 @@ const SignupScreen = ({ navigation, handleActiveTab }) => {
       )}
 
       <TextInput
+        secureTextEntry={true}
+        hookuse
+        iconColor={'#9F9F9F'}
+        icon={'eye-off'}
         color={'#000'}
         mt={10}
         padding={0}
