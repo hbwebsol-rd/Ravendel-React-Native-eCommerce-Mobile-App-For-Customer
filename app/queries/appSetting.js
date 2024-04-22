@@ -8,11 +8,6 @@ const GET_APP_SETTING = gql`
         meta_tag
         meta_description
       }
-      imageStorage {
-        status
-        s3_id
-        s3_key
-      }
       store {
         currency_options {
           currency
@@ -22,10 +17,13 @@ const GET_APP_SETTING = gql`
           number_of_decimals
         }
         store_address {
+          addressLine1
+          addressLine2
           city
           country
           state
           zip
+          hour
         }
         measurements {
           weight_unit
@@ -44,18 +42,16 @@ const GET_APP_SETTING = gql`
           stock_display_format
         }
       }
-      paymnet {
+      payment {
         cash_on_delivery {
           enable
           title
           description
-          instructions
         }
         bank_transfer {
           enable
           title
           description
-          instructions
           account_details {
             account_name
             account_number
@@ -69,28 +65,33 @@ const GET_APP_SETTING = gql`
           enable
           title
           description
-          inline_credit_card_form
-          statement_descriptor
-          capture
           test_mode
-          publishable_key
-          secret_key
-          webhook_key
         }
         paypal {
           enable
           title
           description
-          paypal_email
-          ipn_email_notification
-          receiver_email
-          paypal_identity_token
-          invoice_prefix
           test_mode
-          api_username
-          api_password
-          api_signature
+          sandbox_secret_key
+          live_secret_key
+          sandbox_client_id
+          live_client_id
         }
+        razorpay {
+          enable
+          title
+          description
+          test_mode
+          sandbox_secret_key
+          live_secret_key
+          sandbox_client_id
+          live_client_id
+        }
+      }
+      imageStorage {
+        status
+        s3_id
+        s3_key
       }
       appearance {
         home {
@@ -117,14 +118,18 @@ const GET_APP_SETTING = gql`
         }
         theme {
           primary_color
+          playstore
+          appstore
+          phone_number
+          email
           logo
-        }
-        mobile {
-          slider {
-            image
-            link
-            open_in_tab
+          social_media {
+            name
+            handle
           }
+        }
+
+        mobile {
           mobile_section {
             label
             section_img

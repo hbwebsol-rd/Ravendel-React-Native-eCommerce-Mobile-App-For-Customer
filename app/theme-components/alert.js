@@ -16,7 +16,7 @@ const AlertError = () => {
       dispatch({
         type: ALERT_HIDE,
       });
-    }, 4000);
+    }, 2000);
   };
 
   useEffect(() => {

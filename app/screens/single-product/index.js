@@ -119,8 +119,8 @@ const SingleProductScreen = ({ navigation, route }) => {
       review: val.review,
       rating: val.rating,
       status: val.status,
-      customer_id: val.customer_id,
-      product_id: val.product_id,
+      customerId: val.customer_id,
+      productId: val.product_id,
     };
     dispatch(productAddReviewAction(reviews));
     setWriteReviewPop(!writeReviewPop);
@@ -286,7 +286,6 @@ const SingleProductScreen = ({ navigation, route }) => {
     return (
       <TouchableOpacity
         onPress={() => {
-          console.log('yes it ran', item._id);
           setProductIds(item._id);
           setProductUrls(item.url);
         }}
@@ -374,162 +373,165 @@ const SingleProductScreen = ({ navigation, route }) => {
               index={1}
               snapPoints={snapPoints}
               style={{ flex: 1 }}>
-              <ScrollView style={{ flex: 1 }}>
-                {/* <ProductPriceText Pricing={SingleProduct.pricing} /> */}
-                {/* ===============Product Name============= */}
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginHorizontal: 30,
-                  }}>
-                  <ProductName>
-                    <AText big color={'black'} fonts={FontStyle.semiBold}>
-                      {SingleProduct.name}
-                    </AText>
-                    <View style={styles.starstyle}>
-                      <StarRating
-                        starStyle={{
-                          marginRight: 10,
-                        }}
-                        disabled={true}
-                        maxStars={5}
-                        rating={SingleProduct.rating}
-                        fullStarColor={'#FFDB20'}
-                        emptyStarColor={'gray'}
-                        starSize={14}
-                      />
-                      <AText
-                        color={'black'}
-                        fonts={
-                          FontStyle.semiBold
-                        }>{`(${SingleProduct.rating} rating)`}</AText>
-                    </View>
-                    <AText
-                      mt="5px"
-                      big
-                      fonts={FontStyle.semiBold}
-                      color={'black'}>
-                      {formatCurrency(
-                        SingleProduct.pricing.price,
-                        currencyOptions,
-                        currencySymbol,
-                      )}
-                    </AText>
-                  </ProductName>
-                  <View style={{ width: '45%' }}>
-                    <AText
-                      right
-                      small
-                      color={SingleProduct.quantity > 0 ? '#1FAD08' : 'red'}
-                      fonts={FontStyle.fontBold}>
-                      {SingleProduct.quantity > 0
-                        ? 'Available in stock'
-                        : 'Out of stock'}
-                    </AText>
-                    {((!isEmpty(SingleProduct.quantity) &&
-                      SingleProduct.quantity > 0) ||
-                      !manage_stock) && (
-                      <>
-                        <QtyWrapper>
-                          <QtyButton
-                            onPress={() => {
-                              cartQuantity > 1 &&
-                                setCartQuantity(cartQuantity - 1);
-                            }}>
-                            <AText color="#72787e">
-                              <AIcon size={16} name="minussquare" />
-                            </AText>
-                          </QtyButton>
-                          <AText medium bold ml="7px" mr="7px">
-                            {cartQuantity}
-                          </AText>
-                          <QtyButton
-                            onPress={() => {
-                              ((!isEmpty(SingleProduct.quantity) &&
-                                cartQuantity < SingleProduct.quantity) ||
-                                !manage_stock) &&
-                                setCartQuantity(cartQuantity + 1);
-                            }}>
-                            <AText color="#72787e">
-                              <AIcon size={16} name="plussquare" />
-                            </AText>
-                          </QtyButton>
-                        </QtyWrapper>
-                      </>
-                    )}
-                  </View>
-                </View>
-
-                {/* ================ Product short description================== */}
-                {!isEmpty(SingleProduct.short_description) && (
-                  <>
-                    <AText
-                      ml={'30px'}
-                      fonts={FontStyle.semiBold}
-                      mb="5px"
-                      large>
-                      About
-                    </AText>
-                    <HTMLView
-                      style={{ marginHorizontal: 30 }}
-                      value={SingleProduct.short_description}
-                    />
-                    <HTMLView
-                      style={{ marginHorizontal: 30 }}
-                      value={SingleProduct.description}
-                    />
-                  </>
-                )}
-                <AText ml="30px" mt={'5px'} mb={'20px'} bold>
-                  SKU:{SingleProduct.sku}
-                </AText>
-                {/* ==================Product Quantity============================ */}
-
-                {/* ========================Custom Field================================ */}
-                {!isEmpty(SingleProduct.custom_field) &&
-                  SingleProduct.custom_field.length > 0 && (
-                    <CollapseWrapper>
-                      <CollapseTitle>
-                        <AText bold>Product specifications</AText>
-                      </CollapseTitle>
-                      <ACol col={2}>
-                        {SingleProduct.custom_field.map((item, index) => {
-                          return (
-                            <CustomWrapper>
-                              <ACol>
-                                <AText>{item.key}</AText>
-                              </ACol>
-                              <ACol>
-                                <AText>{item.value}</AText>
-                              </ACol>
-                            </CustomWrapper>
-                          );
-                        })}
-                      </ACol>
-                    </CollapseWrapper>
-                  )}
-
-                {/* ===============Product Reviews============= */}
-                <CollapseWrapper>
-                  <CollapseTitle
-                    onPress={() => setReviewCollapse(!reviewcollapse)}>
-                    <AText bold>Reviews</AText>
-                    <CollapseIcon>
-                      {reviewcollapse ? (
-                        <Icon name="chevron-up" color="#000" />
-                      ) : (
-                        <Icon name="chevron-down" color="#000" />
-                      )}
-                    </CollapseIcon>
-                  </CollapseTitle>
-                  <CollapseContainer
-                    // eslint-disable-next-line react-native/no-inline-styles
+              <>
+                <ScrollView
+                  keyboardShouldPersistTaps={'always'}
+                  style={{ flex: 1 }}>
+                  {/* <ProductPriceText Pricing={SingleProduct.pricing} /> */}
+                  {/* ===============Product Name============= */}
+                  <View
                     style={{
-                      display: reviewcollapse ? 'flex' : 'none',
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      // alignItems: 'center',
+                      marginHorizontal: 30,
+                      marginTop: 20,
                     }}>
-                    {true && (
+                    <ProductName>
+                      <AText big color={'black'} fonts={FontStyle.semiBold}>
+                        {SingleProduct.name}
+                      </AText>
+                      <View style={styles.starstyle}>
+                        <StarRating
+                          starStyle={{
+                            marginRight: 10,
+                          }}
+                          disabled={true}
+                          maxStars={5}
+                          rating={SingleProduct.rating}
+                          fullStarColor={'#FFDB20'}
+                          emptyStarColor={'gray'}
+                          starSize={14}
+                        />
+                        <AText
+                          color={'black'}
+                          fonts={
+                            FontStyle.semiBold
+                          }>{`(${SingleProduct.rating} rating)`}</AText>
+                      </View>
+                      <AText
+                        mt="5px"
+                        big
+                        fonts={FontStyle.semiBold}
+                        color={'black'}>
+                        {formatCurrency(
+                          SingleProduct.pricing.price,
+                          currencyOptions,
+                          currencySymbol,
+                        )}
+                      </AText>
+                    </ProductName>
+                    <View style={{ width: '45%', marginTop: 5 }}>
+                      <AText
+                        right
+                        xtrasmall
+                        color={SingleProduct.quantity > 0 ? '#1FAD08' : 'red'}
+                        fonts={FontStyle.fontBold}>
+                        {SingleProduct.quantity > 0
+                          ? 'Available in stock'
+                          : 'Out of stock'}
+                      </AText>
+                      {((!isEmpty(SingleProduct.quantity) &&
+                        SingleProduct.quantity > 0) ||
+                        !manage_stock) && (
+                        <>
+                          <QtyWrapper>
+                            <QtyButton
+                              onPress={() => {
+                                cartQuantity > 1 &&
+                                  setCartQuantity(cartQuantity - 1);
+                              }}>
+                              <AText color="#72787e">
+                                <AIcon size={16} name="minussquare" />
+                              </AText>
+                            </QtyButton>
+                            <AText medium bold ml="7px" mr="7px">
+                              {cartQuantity}
+                            </AText>
+                            <QtyButton
+                              onPress={() => {
+                                ((!isEmpty(SingleProduct.quantity) &&
+                                  cartQuantity < SingleProduct.quantity) ||
+                                  !manage_stock) &&
+                                  setCartQuantity(cartQuantity + 1);
+                              }}>
+                              <AText color="#72787e">
+                                <AIcon size={16} name="plussquare" />
+                              </AText>
+                            </QtyButton>
+                          </QtyWrapper>
+                        </>
+                      )}
+                    </View>
+                  </View>
+
+                  {/* ================ Product short description================== */}
+                  {!isEmpty(SingleProduct.short_description) && (
+                    <>
+                      <AText
+                        ml={'30px'}
+                        fonts={FontStyle.semiBold}
+                        mb="5px"
+                        large>
+                        About
+                      </AText>
+                      <HTMLView
+                        style={{ marginHorizontal: 30 }}
+                        value={SingleProduct.short_description}
+                      />
+                      <HTMLView
+                        style={{ marginHorizontal: 30 }}
+                        value={SingleProduct.description}
+                      />
+                    </>
+                  )}
+                  <AText ml="30px" mt={'5px'} mb={'20px'} bold>
+                    SKU:{SingleProduct.sku}
+                  </AText>
+                  {/* ==================Product Quantity============================ */}
+
+                  {/* ========================Custom Field================================ */}
+                  {!isEmpty(SingleProduct.custom_field) &&
+                    SingleProduct.custom_field.length > 0 && (
+                      <CollapseWrapper>
+                        <CollapseTitle>
+                          <AText bold>Product specifications</AText>
+                        </CollapseTitle>
+                        <ACol col={2}>
+                          {SingleProduct.custom_field.map((item, index) => {
+                            return (
+                              <CustomWrapper>
+                                <ACol>
+                                  <AText>{item.key}</AText>
+                                </ACol>
+                                <ACol>
+                                  <AText>{item.value}</AText>
+                                </ACol>
+                              </CustomWrapper>
+                            );
+                          })}
+                        </ACol>
+                      </CollapseWrapper>
+                    )}
+
+                  {/* ===============Product Reviews============= */}
+                  <CollapseWrapper>
+                    <CollapseTitle
+                      onPress={() => setReviewCollapse(!reviewcollapse)}>
+                      <AText bold>Reviews</AText>
+                      <CollapseIcon>
+                        {reviewcollapse ? (
+                          <Icon name="chevron-up" color="#000" />
+                        ) : (
+                          <Icon name="chevron-down" color="#000" />
+                        )}
+                      </CollapseIcon>
+                    </CollapseTitle>
+                    <CollapseContainer
+                      // eslint-disable-next-line react-native/no-inline-styles
+                      style={{
+                        display: reviewcollapse ? 'flex' : 'none',
+                      }}>
                       <>
                         <View
                           style={{
@@ -552,56 +554,126 @@ const SingleProductScreen = ({ navigation, route }) => {
                           />
                         </View>
                       </>
-                    )}
-                    <>
-                      {ReviewProduct &&
-                      ReviewProduct.filter(
-                        (review) => review.status === 'approved',
-                      ).length > 0 ? (
+                      <>
+                        {ReviewProduct &&
                         ReviewProduct.filter(
                           (review) => review.status === 'approved',
-                        ).map((singleReview, index) => (
-                          <ReviewWrapper>
-                            <CollapseTitle>
-                              <ReveiwHeading>
-                                <Reviewrating
-                                  backgroundColor={
-                                    singleReview.rating < 2 ? 'red' : 'green'
-                                  }>
-                                  <AText center color="#fff">
-                                    {singleReview.rating}★
+                        ).length > 0 ? (
+                          ReviewProduct.filter(
+                            (review) => review.status === 'approved',
+                          ).map((singleReview, index) => (
+                            <ReviewWrapper>
+                              <CollapseTitle>
+                                <ReveiwHeading>
+                                  <Reviewrating
+                                    backgroundColor={
+                                      singleReview.rating < 2 ? 'red' : 'green'
+                                    }>
+                                    <AText center color="#fff">
+                                      {singleReview.rating}★
+                                    </AText>
+                                  </Reviewrating>
+                                  <AText bold center>
+                                    {singleReview.customerId.firstName}
                                   </AText>
-                                </Reviewrating>
-                                <AText bold center>
-                                  {singleReview.customerId.firstName}
+                                </ReveiwHeading>
+                                <AText small>
+                                  {moment(singleReview.date).format('LL')}
                                 </AText>
-                              </ReveiwHeading>
-                              <AText small>
-                                {moment(singleReview.date).format('LL')}
+                              </CollapseTitle>
+                              <AText capitalize bold medium>
+                                {singleReview.title}
                               </AText>
-                            </CollapseTitle>
-                            <AText capitalize bold medium>
-                              {singleReview.title}
+                              <AText>{singleReview.review}</AText>
+                            </ReviewWrapper>
+                          ))
+                        ) : (
+                          <>
+                            <AText
+                              bbc={Colors.blackColor}
+                              bbw={'0.5px'}
+                              pb="8px"
+                              small
+                              center>
+                              There are no reviews yet. Be the first one to
+                              write one.
                             </AText>
-                            <AText>{singleReview.review}</AText>
-                          </ReviewWrapper>
-                        ))
-                      ) : (
-                        <>
-                          <AText
-                            bbc={Colors.blackColor}
-                            bbw={'0.5px'}
-                            pb="8px"
-                            small
-                            center>
-                            There are no reviews yet. Be the first one to write
-                            one.
-                          </AText>
-                        </>
+                          </>
+                        )}
+                      </>
+                    </CollapseContainer>
+                  </CollapseWrapper>
+
+                  <View style={styles.banner}>
+                    <Checkpoints
+                      title="Happy Customers"
+                      image={require('../../assets/images/feedback.png')}
+                    />
+                    <Checkpoints
+                      title="Genuine Product"
+                      image={require('../../assets/images/award.png')}
+                    />
+                    <Checkpoints
+                      title="Secure Checkout"
+                      image={require('../../assets/images/carttick.png')}
+                    />
+                  </View>
+
+                  <View
+                    style={{
+                      marginHorizontal: 30,
+                      marginTop: 15,
+                      marginBottom: 30,
+                    }}>
+                    <AText medium>Returns</AText>
+                    <AText small>
+                      This products is not returnable for full details on out
+                      return poliies please{' '}
+                      <AText color={Colors.blue} lineThrough small>
+                        click here
+                      </AText>
+                    </AText>
+                  </View>
+                  {!isEmpty(RelatedProducts) ? (
+                    <FlatList
+                      numColumns={2}
+                      data={RelatedProducts}
+                      snapToAlignment="center"
+                      keyExtractor={(item) => item._id}
+                      ListHeaderComponent={() => (
+                        <AText
+                          color={Colors.blackColor}
+                          large
+                          fonts={FontStyle.semiBold}
+                          mb="10px">
+                          Similar Products
+                        </AText>
                       )}
-                    </>
-                  </CollapseContainer>
-                </CollapseWrapper>
+                      renderItem={renderItem}
+                      columnWrapperStyle={{ justifyContent: 'space-between' }}
+                      contentContainerStyle={{
+                        marginTop: 10,
+                        flexDirection: 'column',
+                        margin: 'auto',
+                        marginHorizontal: 30,
+                      }}
+                      ListEmptyComponent={() => (
+                        <View style={{ marginBottom: 20 }}>
+                          <AText
+                            style={{
+                              fontSize: 16,
+                              alignSelf: 'center',
+                              color: 'grey',
+                            }}>
+                            No Records Found
+                          </AText>
+                        </View>
+                      )}
+                    />
+                  ) : (
+                    ''
+                  )}
+                </ScrollView>
                 <AddToCartWrapper>
                   {(!isEmpty(SingleProduct.quantity) &&
                     SingleProduct.quantity > 0) ||
@@ -620,67 +692,7 @@ const SingleProductScreen = ({ navigation, route }) => {
                     />
                   )}
                 </AddToCartWrapper>
-                <View style={styles.banner}>
-                  <Checkpoints
-                    title="Happy Customers"
-                    image={require('../../assets/images/feedback.png')}
-                  />
-                  <Checkpoints
-                    title="Genuine Product"
-                    image={require('../../assets/images/award.png')}
-                  />
-                  <Checkpoints
-                    title="Secure Checkout"
-                    image={require('../../assets/images/carttick.png')}
-                  />
-                </View>
-
-                <View style={{ marginHorizontal: 30, marginTop: 15 }}>
-                  <AText medium>Returns</AText>
-                  <AText small>
-                    This products is not returnable for full details on out
-                    return poliies please{' '}
-                    <AText color={Colors.blue} lineThrough small>
-                      click here
-                    </AText>
-                  </AText>
-                </View>
-                <FlatList
-                  numColumns={2}
-                  data={RelatedProducts}
-                  snapToAlignment="center"
-                  keyExtractor={(item) => item._id}
-                  ListHeaderComponent={() => (
-                    <AText
-                      color={Colors.blackColor}
-                      large
-                      fonts={FontStyle.semiBold}
-                      mb="10px">
-                      Similar Products
-                    </AText>
-                  )}
-                  renderItem={renderItem}
-                  columnWrapperStyle={{ justifyContent: 'space-between' }}
-                  contentContainerStyle={{
-                    marginTop: 10,
-                    flexDirection: 'column',
-                    margin: 'auto',
-                    marginHorizontal: 30,
-                  }}
-                  ListEmptyComponent={() => (
-                    <View>
-                      <AText
-                        style={{
-                          fontSize: 16,
-                          alignSelf: 'center',
-                          color: 'grey',
-                        }}>
-                        No Records Found
-                      </AText>
-                    </View>
-                  )}
-                />
-              </ScrollView>
+              </>
             </BottomSheetModal>
           </View>
 
@@ -886,7 +898,7 @@ const GallerySliderWrapper = styled.View`
   background: white;
 `;
 const ProductName = styled.View`
-  padding: 10px 0;
+  padding: 0px 0;
   width: 55%;
 `;
 const CollapseWrapper = styled.View`
@@ -916,6 +928,8 @@ const AddToCartWrapper = styled.View`
   padding-top: 5px;
   width: 70%;
   align-self: center;
+  position: absolute;
+  bottom: 10;
 `;
 const ReviewWrapper = styled.View`
   background: #fff;

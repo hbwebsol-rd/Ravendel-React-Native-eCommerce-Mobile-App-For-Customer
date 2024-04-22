@@ -12,6 +12,7 @@ import _ from 'lodash';
 
 export const AppSettingAction = () => async (dispatch) => {
   const response = await query(GET_APP_SETTING);
+  // console.log(JSON.stringify(response), ' sett');
   try {
     if (!isEmpty(_.get(response, 'data.getSettings'))) {
       const currencyOptions = _.get(
@@ -62,6 +63,7 @@ export const AppSettingAction = () => async (dispatch) => {
           title: _.get(response, 'data.getSettings.seo.meta_title', ''),
           store: _.get(response, 'data.getSettings.store', {}),
           currencySymbol: crSymbol,
+          payment: _.get(response, 'data.getSettings.payment', {}),
         },
       });
     }
@@ -154,6 +156,43 @@ export const productByPerticulareAction = (payload) => async (dispatch) => {
     dispatch({ type: SETTING_FAIL });
   }
 };
+
+export const AllDataInOne =
+  (showFeature, showRecent, showSale, showProduct, payload) =>
+  async (dispatch) => {
+    dispatch({ type: SETTING_LOADING });
+
+    try {
+      const brand = await query(GET_BRANDS_QUERY);
+      let category = [];
+      let recent = [];
+      let sale = [];
+      let productCategory = [];
+      if (showFeature) {
+        category = await query(FEATURE_CATEGORY);
+      }
+      if (showRecent) {
+        recent = await query(RECENT_PRODUCT);
+      }
+      if (showSale) {
+        sale = await query(SALE_PRODUCT);
+      }
+      if (showProduct) {
+        productCategory = await query(PRODUCT_BY_A_CATEGORY, { id: payload });
+      }
+      const allData = {
+        brands: brand.data.brands.data,
+        featureData: category.data.featureproducts,
+        recentAddedProduct: recent.data.recentproducts,
+        saleProduct: sale.data.onSaleProducts,
+        ProductByCategory: productCategory.data.productsbycatid,
+      };
+      dispatch({ type: GET_ALL_DATA, payload: allData });
+    } catch (error) {
+      dispatch({ type: SETTING_FAIL });
+    }
+  };
+
 export const SETTING_LOADING = 'SETTING_LOADING';
 export const GET_THEME_VALUE = 'GET_THEME_VALUE';
 export const SETTING_FAIL = 'SETTING_FAIL';
@@ -162,3 +201,4 @@ export const RECENT_ADD__PRODUCT = 'RECENT_ADD__PRODUCT';
 export const SALE_PRODUCTS = 'SALE_PRODUCTS ';
 export const CATEGORY_PRODUCT = 'CATEGORY_PRODUCT ';
 export const GET_BRANDS = 'GET_BRANDS ';
+export const GET_ALL_DATA = 'GET_ALL_DATA ';

@@ -7,6 +7,7 @@ import {
   CATEGORY_PRODUCT,
   GET_FEATURE_PRODUCT,
   GET_BRANDS,
+  GET_ALL_DATA,
 } from '../action/settingAction';
 
 const initialState = {
@@ -23,6 +24,14 @@ const initialState = {
   currencyOptions: [],
   currencySymbol: '',
   brands: [],
+  paymentSetting: {},
+  allData: {
+    brands: [],
+    featureData: [],
+    recentAddedProduct: [],
+    saleProduct: [],
+    ProductByCategory: [],
+  },
   manage_stock: false,
 };
 
@@ -40,6 +49,7 @@ export default (state = initialState, action) => {
         currencyOptions: action.payload.store.currency_options,
         currencySymbol: action.payload.currencySymbol,
         manage_stock: action.payload.store.inventory.manage_stock,
+        paymentSetting: action.payload.payment,
       };
     case GET_FEATURE_PRODUCT:
       return {
@@ -82,6 +92,12 @@ export default (state = initialState, action) => {
         ...state,
         loading: false,
         brands: action.payload,
+      };
+    case GET_ALL_DATA:
+      return {
+        ...state,
+        loading: false,
+        allData: action.payload,
       };
     default: {
       return state;

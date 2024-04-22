@@ -64,13 +64,15 @@ const SubCategoriesScreen = ({ navigation, route }) => {
   const [amountRange, setAmountRange] = useState([0, 10000]);
   const [values, setValues] = useState([0, 10000]);
 
+  //Slider Value Setter
   const multiSliderValuesChange = (values) => {
     setValues(values);
   };
+
   const bottomSheetModalRef = useRef(null);
 
   // variables
-  const snapPoints = useMemo(() => ['60%'], []);
+  const snapPoints = useMemo(() => ['60%'], []); // For Bottomsheet Modal
   const { currencyOptions, currencySymbol } = useSelector(
     (state) => state.settings,
   );
@@ -79,9 +81,11 @@ const SubCategoriesScreen = ({ navigation, route }) => {
     console.log('pressing', bottomSheetModalRef.current);
     bottomSheetModalRef.current?.present();
   }, []);
+
   const handleSheetChanges = useCallback((index) => {
     console.log('handleSheetChanges', index);
   }, []);
+
   const [starCount, setStarCount] = useState(3.5);
 
   const onStarRatingPress = (rating) => {
@@ -101,7 +105,6 @@ const SubCategoriesScreen = ({ navigation, route }) => {
   const [withChild, setWithChild] = useState([]);
   const [inpvalue, setInpvalue] = useState('');
   const [ActiveBrand, setActiveBrand] = useState('');
-
   //Custom Functions
   const handleinpiut = (e) => {
     setInpvalue(e);
@@ -361,7 +364,7 @@ const SubCategoriesScreen = ({ navigation, route }) => {
               size={22}
             />
             <AText fonts={FontStyle.semiBold} ml="20px">
-              {capitalizeFirstLetter(singleCat.url)}
+              {capitalizeFirstLetter(singleCat.url).replace(/-/g, ' ')}
             </AText>
           </View>
           <ARow

@@ -38,7 +38,7 @@ const AccountScreen = ({ navigation }) => {
         {isLoggin ? (
           <>
             <View
-              style={{ alignItems: 'center', marginTop: 60, marginBottom: 25 }}>
+              style={{ alignItems: 'center', marginTop: 60, marginBottom: 10 }}>
               <Image source={require('../../assets/images/man.png')} />
               <AText
                 mb="5px"
@@ -113,12 +113,9 @@ const AccountScreen = ({ navigation }) => {
               <TouchableOpacity
                 style={styles.optionstyle}
                 onPress={() =>
-                  navigation.navigate(
-                    NavigationConstants.CHANGE_PASSWORD_SCREEN,
-                    {
-                      initial: false,
-                    },
-                  )
+                  navigation.navigate(NavigationConstants.WISHLIST, {
+                    initial: false,
+                  })
                 }>
                 <ListIcon>
                   <Icon name="heart-o" color={GREYTEXT} size={18} />
@@ -159,12 +156,9 @@ const AccountScreen = ({ navigation }) => {
               <TouchableOpacity
                 style={styles.optionstyle}
                 onPress={() =>
-                  navigation.navigate(
-                    NavigationConstants.SAVED_ADDRESS_SCREEN,
-                    {
-                      initial: false,
-                    },
-                  )
+                  navigation.navigate(NavigationConstants.NOTIFICATION, {
+                    initial: false,
+                  })
                 }>
                 <ListIcon>
                   <Icon name="bell-o" color={GREYTEXT} size={18} />
@@ -176,6 +170,30 @@ const AccountScreen = ({ navigation }) => {
                     color={GREYTEXT}
                     mb="5px">
                     Notification
+                  </AText>
+                  <FIcon name="chevron-right" size={15} />
+                </ListTitleWrapper>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.optionstyle}
+                onPress={() =>
+                  navigation.navigate(
+                    NavigationConstants.CHANGE_PASSWORD_SCREEN,
+                    {
+                      initial: false,
+                    },
+                  )
+                }>
+                <ListIcon>
+                  <Icon name="lock" color={GREYTEXT} size={18} />
+                </ListIcon>
+                <ListTitleWrapper>
+                  <AText
+                    medium
+                    fonts={FontStyle.semiBold}
+                    color={GREYTEXT}
+                    mb="5px">
+                    Change Password
                   </AText>
                   <FIcon name="chevron-right" size={15} />
                 </ListTitleWrapper>
@@ -280,7 +298,7 @@ const AppInfo = styled.View`
 const styles = StyleSheet.create({
   container: {
     borderRadius: 10,
-    elevation: 3,
+    elevation: 1,
     padding: 10,
     marginHorizontal: 30,
     backgroundColor: 'white',
@@ -302,7 +320,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     paddingHorizontal: 10,
-    paddingVertical: 15,
+    paddingVertical: 12,
     borderWidth: 0,
     borderBottomWidth: 0.3,
     borderRadius: 10,

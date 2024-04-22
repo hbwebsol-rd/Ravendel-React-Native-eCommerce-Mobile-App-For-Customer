@@ -42,7 +42,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { brandAction } from '../../store/action/settingAction';
+import { AllDataInOne, brandAction } from '../../store/action/settingAction';
 import HomeBrandViews from './Components.js/BrandShow';
 import {
   APP_PRIMARY_COLOR,
@@ -76,13 +76,22 @@ const HomeScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const {
     homeData,
+    // featureData,
+    // recentAddedProduct,
+    // saleProduct,
+    // ProductByCategory,
+    // brands,
+    appTitle,
+    allData,
+  } = useSelector((state) => state.settings);
+  const {
+    brands,
     featureData,
     recentAddedProduct,
     saleProduct,
     ProductByCategory,
-    brands,
-    appTitle,
-  } = useSelector((state) => state.settings);
+  } = allData;
+  // console.log(allData, 'all d');
   const primaryColor = '#000';
   const settingLoading = useSelector((state) => state.settings.loading);
   const [allCategories, setAllCategories] = useState([]);
@@ -185,7 +194,6 @@ const HomeScreen = ({ navigation }) => {
         })[0];
     return cat;
   };
-
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
     dispatch(AppSettingAction());
@@ -195,17 +203,13 @@ const HomeScreen = ({ navigation }) => {
   // Use Effect Call
 
   useEffect(() => {
-    console.log(homeData);
-  }, []);
-
-  useEffect(() => {
     dispatch(AppSettingAction());
     dispatch(categoriesAction());
   }, [isFocused]);
 
   useEffect(() => {
     // Filter data as per categories
-    dispatch(brandAction());
+    // dispatch(brandAction());
     if (!isEmpty(homeData)) {
       const featuredProduct = homeData.filter(
         (section) => section.label === 'Featured Product',
@@ -222,26 +226,29 @@ const HomeScreen = ({ navigation }) => {
       const productFromSpecific = homeData.filter(
         (section) => section.label === 'Product from Specific Categories',
       )[0];
-      if (featuredProduct.visible) {
-        dispatch(featureDataAction());
-      }
-      if (recentProduct.visible) {
-        dispatch(recentaddedproductAction());
-      }
-      // if (homeData.most_viewed_products) {
+      // if (featuredProduct.visible) {
+      //   dispatch(featureDataAction());
       // }
-      // if (homeData.recently_bought_products) {
+      // if (recentProduct.visible) {
+      //   dispatch(recentaddedproductAction());
       // }
-      if (productRec.visible) {
-        // dispatch(productOnSaleAction());
-      }
-      if (productOnsale.visible) {
-        dispatch(productOnSaleAction());
-      }
-      if (productFromSpecific.visible) {
-        let catID = '62fe094eb2831ffd1e6fdfe8';
-        dispatch(productByPerticulareAction(catID));
-      }
+      // if (productOnsale.visible) {
+      //   dispatch(productOnSaleAction());
+      // }
+      // if (productFromSpecific.visible) {
+      //   let catID = '62fe094eb2831ffd1e6fdfe8';
+      //   dispatch(productByPerticulareAction(catID));
+      // }
+      let catID = '62fe094eb2831ffd1e6fdfe8';
+      dispatch(
+        AllDataInOne(
+          featuredProduct.visible,
+          recentProduct.visible,
+          productOnsale.visible,
+          true,
+          catID,
+        ),
+      );
     }
   }, [homeData]);
 

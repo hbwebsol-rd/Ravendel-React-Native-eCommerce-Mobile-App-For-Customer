@@ -116,8 +116,8 @@ const EDIT_CUSTOMER = gql`
   ) {
     updateCustomer(
       id: $id
-      first_name: $first_name
-      last_name: $last_name
+      firstName: $first_name
+      lastName: $last_name
       email: $email
       phone: $phone
       gender: $gender

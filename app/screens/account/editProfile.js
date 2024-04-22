@@ -23,7 +23,6 @@ import Colors from '../../constants/Colors';
 const EditProfileScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const userData = useSelector((state) => state.customer.userDetails);
-  console.log(userData, 'udata');
   const [genderArr, setGenderArr] = useState([
     { id: 1, type: 'male' },
     { id: 2, type: 'female' },
@@ -56,7 +55,7 @@ const EditProfileScreen = ({ navigation }) => {
     onSubmit: (values, { setSubmitting, resetForm }) => {
       setSubmitting(false);
       profileUpdate(values);
-      resetForm({ values: '' });
+      // resetForm({ values: '' });
     },
   });
 
