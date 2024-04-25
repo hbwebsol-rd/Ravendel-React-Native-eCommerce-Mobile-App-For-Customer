@@ -2,10 +2,8 @@ import {
   GET_PRODUCTS,
   GET_CATEGORIES,
   GET_PRODUCT,
-  GET_CAT_PRODUCTS,
   GET_PRODUCT_REVIEWS,
   ADD_REVIEW,
-  GET_ALL_CATEGORIES,
   GET_FILTEREDPRODUCTS,
   GET_RELATED_PRODUCTS_QUERY,
 } from '../../queries/productQuery';
@@ -159,8 +157,8 @@ export const productReviewsAction = (id) => async (dispatch) => {
 export const productAddReviewAction = (object) => async (dispatch) => {
   dispatch({ type: PRODUCT_LOADING });
 
-  const response = await mutation(ADD_REVIEW, object);
   try {
+    const response = await mutation(ADD_REVIEW, object);
     if (
       !isEmpty(_.get(response, 'data.addReview')) &&
       _.get(response, 'data.addReview.success')

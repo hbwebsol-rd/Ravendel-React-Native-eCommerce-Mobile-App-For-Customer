@@ -1,19 +1,4 @@
 import gql from 'graphql-tag';
-const GET_CUSTOMERS = gql`
-  {
-    customers {
-      id
-      first_name
-      last_name
-      email
-      company
-      phone
-      address_book
-      date
-      updated
-    }
-  }
-`;
 
 const GET_CUSTOMER = gql`
   query ($id: ID!) {
@@ -26,8 +11,6 @@ const GET_CUSTOMER = gql`
         company
         phone
         addressBook
-        date
-        updated
       }
     }
   }
@@ -193,7 +176,6 @@ const DELETE_ADDRESSBOOK = gql`
 `;
 
 export {
-  GET_CUSTOMERS,
   GET_CUSTOMER,
   ADD_CUSTOMER,
   UPDATE_CUSTOMER,

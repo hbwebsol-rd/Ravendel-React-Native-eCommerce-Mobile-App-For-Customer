@@ -5,8 +5,6 @@ const GET_APP_SETTING = gql`
     getSettings {
       seo {
         meta_title
-        meta_tag
-        meta_description
       }
       store {
         currency_options {
@@ -24,10 +22,6 @@ const GET_APP_SETTING = gql`
           state
           zip
           hour
-        }
-        measurements {
-          weight_unit
-          dimensions_unit
         }
         inventory {
           manage_stock
@@ -139,8 +133,6 @@ const GET_APP_SETTING = gql`
           }
         }
       }
-      createdAt
-      updatedAt
     }
   }
 `;

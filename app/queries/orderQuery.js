@@ -38,50 +38,6 @@ const ADD_CART = gql`
     }
   }
 `;
-const GET_ORDERS = gql`
-  {
-    orders {
-      id
-      user_id
-      status
-      shipping
-      billing
-      products
-      date
-      updated
-    }
-  }
-`;
-
-const GET_ORDER = gql`
-  query ($id: ID!) {
-    productCategory(id: $id) {
-      id
-      user_id
-      status
-      shipping
-      billing
-      products
-      date
-      updated
-    }
-  }
-`;
-
-const DELETE_ORDER = gql`
-  mutation ($id: ID!) {
-    deleteOrder(id: $id) {
-      id
-      user_id
-      status
-      shipping
-      billing
-      products
-      date
-      updated
-    }
-  }
-`;
 
 const UPDATE_ORDER = gql`
   mutation (
@@ -151,8 +107,6 @@ const CALCULATE_CART = gql`
       cartItems
       date
       totalSummary
-
-      updated
     }
   }
 `;
@@ -166,24 +120,10 @@ const CALCULATE_CART_WITHOUT_LOGIN = gql`
       cartItems
       date
       totalSummary
-      updated
     }
   }
 `;
 
-const CART = gql`
-  query ($id: ID!) {
-    cart(id: $id) {
-      id
-      user_id
-      status
-      total
-      products
-      date
-      updated
-    }
-  }
-`;
 const UPDATE_CART = gql`
   mutation ($id: ID!, $products: [cartProduct]) {
     updateCart(id: $id, products: $products) {
@@ -236,20 +176,6 @@ const APPLY_COUPON_CODE = gql`
   }
 `;
 
-const ADD_CHECKOUT = gql`
-  mutation ($user_id: ID, $products: [checkoutProduct]) {
-    addCheckout(user_id: $user_id, products: $products) {
-      id
-      user_id
-      shipping
-      payment
-      products
-      status
-      date
-      updated
-    }
-  }
-`;
 const ORDER_HISTORY = gql`
   query ($id: ID!) {
     orderbyUser(userId: $id) {
@@ -290,6 +216,8 @@ const ADD_ORDER = gql`
       message
       success
       redirectUrl
+      paypalOrderId
+      razorpayOrderId
     }
   }
 `;
@@ -305,19 +233,14 @@ export const UPDATE_PAYMENT_STATUS = gql`
 export {
   ADD_TOCART,
   ADD_CART,
-  GET_ORDERS,
-  GET_ORDER,
-  DELETE_ORDER,
   DELETE_CART,
   UPDATE_ORDER,
   DELETE_CART_PRODUCT,
   GET_CART,
   UPDATE_CART,
   APPLY_COUPON_CODE,
-  ADD_CHECKOUT,
   ORDER_HISTORY,
   ADD_ORDER,
-  CART,
   CALCULATE_CART,
   CALCULATE_CART_WITHOUT_LOGIN,
   CHANGE_QTY,

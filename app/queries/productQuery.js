@@ -122,31 +122,9 @@ const GET_CATEGORIES = gql`
         name
         parentId
         date
-        updated
         url
         image
       }
-    }
-  }
-`;
-
-const GET_ALL_CATEGORIES = gql`
-  query ($fillter: customObject) {
-    productCategoriesByFilter(filter: $fillter) {
-      id
-      name
-      parentId
-      url
-      description
-      image
-      child_cat {
-        id
-        name
-        parentId
-      }
-      meta
-      date
-      updated
     }
   }
 `;
@@ -193,49 +171,6 @@ export const GET_FILTEREDPRODUCTS = gql`
   }
 `;
 
-const GET_CAT_PRODUCTS = gql`
-  query ($url: String!) {
-    productsbycaturl(cat_url: $url) {
-      data {
-        id
-        name
-        parentId
-        url
-        description
-        image
-        meta
-        date
-        updated
-        products {
-          _id
-          name
-          url
-          sku
-          description
-          quantity
-          pricing
-          feature_image
-          gallery_image
-          meta
-          shipping
-          tax_class
-          status
-          featured_product
-          product_type
-          custom_field
-          date
-          updated
-          rating
-          categoryId {
-            id
-            name
-          }
-        }
-      }
-    }
-  }
-`;
-
 const GET_PRODUCT_REVIEWS = gql`
   query ($id: ID!) {
     productwisereview(productId: $id) {
@@ -277,8 +212,8 @@ const ADD_REVIEW = gql`
   ) {
     addReview(
       title: $title
-      customer_id: $customer_id
-      product_id: $product_id
+      customerId: $customer_id
+      productId: $product_id
       email: $email
       review: $review
       rating: $rating
@@ -366,12 +301,6 @@ const GET_BRANDS_QUERY = gql`
           description
           keywords
         }
-        date
-        updated
-      }
-      message {
-        message
-        success
       }
     }
   }
@@ -444,10 +373,8 @@ export {
   GET_PRODUCTS,
   GET_CATEGORIES,
   GET_PRODUCT,
-  GET_CAT_PRODUCTS,
   GET_PRODUCT_REVIEWS,
   ADD_REVIEW,
-  GET_ALL_CATEGORIES,
   SALE_PRODUCT,
   RECENT_PRODUCT,
   PRODUCT_BY_A_CATEGORY,
