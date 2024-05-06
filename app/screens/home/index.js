@@ -42,7 +42,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { AllDataInOne, brandAction } from '../../store/action/settingAction';
+import {
+  AllDataInOne,
+  homeScreenFields,
+  brandAction,
+} from '../../store/action/settingAction';
 import HomeBrandViews from './Components.js/BrandShow';
 import {
   APP_PRIMARY_COLOR,
@@ -66,7 +70,7 @@ const HomeScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const allCategoriesWithChild = useSelector(
-    (state) => state.products.categories.data,
+    (state) => state.products.categories,
   );
   const { cartId, cartChecked } = useSelector((state) => state.cart);
   const cartItems = useSelector((state) => state.cart.products);
@@ -91,8 +95,6 @@ const HomeScreen = ({ navigation }) => {
     saleProduct,
     ProductByCategory,
   } = allData;
-  // console.log(allData, 'all d');
-  const primaryColor = '#000';
   const settingLoading = useSelector((state) => state.settings.loading);
   const [allCategories, setAllCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -197,65 +199,23 @@ const HomeScreen = ({ navigation }) => {
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
     dispatch(AppSettingAction());
-    dispatch(categoriesAction());
     wait(2000).then(() => setRefreshing(false));
   }, []);
   // Use Effect Call
 
   useEffect(() => {
     dispatch(AppSettingAction());
-    dispatch(categoriesAction());
   }, [isFocused]);
-
   useEffect(() => {
     // Filter data as per categories
-    // dispatch(brandAction());
     if (!isEmpty(homeData)) {
-      const featuredProduct = homeData.filter(
-        (section) => section.label === 'Featured Product',
-      )[0];
-      const recentProduct = homeData.filter(
-        (section) => section.label === 'Recently Added Products',
-      )[0];
-      const productOnsale = homeData.filter(
-        (section) => section.label === 'Products On Sales',
-      )[0];
-      const productRec = homeData.filter(
-        (section) => section.label === 'Product Recommendation',
-      )[0];
-      const productFromSpecific = homeData.filter(
-        (section) => section.label === 'Product from Specific Categories',
-      )[0];
-      // if (featuredProduct.visible) {
-      //   dispatch(featureDataAction());
-      // }
-      // if (recentProduct.visible) {
-      //   dispatch(recentaddedproductAction());
-      // }
-      // if (productOnsale.visible) {
-      //   dispatch(productOnSaleAction());
-      // }
-      // if (productFromSpecific.visible) {
-      //   let catID = '62fe094eb2831ffd1e6fdfe8';
-      //   dispatch(productByPerticulareAction(catID));
-      // }
-      let catID = '62fe094eb2831ffd1e6fdfe8';
-      dispatch(
-        AllDataInOne(
-          featuredProduct.visible,
-          recentProduct.visible,
-          productOnsale.visible,
-          true,
-          catID,
-        ),
-      );
+      dispatch(homeScreenFields());
     }
   }, [homeData]);
 
   useEffect(() => {
     if (allCategoriesWithChild) {
-      const data = unflatten(allCategoriesWithChild);
-      setAllCategories(data);
+      setAllCategories(allCategoriesWithChild);
     }
   }, [allCategoriesWithChild]);
 
@@ -275,7 +235,7 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={Styles.mainContainer}>
-      {settingLoading && catLoading ? <AppLoader /> : null}
+      {settingLoading ? <AppLoader /> : null}
       <StatusBar backgroundColor={APP_PRIMARY_COLOR} />
       <Header showProfileIcon navigation={navigation} title={''} />
       <View style={styles.searchstyle}>

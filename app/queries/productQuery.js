@@ -76,33 +76,15 @@ const GET_PRODUCT = gql`
         custom_field
         date
         updated
-        attribute
-        attribute_master {
-          id
-          name
-          attribute_values
-          createdAt
-          updatedAt
-        }
         categoryId {
           id
           name
           __typename
         }
-        variation_master {
-          id
-          productId
-          combination
-          quantity
-          sku
-          image
-          pricing
-          createdAt
-          updatedAt
-        }
         short_description
-        variant
         __typename
+        ratingCount
+        levelWiseRating
       }
       message {
         message
@@ -168,6 +150,32 @@ export const GET_FILTEREDPRODUCTS = gql`
     shipping
     taxClass
     __typename
+  }
+`;
+
+const GET_FILTEREDPRODUCTS_WITH_PAGINATION = gql`
+  query GetCategoryPageData(
+    $mainFilter: customObject
+    $filters: customArray
+    $sort: customObject
+    $pageNo: Int
+    $limit: Int
+  ) {
+    getCategoryPageData(
+      mainFilter: $mainFilter
+      filters: $filters
+      pageNo: $pageNo
+      limit: $limit
+      sort: $sort
+    ) {
+      isMostParentCategory
+      mostParentCategoryData
+      categoryTree
+      filterData
+      productData
+      message
+      success
+    }
   }
 `;
 
@@ -288,6 +296,31 @@ export const GET_RELATED_PRODUCTS_QUERY = gql`
   }
 `;
 
+const GET_ALL_FIELDS = gql`
+  query HomePageData($deviceType: ID!) {
+    getHomePage(deviceType: $deviceType) {
+      parentCategories {
+        id
+        name
+        url
+        image
+      }
+      sections {
+        name
+        section_img
+        products {
+          name
+          quantity
+          rating
+          pricing
+          feature_image
+          url
+        }
+      }
+    }
+  }
+`;
+
 const GET_BRANDS_QUERY = gql`
   query {
     brands {
@@ -380,4 +413,6 @@ export {
   PRODUCT_BY_A_CATEGORY,
   FEATURE_CATEGORY,
   GET_BRANDS_QUERY,
+  GET_ALL_FIELDS,
+  GET_FILTEREDPRODUCTS_WITH_PAGINATION,
 };

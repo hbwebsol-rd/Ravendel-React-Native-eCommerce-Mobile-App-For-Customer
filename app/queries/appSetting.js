@@ -105,7 +105,6 @@ const GET_APP_SETTING = gql`
           }
           add_section_web {
             label
-            name
             visible
             category
           }
@@ -114,13 +113,7 @@ const GET_APP_SETTING = gql`
           primary_color
           playstore
           appstore
-          phone_number
-          email
           logo
-          social_media {
-            name
-            handle
-          }
         }
 
         mobile {
