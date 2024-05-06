@@ -115,17 +115,6 @@ const DrawerNavigator = () => {
       />
       {/* Categories */}
       <Drawer.Screen
-        name={NavigationConstants.SHOP_SCREEN}
-        component={Shop}
-        options={{
-          unmountOnBlur: true,
-          drawerLabel: 'Shop',
-          drawerIcon: ({ focused, size, color }) => (
-            <Feather name="shopping-bag" color={color} size={size} />
-          ),
-        }}
-      />
-      <Drawer.Screen
         name={NavigationConstants.CATEGORIES_SCREEN}
         component={CategoriesScreen}
         options={{
