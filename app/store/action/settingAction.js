@@ -1,6 +1,7 @@
 import { GET_APP_SETTING } from '../../queries/appSetting';
 import {
   FEATURE_CATEGORY,
+  GET_ALL_FIELDS,
   GET_BRANDS_QUERY,
   PRODUCT_BY_A_CATEGORY,
   RECENT_PRODUCT,
@@ -9,6 +10,7 @@ import {
 import { isEmpty, storeData } from '../../utils/helper';
 import { query } from '../../utils/service';
 import _ from 'lodash';
+import { CATS_SUCCESS } from './productAction';
 
 export const AppSettingAction = () => async (dispatch) => {
   const response = await query(GET_APP_SETTING);
@@ -157,41 +159,44 @@ export const productByPerticulareAction = (payload) => async (dispatch) => {
   }
 };
 
-export const AllDataInOne =
-  (showFeature, showRecent, showSale, showProduct, payload) =>
-  async (dispatch) => {
-    dispatch({ type: SETTING_LOADING });
+export const homeScreenFields = () => async (dispatch) => {
+  dispatch({ type: SETTING_LOADING });
+  try {
+    const allDataInOnce = await query(GET_ALL_FIELDS, { deviceType: '2' });
+    const productOnSale = allDataInOnce.data.getHomePage.sections.filter(
+      (section) => section.name === 'Products On Sales',
+    )[0];
+    const recentlyAddedProduct = allDataInOnce.data.getHomePage.sections.filter(
+      (section) => section.name === 'Recently Added Products',
+    )[0];
+    const featureProduct = allDataInOnce.data.getHomePage.sections.filter(
+      (section) => section.name === 'Featured Product',
+    )[0];
+    const pr = allDataInOnce.data.getHomePage.sections.filter(
+      (section) => section.name === 'Product Recommendation',
+    )[0];
+    const productFromSpecificCategory =
+      allDataInOnce.data.getHomePage.sections.filter(
+        (section) => section.name === 'Product from Specific Categories',
+      )[0];
 
-    try {
-      const brand = await query(GET_BRANDS_QUERY);
-      let category = [];
-      let recent = [];
-      let sale = [];
-      let productCategory = [];
-      if (showFeature) {
-        category = await query(FEATURE_CATEGORY);
-      }
-      if (showRecent) {
-        recent = await query(RECENT_PRODUCT);
-      }
-      if (showSale) {
-        sale = await query(SALE_PRODUCT);
-      }
-      if (showProduct) {
-        productCategory = await query(PRODUCT_BY_A_CATEGORY, { id: payload });
-      }
-      const allData = {
-        brands: brand.data.brands.data,
-        featureData: category.data.featureproducts,
-        recentAddedProduct: recent.data.recentproducts,
-        saleProduct: sale.data.onSaleProducts,
-        ProductByCategory: productCategory.data.productsbycatid,
-      };
-      dispatch({ type: GET_ALL_DATA, payload: allData });
-    } catch (error) {
-      dispatch({ type: SETTING_FAIL });
-    }
-  };
+    const allData = {
+      brands: _.get(allDataInOnce, 'data.getMobileHomePage.homepageBrands', []),
+      featureData: featureProduct?.products,
+      recentAddedProduct: recentlyAddedProduct?.products,
+      saleProduct: productOnSale?.products,
+      ProductByCategory: productFromSpecificCategory?.products,
+    };
+    dispatch({ type: GET_ALL_DATA, payload: allData });
+    return dispatch({
+      type: CATS_SUCCESS,
+      payload: _.get(allDataInOnce, 'data.getHomePage.parentCategories', []),
+    });
+  } catch (error) {
+    console.log(error);
+    dispatch({ type: SETTING_FAIL });
+  }
+};
 
 export const SETTING_LOADING = 'SETTING_LOADING';
 export const GET_THEME_VALUE = 'GET_THEME_VALUE';
