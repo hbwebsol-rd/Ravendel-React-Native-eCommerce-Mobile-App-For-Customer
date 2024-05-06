@@ -27,6 +27,7 @@ import {
   isEmpty,
 } from '../../utils/helper';
 import {
+  ActivityIndicator,
   // FlatList,
   ImageBackground,
   // ScrollView,
@@ -44,30 +45,22 @@ import {
   windowWidth,
 } from '../../utils/config';
 import { catProductAction } from '../../store/action';
-import { ProductPriceText } from '../components';
-import Feather from 'react-native-vector-icons/Feather';
 import StarRating from 'react-native-star-rating';
-import LinearGradient from 'react-native-linear-gradient';
-import { CAT_PRODUCTS_CLEAR } from '../../store/action/productAction';
 import Colors from '../../constants/Colors';
 import {
   BottomSheetModal,
   BottomSheetModalProvider,
 } from '@gorhom/bottom-sheet';
-import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import NavigationConstants from '../../navigation/NavigationConstants';
 import PropTypes from 'prop-types';
+import BrandFilter from '../components/BrandFilter';
+import RangeFilter from '../components/RangeFilter';
+import RatingFilter from '../components/RatingFilter';
 
 const SubCategoriesScreen = ({ navigation, route }) => {
-  const isFocused = useIsFocused();
   const dispatch = useDispatch();
   const [amountRange, setAmountRange] = useState([0, 10000]);
-  const [values, setValues] = useState([0, 10000]);
-
-  //Slider Value Setter
-  const multiSliderValuesChange = (values) => {
-    setValues(values);
-  };
+  const [loader, setLoader] = useState(false);
 
   const bottomSheetModalRef = useRef(null);
 
@@ -78,7 +71,6 @@ const SubCategoriesScreen = ({ navigation, route }) => {
   );
   // callbacks
   const handlePresentModalPress = useCallback(() => {
-    console.log('pressing', bottomSheetModalRef.current);
     bottomSheetModalRef.current?.present();
   }, []);
 
@@ -86,38 +78,61 @@ const SubCategoriesScreen = ({ navigation, route }) => {
     console.log('handleSheetChanges', index);
   }, []);
 
-  const [starCount, setStarCount] = useState(3.5);
+  const [starCount, setStarCount] = useState(0);
 
   const onStarRatingPress = (rating) => {
     setStarCount(rating);
   };
   const [selectedCat, setSelectedCat] = useState('All');
-  const [selectedCatId, setSelectedCatId] = useState('');
   const singleCat = route?.params?.singleCategory;
+  const [selectedCatId, setSelectedCatId] = useState(singleCat.url);
   const singleCatChildern = route?.params?.withChildern;
   const loading = useSelector((state) => state.products.loading);
-  const singleCateogry = useSelector(
-    (state) => state.products.singleCategoryDetails,
-  );
+  const {
+    filterData,
+    singleCategoryDetails: singleCateogry,
+    totalCount,
+  } = useSelector((state) => state.products);
   const { brands } = useSelector((state) => state.settings);
   const [categorydata, setCategorydata] = useState(null);
   const [optionSelect, setOptionSelect] = useState(['All']);
   const [withChild, setWithChild] = useState([]);
   const [inpvalue, setInpvalue] = useState('');
-  const [ActiveBrand, setActiveBrand] = useState('');
+  const [ActiveBrand, setActiveBrand] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPage, setTotalPage] = useState('');
+  const [sortBy, setSortBy] = useState({
+    field: 'date',
+    type: 'desc',
+  });
   //Custom Functions
   const handleinpiut = (e) => {
     setInpvalue(e);
   };
 
+  const handleLoadMore = () => {
+    setLoader(true);
+    const filter = {
+      mainFilter: {
+        categoryUrl: selectedCatId,
+      },
+      filters: [],
+      pageNo: 1,
+      limit: 10 * (currentPage + 1),
+    };
+    dispatch(
+      catProductAction(filter, true, setLoader, setCurrentPage, currentPage),
+    );
+  };
+
   // Custom Call
   const handleselectedCat = (name, id) => {
-    if (name == selectedCat) {
-      setSelectedCat(null);
-      setSelectedCatId(null);
+    if (name === 'All') {
+      setSelectedCat('All');
+      setSelectedCatId(singleCat.url);
     } else {
       setSelectedCat(name);
-      setSelectedCatId(id);
+      setSelectedCatId(name);
     }
   };
   useEffect(() => {
@@ -167,116 +182,88 @@ const SubCategoriesScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     setCategorydata(singleCateogry);
-  }, [singleCateogry]);
-
-  useEffect(() => {
-    if (singleCat) {
-      let filter = {
-        category: singleCat.id,
-        brand: '',
-        most_reviewed: false,
-        product_type: '',
-        rating: {
-          min: 0,
-          max: 5,
-        },
-        price: {
-          min: 1,
-          max: 100000,
-        },
-        search: '',
-      };
-      dispatch(catProductAction(filter, true));
-    } else {
-      dispatch({
-        type: CAT_PRODUCTS_CLEAR,
-      });
+    if (totalCount > 0) {
+      setTotalPage(Math.ceil(totalCount / 10));
     }
-  }, [isFocused]);
+  }, [singleCateogry, totalCount]);
 
   useEffect(() => {
     if (selectedCat !== 'All') {
-      let filter = {
-        category: selectedCatId,
-        brand: '',
-        most_reviewed: false,
-        product_type: '',
-        rating: {
-          min: 0,
-          max: 5,
+      const filter = {
+        mainFilter: {
+          categoryUrl: selectedCatId,
         },
-        price: {
-          min: 1,
-          max: 100000,
-        },
-        search: '',
+        filters: [],
+        pageNo: 1,
+        limit: 10,
       };
-      dispatch(catProductAction(filter, true));
+      dispatch(catProductAction(filter));
     } else {
-      let filter = {
-        category: singleCat.id,
-        brand: '',
-        most_reviewed: false,
-        product_type: '',
-        rating: {
-          min: 0,
-          max: 5,
+      const filter = {
+        mainFilter: {
+          categoryUrl: selectedCatId,
         },
-        price: {
-          min: 1,
-          max: 100000,
-        },
-        search: '',
+        filters: [],
+        pageNo: 1,
+        limit: 10,
       };
-      dispatch(catProductAction(filter, true));
+
+      dispatch(catProductAction(filter));
     }
   }, [selectedCat]);
 
   const handleFilter = () => {
-    const brandobj = !isEmpty(ActiveBrand)
-      ? brands
-          .filter((item) => item.name === ActiveBrand)
-          .map((item) => {
-            return { id: item.id, name: item.name };
-          })
-      : '';
-    let filter = {
-      category: selectedCatId,
-      brand: !isEmpty(brandobj) ? brandobj[0] : '',
-      most_reviewed: false,
-      product_type: '',
-      rating: {
-        min: 0,
-        max: starCount,
+    const filter = {
+      mainFilter: {
+        categoryUrl: selectedCatId,
       },
-      price: {
-        min: values[0],
-        max: values[1],
-      },
-      search: '',
+      sort: sortBy,
+      filters: [
+        {
+          field: 'brand',
+          type: 'array',
+          category: 'static',
+          valueType: 'ObjectId',
+          select: ActiveBrand,
+        },
+        {
+          field: 'pricing.sellprice',
+          type: 'range',
+          category: 'static',
+          select: {
+            minValue: amountRange[0],
+            maxValue: amountRange[1],
+          },
+        },
+        {
+          field: 'rating',
+          type: 'choice',
+          category: 'static',
+          valueType: 'Integer',
+          select: {
+            minValue: starCount,
+          },
+        },
+      ],
+      pageNo: 1,
+      limit: 10,
     };
     dispatch(catProductAction(filter, true));
+    bottomSheetModalRef.current?.dismiss();
   };
 
   const handleReset = () => {
-    setActiveBrand('');
-    setStarCount(5);
+    setActiveBrand([]);
+    setStarCount(0);
     setAmountRange[(0, 10000)];
     bottomSheetModalRef.current?.dismiss();
-    let filter = {
-      category: '',
-      brand: '',
-      most_reviewed: false,
-      product_type: '',
-      rating: {
-        min: 0,
-        max: 5,
+    const filter = {
+      mainFilter: {
+        categoryUrl: selectedCatId,
       },
-      price: {
-        min: 1,
-        max: 100000,
-      },
-      search: '',
+      filters: [],
+      pageNo: 1,
+      limit: 10,
     };
     dispatch(catProductAction(filter, true));
   };
@@ -346,6 +333,30 @@ const SubCategoriesScreen = ({ navigation, route }) => {
       </TouchableOpacity>
     );
   }
+
+  const sortData = [
+    {
+      name: 'Lowest to highest',
+      sortData: {
+        field: 'pricing.sellprice',
+        type: 'asc',
+      },
+    },
+    {
+      name: 'highest to Lowest',
+      sortData: {
+        field: 'pricing.sellprice',
+        type: 'desc',
+      },
+    },
+    {
+      name: 'Newest',
+      sortData: {
+        field: 'date',
+        type: 'desc',
+      },
+    },
+  ];
 
   if (loading) {
     return <AppLoader />;
@@ -474,6 +485,7 @@ const SubCategoriesScreen = ({ navigation, route }) => {
               flexDirection: 'column',
               margin: 'auto',
               marginHorizontal: 30,
+              paddingBottom: 20,
             }}
             ListEmptyComponent={() => (
               <View>
@@ -483,8 +495,27 @@ const SubCategoriesScreen = ({ navigation, route }) => {
                 </AText>
               </View>
             )}
+            ListFooterComponent={() =>
+              // Render Load More button as a footer
+              currentPage < totalPage && (
+                <TouchableOpacity
+                  onPress={() => handleLoadMore()}
+                  style={{
+                    width: '100%',
+                    alignItems: 'center',
+                    paddingVertical: 2,
+                  }}>
+                  {loader ? (
+                    <ActivityIndicator />
+                  ) : (
+                    <AText color={Colors.blue}>Load More</AText>
+                  )}
+                </TouchableOpacity>
+              )
+            }
           />
         </View>
+
         <BottomSheetModal
           // enableDismissOnClose={false}
           ref={bottomSheetModalRef}
@@ -500,81 +531,52 @@ const SubCategoriesScreen = ({ navigation, route }) => {
                 <AText fonts={FontStyle.semiBold}>Reset</AText>
               </TouchableOpacity>
             </View>
-            <AText mt={'20px'} mb={'5px'} fonts={FontStyle.semiBold}>
-              Brands
-            </AText>
-            <View
-              style={{
-                elevation: 10,
-                flexDirection: 'row',
-                flexWrap: 'wrap',
-              }}>
-              {brands.map((item) => (
-                <TouchableOpacity
-                  onPress={() => setActiveBrand(item.name)}
-                  style={{
-                    ...styles.chipstyle,
-                    backgroundColor:
-                      ActiveBrand === item.name
-                        ? Colors.green
-                        : Colors.lightGreen,
-                  }}>
-                  <AText
-                    fonts={FontStyle.semiBold}
-                    color={
-                      ActiveBrand === item.name
-                        ? Colors.whiteColor
-                        : Colors.blackColor
-                    }>
-                    {item.name}
-                  </AText>
-                </TouchableOpacity>
-              ))}
-            </View>
-            <AText
-              mt="20px"
-              color={Colors.blackColor}
-              fonts={FontStyle.semiBold}>
-              Price Range
-            </AText>
-            <Text>
-              Selected Range: {values[0]} - {values[1]}
-            </Text>
+            {filterData &&
+              filterData.map((item) =>
+                item.field === 'brand' ? (
+                  <BrandFilter
+                    ActiveBrand={ActiveBrand}
+                    setActiveBrand={setActiveBrand}
+                    data={item}
+                  />
+                ) : item.field === 'pricing.sellprice' ? (
+                  <RangeFilter setAmountRange={setAmountRange} data={item} />
+                ) : item.field === 'rating' ? (
+                  <RatingFilter
+                    starCount={starCount}
+                    onStarRatingPress={onStarRatingPress}
+                    data={item}
+                  />
+                ) : null,
+              )}
 
-            <MultiSlider
-              containerStyle={{ marginLeft: 20 }}
-              values={values}
-              sliderLength={300}
-              onValuesChange={multiSliderValuesChange}
-              min={0}
-              max={10000}
-              step={1}
-              allowOverlap={false}
-              snapped
-              selectedStyle={{
-                backgroundColor: APP_PRIMARY_COLOR,
-              }}
-              unselectedStyle={{
-                backgroundColor: APP_PRIMARY_COLOR,
-              }}
-              markerStyle={{
-                backgroundColor: APP_PRIMARY_COLOR,
-              }}
-            />
-            <AText color={Colors.blackColor} fonts={FontStyle.semiBold}>
-              Rating
+            <AText
+              color={Colors.blackColor}
+              mt={'10px'}
+              fonts={FontStyle.semiBold}>
+              Sort By
             </AText>
             <View style={{ width: '35%' }}>
-              <StarRating
-                disabled={false}
-                maxStars={5}
-                rating={starCount}
-                selectedStar={(rating) => onStarRatingPress(rating)}
-                emptyStarColor={'gray'}
-                starSize={19}
-                containerStyle={{ marginTop: 5 }}
-                fullStarColor={'#FFDB20'}
-              />
+              {sortData.map((item) => (
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <TouchableOpacity
+                    onPress={() => setSortBy(item.sortData)}
+                    style={{
+                      marginRight: 5,
+                      height: 15,
+                      width: 15,
+                      borderWidth: 1,
+                      borderColor: Colors.blackColor,
+                      borderRadius: 8,
+                      backgroundColor:
+                        sortBy.field == item.sortData.field &&
+                        sortBy.type == item.sortData.type
+                          ? APP_PRIMARY_COLOR
+                          : Colors.transparentColor,
+                    }}></TouchableOpacity>
+                  <AText>{item.name}</AText>
+                </View>
+              ))}
             </View>
             <AButton
               mt={'20px'}

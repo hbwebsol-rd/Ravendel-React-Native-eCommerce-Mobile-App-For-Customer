@@ -43,7 +43,6 @@ export default (state = initialState, action) => {
         themeSettings: action.payload.themeSettings,
         homeslider: action.payload.homeslider,
         homeData: action.payload.homeData,
-        loading: false,
         success: true,
         appTitle: action.payload.title,
         currencyOptions: action.payload.store.currency_options,

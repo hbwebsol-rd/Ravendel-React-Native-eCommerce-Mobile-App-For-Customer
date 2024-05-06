@@ -1,26 +1,105 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  ImageBackground,
-  TouchableOpacity,
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import Colors from '../../constants/Colors';
-import { ACol, ARow, AText } from '../../theme-components';
+import { ACol, ARow, AText, AppLoader } from '../../theme-components';
 import { FontStyle } from '../../utils/config';
 import AIcon from 'react-native-vector-icons/AntDesign';
 import { capitalizeFirstLetter, isEmpty } from '../../utils/helper';
-import FastImage from 'react-native-fast-image';
 import URL from '../../utils/baseurl';
 import NavigationConstants from '../../navigation/NavigationConstants';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  CLEAR_SUBCATEGORY,
+  getSubcategories,
+} from '../../store/action/productAction';
+import { GET_FILTEREDPRODUCTS_WITH_PAGINATION } from '../../queries/productQuery';
+import { query } from '../../utils/service';
 
 const SubcategoryOption = ({ navigation, route }) => {
+  const dispatch = useDispatch();
   const singleCat = route?.params?.singleCategory;
   const singleCatChildern = route?.params?.withChildern;
+  const { subcategories, loading } = useSelector((state) => state.products);
+  const [subcategoriesData, setSubcategoriesData] = useState([]);
+
+  useEffect(() => {
+    if (subcategories?.getCategoryPageData) {
+      setSubcategoriesData(
+        subcategories.getCategoryPageData.mostParentCategoryData.subCategories,
+      );
+    }
+  }, [subcategories]);
+
+  useEffect(() => {
+    return () => {
+      console.log(' clear run');
+      dispatch({ type: CLEAR_SUBCATEGORY });
+    };
+  }, []);
+
+  useEffect(() => {
+    const subcat = {
+      mainFilter: {
+        categoryUrl: singleCat.url,
+      },
+      filters: [
+        {
+          field: 'brand',
+          type: 'array',
+          category: 'static',
+          valueType: 'ObjectId',
+          select: [],
+        },
+        {
+          field: 'pricing.sellprice',
+          type: 'range',
+          category: 'static',
+          select: {
+            minValue: 500,
+            maxValue: 50000,
+          },
+        },
+        {
+          field: 'rating',
+          type: 'choice',
+          category: 'static',
+          valueType: 'Integer',
+          select: {
+            minValue: 0,
+          },
+        },
+      ],
+      pageNo: 1,
+      limit: 3,
+    };
+    dispatch(getSubcategories(subcat));
+  }, []);
+
+  const handleGetSubcategory = async (url) => {
+    console.log(url);
+    const subcatPayload = {
+      mainFilter: {
+        categoryUrl: url,
+      },
+      filters: [],
+      pageNo: 1,
+      limit: 3,
+    };
+    const res = await query(
+      GET_FILTEREDPRODUCTS_WITH_PAGINATION,
+      subcatPayload,
+    );
+    console.log(res, ' new sub data');
+    if (!res.data.getCategoryPageData.isMostParentCategory) {
+      navigation.navigate(NavigationConstants.SUBCATEGORIES_SCREEN, {
+        singleCategory: res.data.getCategoryPageData.categoryTree.subCategories,
+        withChildern:
+          res.data.getCategoryPageData.categoryTree.subCategories.subCategories,
+      });
+    }
+  };
 
   //List of categories
   const menuListing = (Categories) => {
@@ -28,14 +107,10 @@ const SubcategoryOption = ({ navigation, route }) => {
       // if (category.parentId === null) {
       return (
         <ACol mt={'60px'} col={2} key={category.id}>
-          {console.log(JSON.stringify(category.children, ' chillldr'))}
           <CategoriesListingWrapper
             activeOpacity={0.9}
             onPress={() => {
-              navigation.navigate(NavigationConstants.SUBCATEGORIES_SCREEN, {
-                singleCategory: category,
-                withChildern: category.children,
-              });
+              handleGetSubcategory(category.url);
             }}>
             <ARow height="100%" padding={0}>
               <ACol col={1}>
@@ -63,26 +138,23 @@ const SubcategoryOption = ({ navigation, route }) => {
   };
 
   return (
-    <>
-      <View style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
-        <View style={styles.header}>
-          <AIcon
-            onPress={() => navigation.goBack()}
-            name="arrowleft"
-            size={22}
-          />
-          <AText fonts={FontStyle.semiBold} ml="20px">
-            {capitalizeFirstLetter(singleCat?.url)}
-          </AText>
-        </View>
-        <View style={{ marginTop: 60 }} />
-        {!isEmpty(singleCat.children) && singleCat.children.length > 0 ? (
+    <View style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
+      {loading ? <AppLoader /> : null}
+      <View style={styles.header}>
+        <AIcon onPress={() => navigation.goBack()} name="arrowleft" size={22} />
+        <AText fonts={FontStyle.semiBold} ml="20px">
+          {capitalizeFirstLetter(singleCat?.url)}
+        </AText>
+      </View>
+      <ScrollView style={{ backgroundColor: Colors.whiteColor, marginTop: 50 }}>
+        <View style={{ marginTop: 15 }} />
+        {!isEmpty(subcategoriesData) && subcategoriesData.length > 0 ? (
           <ARow row wrap>
-            {menuListing(singleCat.children)}
+            {menuListing(subcategoriesData)}
           </ARow>
         ) : null}
-      </View>
-    </>
+      </ScrollView>
+    </View>
   );
 };
 
