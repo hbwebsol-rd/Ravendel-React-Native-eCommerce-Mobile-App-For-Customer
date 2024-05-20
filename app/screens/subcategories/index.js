@@ -124,7 +124,6 @@ const SubCategoriesScreen = ({ navigation, route }) => {
       catProductAction(filter, true, setLoader, setCurrentPage, currentPage),
     );
   };
-
   // Custom Call
   const handleselectedCat = (name, id) => {
     if (name === 'All') {
@@ -713,48 +712,4 @@ const styles = StyleSheet.create({
   },
 });
 
-const CollapseContainer = styled.View`
-  background: #f7f7f7;
-  border-radius: 10px;
-`;
-
-const CategoriesList = styled.TouchableOpacity``;
-
-const ListItem = styled.View`
-  flex: 1;
-  flex-wrap: wrap;
-  margin: 5px 2px 5px 5px;
-  flex-direction: row;
-  align-items: center;
-`;
-
-const SubCategoryContainer = styled.View``;
-
-const CategoryContainer = styled.View`
-  flex: 1;
-`;
-
-const CategoryImageWrapper = styled.View`
-  width: 30px;
-  height: 30px;
-  border-radius: 50px;
-  overflow: hidden;
-`;
-
-const CategoryImage = styled.Image`
-  width: null;
-  height: null;
-  flex: 1;
-  resize-mode: cover;
-`;
-const CollapseIcon = styled.Text`
-  align-self: flex-end;
-`;
-
-const CategoryName = styled.View`
-  flex: 1;
-  justify-content: space-between;
-  align-items: center;
-  flex-direction: row;
-`;
 export default SubCategoriesScreen;

@@ -9,7 +9,6 @@ import {
   AppLoader,
 } from '../../theme-components';
 import { useSelector, useDispatch } from 'react-redux';
-import { categoriesAction } from '../../store/action';
 import URL from '../../utils/baseurl';
 import { isEmpty, unflatten } from '../../utils/helper';
 import NavigationConstants from '../../navigation/NavigationConstants';
@@ -24,19 +23,15 @@ const CategoriesScreen = ({ navigation }) => {
   //   state => state.products.allCategories,
   // );
   const allCategoriesWithChild = useSelector(
-    (state) => state.products.categories.data,
+    (state) => state.products.categories,
   );
   const [allCategoriesWithChildData, setAllCategoriesWithChildData] = useState(
     [],
   );
 
   useEffect(() => {
-    categories(categoriesAction());
-  }, [categories]);
-  useEffect(() => {
     if (allCategoriesWithChild) {
-      const data = unflatten(allCategoriesWithChild);
-      setAllCategoriesWithChildData(data);
+      setAllCategoriesWithChildData(allCategoriesWithChild);
     }
   }, [allCategoriesWithChild]);
 
@@ -68,7 +63,7 @@ const CategoriesScreen = ({ navigation }) => {
   //List of categories
   const menuListing = (Categories) => {
     return Categories.map((category) => {
-      if (category.parentId === null) {
+      if (!category.parentId) {
         return (
           <ACol mt={'60px'} col={2} key={category.id}>
             <CategoriesListingWrapper
@@ -110,7 +105,19 @@ const CategoriesScreen = ({ navigation }) => {
           <ARow row wrap>
             {menuListing(allCategoriesWithChildData)}
           </ARow>
-        ) : null}
+        ) : (
+          <View>
+            <AText
+              style={{
+                fontSize: 16,
+                alignSelf: 'center',
+                color: 'grey',
+                marginTop: 20,
+              }}>
+              No Records Found
+            </AText>
+          </View>
+        )}
       </View>
     </>
   );

@@ -152,7 +152,19 @@ const SubcategoryOption = ({ navigation, route }) => {
           <ARow row wrap>
             {menuListing(subcategoriesData)}
           </ARow>
-        ) : null}
+        ) : (
+          <View>
+            <AText
+              style={{
+                fontSize: 16,
+                alignSelf: 'center',
+                color: 'grey',
+                marginTop: 20,
+              }}>
+              No Records Found
+            </AText>
+          </View>
+        )}
       </ScrollView>
     </View>
   );

@@ -533,28 +533,6 @@ const SingleProductScreen = ({ navigation, route }) => {
                         display: reviewcollapse ? 'flex' : 'none',
                       }}>
                       <>
-                        <View
-                          style={{
-                            width: '40%',
-                            alignSelf: 'flex-end',
-                            marginBottom: 10,
-                          }}>
-                          <AButton
-                            title={'Add a review'}
-                            round
-                            onPress={() =>
-                              isLoggin
-                                ? setWriteReviewPop(true)
-                                : navigation.navigate(
-                                    NavigationConstants.LOGIN_SIGNUP_SCREEN,
-                                  )
-                            }
-                            small
-                            semi
-                          />
-                        </View>
-                      </>
-                      <>
                         {ReviewProduct &&
                         ReviewProduct.filter(
                           (review) => review.status === 'approved',
