@@ -184,10 +184,12 @@ export const registerAction =
       const { data } = response;
       const { addCustomer } = data;
       if (!isEmpty(addCustomer) && addCustomer.success) {
-        handleActiveTab('Login');
+        // handleActiveTab('Login');
         dispatch({
           type: LOGIN_STOP,
         });
+        dispatch(LoginAction(payload.email, payload.password, navigation));
+
         dispatch({
           type: ALERT_SUCCESS,
           payload: 'Signup successfully',
