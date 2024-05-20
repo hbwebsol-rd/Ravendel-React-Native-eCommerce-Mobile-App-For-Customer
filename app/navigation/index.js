@@ -32,6 +32,7 @@ import {
   ThankYou,
   WishList,
   PaypalPayment,
+  SearchProduct,
 } from '../screens';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
@@ -153,6 +154,14 @@ const Navigation = () => {
             unmountOnBlur: false,
           }}
           component={HomeScreen}
+        />
+        <Tab.Screen
+          name={NVC.SEARCH_PRODUCT_SCREEN}
+          options={{
+            tabBarLabel: 'SearchProduct',
+            tabBarButton: () => null,
+          }}
+          component={SearchProduct}
         />
         {/* Home End */}
 

@@ -1,4 +1,5 @@
 import HomeScreen from './home';
+import SearchProduct from './home/searchProduct';
 import Temp from './home/temp';
 import CartScreen from './cart';
 import CategoriesScreen from './categories';
@@ -65,4 +66,5 @@ export {
   WishList,
   Notification,
   PaypalPayment,
+  SearchProduct,
 };

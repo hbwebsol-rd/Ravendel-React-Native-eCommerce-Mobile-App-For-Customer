@@ -163,29 +163,10 @@ export const homeScreenFields = () => async (dispatch) => {
   dispatch({ type: SETTING_LOADING });
   try {
     const allDataInOnce = await query(GET_ALL_FIELDS, { deviceType: '2' });
-    const productOnSale = allDataInOnce.data.getHomePage.sections.filter(
-      (section) => section.name === 'Products On Sales',
-    )[0];
-    const recentlyAddedProduct = allDataInOnce.data.getHomePage.sections.filter(
-      (section) => section.name === 'Recently Added Products',
-    )[0];
-    const featureProduct = allDataInOnce.data.getHomePage.sections.filter(
-      (section) => section.name === 'Featured Product',
-    )[0];
-    const pr = allDataInOnce.data.getHomePage.sections.filter(
-      (section) => section.name === 'Product Recommendation',
-    )[0];
-    const productFromSpecificCategory =
-      allDataInOnce.data.getHomePage.sections.filter(
-        (section) => section.name === 'Product from Specific Categories',
-      )[0];
 
     const allData = {
       brands: _.get(allDataInOnce, 'data.getMobileHomePage.homepageBrands', []),
-      featureData: featureProduct?.products,
-      recentAddedProduct: recentlyAddedProduct?.products,
-      saleProduct: productOnSale?.products,
-      ProductByCategory: productFromSpecificCategory?.products,
+      allSection: allDataInOnce.data.getHomePage.sections,
     };
     dispatch({ type: GET_ALL_DATA, payload: allData });
     return dispatch({

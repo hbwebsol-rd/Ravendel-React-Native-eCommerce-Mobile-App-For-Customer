@@ -179,6 +179,18 @@ const GET_FILTEREDPRODUCTS_WITH_PAGINATION = gql`
   }
 `;
 
+const GET_SEARCH_PRODUCTS = gql`
+  query SearchProducts($searchTerm: String!, $page: Int!, $limit: Int!) {
+    searchProducts(searchTerm: $searchTerm, page: $page, limit: $limit) {
+      name
+      url
+      pricing
+      feature_image
+      rating
+    }
+  }
+`;
+
 const GET_PRODUCT_REVIEWS = gql`
   query ($id: ID!) {
     productwisereview(productId: $id) {
@@ -297,7 +309,7 @@ export const GET_RELATED_PRODUCTS_QUERY = gql`
 `;
 
 const GET_ALL_FIELDS = gql`
-  query HomePageData($deviceType: ID!) {
+  query GetHomePage($deviceType: ID!) {
     getHomePage(deviceType: $deviceType) {
       parentCategories {
         id
@@ -308,6 +320,7 @@ const GET_ALL_FIELDS = gql`
       sections {
         name
         section_img
+        display_type
         products {
           name
           quantity
@@ -415,4 +428,5 @@ export {
   GET_BRANDS_QUERY,
   GET_ALL_FIELDS,
   GET_FILTEREDPRODUCTS_WITH_PAGINATION,
+  GET_SEARCH_PRODUCTS,
 };

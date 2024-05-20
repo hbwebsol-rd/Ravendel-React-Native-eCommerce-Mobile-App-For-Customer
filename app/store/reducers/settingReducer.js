@@ -32,6 +32,7 @@ const initialState = {
     saleProduct: [],
     ProductByCategory: [],
   },
+  allSections: [],
   manage_stock: false,
 };
 
@@ -96,7 +97,8 @@ export default (state = initialState, action) => {
       return {
         ...state,
         loading: false,
-        allData: action.payload,
+        // allData: action.payload,
+        allSections: action.payload.allSection,
       };
     default: {
       return state;

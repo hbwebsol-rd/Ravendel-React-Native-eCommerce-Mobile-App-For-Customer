@@ -1,5 +1,6 @@
 export default {
   HOME_SCREEN: 'Home',
+  SEARCH_PRODUCT_SCREEN: 'SearchProduct',
   TEMP_SCREEN: 'Temp',
   CATEGORIES_SCREEN: 'Categories',
   SHOP_SCREEN: 'Shop',

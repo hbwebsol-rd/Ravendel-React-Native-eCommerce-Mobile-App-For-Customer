@@ -17,6 +17,7 @@ import {
   RELATED_CAT_PRODUCTS,
   SUB_CATS_SUCCESS,
   CLEAR_SUBCATEGORY,
+  CLEAR_SEARCH_PRODUCT,
 } from '../action/productAction';
 
 const initialState = {
@@ -181,6 +182,12 @@ export default (state = initialState, action) => {
         productReviews: action.payload,
         loading: false,
         success: true,
+      };
+    case CLEAR_SEARCH_PRODUCT:
+      console.log(' clear productssss');
+      return {
+        ...state,
+        singleCategoryDetails: [],
       };
     case ADD_PRODUCT_REVIEWS:
       return {
