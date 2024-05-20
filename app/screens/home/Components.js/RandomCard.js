@@ -9,11 +9,9 @@ import {
 } from 'react-native';
 import { AText } from '../../../theme-components';
 import { FontStyle } from '../../../utils/config';
-import LinearGradient from 'react-native-linear-gradient';
 import { formatCurrency, isEmpty } from '../../../utils/helper';
 import URL from '../../../utils/baseurl';
 import FastImage from 'react-native-fast-image';
-import { ProductPriceText } from '../../components';
 import PropTypes from 'prop-types';
 import { ImageBackground } from 'react-native';
 import { useSelector } from 'react-redux';
@@ -24,53 +22,14 @@ const windowWidth = Dimensions.get('window').width;
 const itemWidth = windowWidth * 0.45; // visible item width
 const itemHeight = itemWidth * 1.5; // visible item height
 
-const getRandomHeight = () => Math.floor(Math.random() * (200 - 100) + 100);
-function generateRandomNumbers() {
-  let num1 = Math.floor(Math.random() * 35) + 30;
-  let num2 = 98 - num1;
-  return [num1, num2];
-}
-const Card = ({ data, width, height, navigatetonext }) => (
-  <LinearGradient
-    colors={['#088178', '#0cc9bb']}
-    style={[styles.card, { width: `${width}%`, height: height }]}>
-    <TouchableOpacity
-      onPress={() => {
-        navigatetonext(data);
-      }}>
-      <FastImage
-        source={{
-          uri: !isEmpty(data.feature_image)
-            ? URL + data.feature_image
-            : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
-          priority: FastImage.priority.normal,
-        }}
-        resizeMode={FastImage.resizeMode.contain}
-        style={styles.image}
-      />
-      {/* <ProductPriceText fontsizesmall={'18'} Pricing={data.pricing} /> */}
-
-      <AText fonts={FontStyle.semiBold} color={'red'} large center>
-        {'  '}(
-        {Math.round(
-          (100 / data.pricing.price) *
-            (data.pricing.price - data.pricing.sellprice),
-        )}
-        % off)
-      </AText>
-    </TouchableOpacity>
-  </LinearGradient>
-);
-let width1 = 0;
-let height = 0;
-const CardContainer = ({ dataItems, navigatetonext }) => {
+const CardContainer = ({ dataItems, navigatetonext, title }) => {
   const { currencySymbol, currencyOptions } = useSelector(
     (state) => state.settings,
   );
   return (
     <View style={styles.container}>
       <AText mb={'10px'} large fonts={FontStyle.fontBold}>
-        Products on Sale
+        {title}
       </AText>
       <View
         style={{
@@ -131,7 +90,6 @@ const CardContainer = ({ dataItems, navigatetonext }) => {
                     )}
                     {/* $ {item.pricing.sellprice + '.00'} */}
                   </AText>
-                  {/* <ProductPriceText fontsizesmall={true} Pricing={item.pricing} /> */}
                 </View>
                 <View style={styles.textContainer2}>
                   <TouchableOpacity style={styles.iconcontainer}>
@@ -151,34 +109,6 @@ const CardContainer = ({ dataItems, navigatetonext }) => {
           );
         })}
       </View>
-      {/* {dataItems.map((item, index) => {
-      if (index % 2 === 0) {
-        width1 = '48';
-        height = getRandomHeight();
-        return (
-          <View style={styles.row} key={item._id}>
-            <Card
-              navigatetonext={navigatetonext}
-              data={item}
-              width={width1}
-              height={height}
-            />
-            {dataItems[index + 1] && (
-              <Card
-                navigatetonext={navigatetonext}
-                onPress={() => {
-                  navigatetonext(item);
-                }}
-                data={dataItems[index + 1]}
-                width={width1}
-                height={height}
-              />
-            )}
-          </View>
-        );
-      }
-      return null;
-    })} */}
     </View>
   );
 };

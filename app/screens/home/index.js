@@ -55,7 +55,7 @@ import {
 } from '../../utils/config';
 import Icon from 'react-native-vector-icons/Feather';
 import Categories from './Components.js/CategoriesList';
-import ImageSlider from './Components.js/CustomSlider';
+import ImageSliderNew from './Components.js/CustomSliderNew';
 import CardContainer from './Components.js/RandomCard';
 import { ALREADY_HAS_LOGIN } from '../../store/action/loginAction';
 import { USER_ALREADY_HAS_LOGIN } from '../../store/action/customerAction';
@@ -75,26 +75,10 @@ const HomeScreen = ({ navigation }) => {
   const { cartId, cartChecked } = useSelector((state) => state.cart);
   const cartItems = useSelector((state) => state.cart.products);
   const userDetails = useSelector((state) => state.customer.userDetails);
-  const catLoading = useSelector((state) => state.products.loading);
   const loginState = useSelector((state) => state.login);
   const [refreshing, setRefreshing] = useState(false);
-  const {
-    homeData,
-    // featureData,
-    // recentAddedProduct,
-    // saleProduct,
-    // ProductByCategory,
-    // brands,
-    appTitle,
-    allData,
-  } = useSelector((state) => state.settings);
-  const {
-    brands,
-    featureData,
-    recentAddedProduct,
-    saleProduct,
-    ProductByCategory,
-  } = allData;
+  const { homeData, allSections } = useSelector((state) => state.settings);
+
   const settingLoading = useSelector((state) => state.settings.loading);
   const [allCategories, setAllCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -178,7 +162,9 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleSearchProduct = () => {
-    navigation.navigate('Shop', { searchTerm: searchTerm });
+    navigation.navigate(NavigationConstants.SEARCH_PRODUCT_SCREEN, {
+      searchTerm: searchTerm,
+    });
   };
 
   //Get URL of banners
@@ -275,174 +261,71 @@ const HomeScreen = ({ navigation }) => {
           }}
           allCategories={allCategories}
         />
-
-        {!isEmpty(recentAddedProduct) && (
+        {allSections && allSections.length > 0 ? (
           <>
-            <ARow mb="20px" wrap row>
-              <ACol col={1}>
-                <PopularPicksWrapper>
-                  <PopularPicksImage
-                    source={{
-                      uri: getCategoryImage('Recently Added Products'),
-                    }}
-                  />
-                </PopularPicksWrapper>
-              </ACol>
-            </ARow>
-            <ImageSlider
-              title={'New Arrival'}
-              dataItems={recentAddedProduct}
-              navigatetonext={(item) => {
-                navigation.navigate(NavigationConstants.SINGLE_PRODUCT_SCREEN, {
-                  productID: item._id,
-                  productUrl: item.url,
-                });
-              }}
-            />
+            {allSections.map((item) =>
+              item.display_type === 'SLIDER' ? (
+                <>
+                  <ARow mb="20px" wrap row>
+                    <ACol col={1}>
+                      <PopularPicksWrapper>
+                        <PopularPicksImage
+                          source={{
+                            uri: getCategoryImage('Featured Product'),
+                          }}
+                        />
+                      </PopularPicksWrapper>
+                    </ACol>
+                  </ARow>
+                  <SectionView>
+                    <ImageSliderNew
+                      title={item.name}
+                      dataItems={item.products}
+                      navigatetonext={(item) => {
+                        navigation.navigate(
+                          NavigationConstants.SINGLE_PRODUCT_SCREEN,
+                          {
+                            productID: item._id,
+                            productUrl: item.url,
+                          },
+                        );
+                      }}
+                    />
+                  </SectionView>
+                </>
+              ) : (
+                <>
+                  <ARow mb="20px" wrap row>
+                    <ACol col={1}>
+                      <PopularPicksWrapper>
+                        <PopularPicksImage
+                          source={{
+                            uri: item.section_url,
+                          }}
+                        />
+                      </PopularPicksWrapper>
+                    </ACol>
+                  </ARow>
+                  <SectionView>
+                    <CardContainer
+                      title={item.name}
+                      dataItems={item.products ? item.products : []}
+                      navigatetonext={(item) => {
+                        navigation.navigate(
+                          NavigationConstants.SINGLE_PRODUCT_SCREEN,
+                          {
+                            productID: item._id,
+                            productUrl: item.url,
+                          },
+                        );
+                      }}
+                    />
+                  </SectionView>
+                </>
+              ),
+            )}
           </>
-        )}
-        <ARow wrap row></ARow>
-
-        {!isEmpty(brands) && (
-          <SectionView>
-            <AText
-              ml="30px"
-              mb={'10px'}
-              mt={'15px'}
-              large
-              fonts={FontStyle.fontBold}>
-              Featured Brands
-            </AText>
-            <HomeBrandViews
-              allbrands={brands}
-              navigation
-              navigateNextScreen={(item) => {
-                navigateNextScreen(item);
-              }}
-            />
-          </SectionView>
-        )}
-        {!isEmpty(featureData) && (
-          <>
-            <ARow mb="20px" wrap row>
-              <ACol col={1}>
-                <PopularPicksWrapper>
-                  <PopularPicksImage
-                    source={{
-                      uri: getCategoryImage('Featured Product'),
-                    }}
-                  />
-                </PopularPicksWrapper>
-              </ACol>
-            </ARow>
-            <SectionView>
-              <ImageSlider
-                title={'Featured Collection'}
-                dataItems={featureData}
-                navigatetonext={(item) => {
-                  navigation.navigate(
-                    NavigationConstants.SINGLE_PRODUCT_SCREEN,
-                    {
-                      productID: item._id,
-                      productUrl: item.url,
-                    },
-                  );
-                }}
-              />
-            </SectionView>
-          </>
-        )}
-
-        {!isEmpty(recentAddedProduct) && (
-          <>
-            <ARow mb="20px" wrap row>
-              <ACol col={1}>
-                <PopularPicksWrapper>
-                  <PopularPicksImage
-                    source={{
-                      uri: getCategoryImage('Products On Sales'),
-                    }}
-                  />
-                </PopularPicksWrapper>
-              </ACol>
-            </ARow>
-            <SectionView>
-              <ImageSlider
-                title={'Latest Collection'}
-                dataItems={recentAddedProduct}
-                navigatetonext={(item) => {
-                  navigation.navigate(
-                    NavigationConstants.SINGLE_PRODUCT_SCREEN,
-                    {
-                      productID: item._id,
-                      productUrl: item.url,
-                    },
-                  );
-                }}
-              />
-            </SectionView>
-          </>
-        )}
-
-        {!isEmpty(saleProduct) && (
-          <>
-            <ARow mb="20px" wrap row>
-              <ACol col={1}>
-                <PopularPicksWrapper>
-                  <PopularPicksImage
-                    source={{
-                      uri: getCategoryImage('Product from Specific Categories'),
-                    }}
-                  />
-                </PopularPicksWrapper>
-              </ACol>
-            </ARow>
-            <SectionView>
-              <CardContainer
-                dataItems={saleProduct}
-                navigatetonext={(item) => {
-                  navigation.navigate(
-                    NavigationConstants.SINGLE_PRODUCT_SCREEN,
-                    {
-                      productID: item._id,
-                      productUrl: item.url,
-                    },
-                  );
-                }}
-              />
-
-              {/* <HomeComponentShowViews
-                dataItems={saleProduct}
-                navigatetonext={(item) => {
-                   navigation.navigate(NavigationConstants.SINGLE_PRODUCT_SCREEN, {
-                    productID: item._id,
-                    productUrl: item.url,
-                  });
-                }}
-              /> */}
-            </SectionView>
-          </>
-        )}
-
-        {!isEmpty(ProductByCategory) && (
-          <>
-            <SectionView>
-              {/* <AText uppercase heavy mb={'10px'} center color={primaryColor}></AText> */}
-              <HomeComponentShowViews
-                dataItems={ProductByCategory}
-                navigatetonext={(item) => {
-                  navigation.navigate(
-                    NavigationConstants.SINGLE_PRODUCT_SCREEN,
-                    {
-                      productID: item._id,
-                      productUrl: item.url,
-                    },
-                  );
-                }}
-              />
-            </SectionView>
-          </>
-        )}
+        ) : null}
       </AContainer>
     </View>
   );
