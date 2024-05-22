@@ -1,30 +1,19 @@
 import React from 'react';
-import { AText, AButton, ZHeader } from '../../theme-components';
+import { AText, AButton, BackHeader } from '../../theme-components';
 import styled from 'styled-components/native';
-import { RadioButton } from 'react-native-paper';
-import PaypalImage from '../../assets/images/paypal.png';
-import CreditCardImage from '../../assets/images/credit-card.png';
-import CashondelieveryImage from '../../assets/images/cash-on-delievery.png';
-import { formatCurrency, isEmpty } from '../../utils/helper';
+import { isEmpty } from '../../utils/helper';
 import { useDispatch, useSelector } from 'react-redux';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import AIcon from 'react-native-vector-icons/AntDesign';
-
-import {
-  APP_PRIMARY_COLOR,
-  APP_SECONDARY_COLOR,
-  FontStyle,
-  GREYTEXT,
-} from '../../utils/config';
-import { useIsFocused } from '@react-navigation/native';
+import { APP_PRIMARY_COLOR, FontStyle, GREYTEXT } from '../../utils/config';
 import { addAddressAction } from '../../store/action';
 import { AdressForm } from '../components';
 import Colors from '../../constants/Colors';
+import NavigationConstants from '../../navigation/NavigationConstants';
+import PropTypes from 'prop-types';
 
 const ShippingMethodScreen = ({ navigation, route }) => {
   const dispatch = useDispatch();
-  const isFocused = useIsFocused();
-  const { loading } = useSelector((state) => state.customer);
   const [addressForm, setAddressForm] = React.useState(false);
   const [scrollenable, setScrollEnable] = React.useState(true);
   const [initialFormValues, setInitialFormValues] = React.useState({
@@ -49,11 +38,11 @@ const ShippingMethodScreen = ({ navigation, route }) => {
     if (isEmpty(initialFormValues._id)) {
       const payload = {
         id: userDetails._id,
-        first_name: values.firstname,
-        last_name: values.lastname,
+        firstName: values.firstname,
+        lastName: values.lastname,
         phone: values.phone,
-        address_line1: values.address,
-        address_line2: values.landmark,
+        addressLine1: values.address,
+        addressLine2: values.landmark,
         city: values.city,
         country: values.country,
         state: values.state,
@@ -70,13 +59,13 @@ const ShippingMethodScreen = ({ navigation, route }) => {
         first_name: values.firstname,
         last_name: values.lastname,
         phone: values.phone,
-        address_line1: values.address,
-        address_line2: values.landmark,
+        addressLine1: values.address,
+        addressLine2: values.landmark,
         city: values.city,
         country: values.country,
         state: values.state,
         pincode: values.pincode,
-        default_address: true,
+        defaultAddress: true,
       };
       setInitialFormValues({
         firstname: '',
@@ -95,11 +84,11 @@ const ShippingMethodScreen = ({ navigation, route }) => {
   };
   const editFormValues = (values) => {
     setInitialFormValues({
-      firstname: values.first_name,
-      lastname: values.last_name,
+      firstname: values.firstName,
+      lastname: values.lastName,
       phone: values.phone,
-      address: values.address_line1,
-      landmark: values.address_line2,
+      address: values.addressLine1,
+      landmark: values.addressLine2,
       city: values.city,
       state: values.state,
       country: values.country,
@@ -130,7 +119,7 @@ const ShippingMethodScreen = ({ navigation, route }) => {
         </>
       ) : (
         <View style={styles.container}>
-          <ZHeader navigation={navigation} name="Checkout" />
+          <BackHeader navigation={navigation} name="Checkout" />
           <View style={styles.container2}>
             <View style={styles.step}>
               <View style={styles.circle} />
@@ -140,6 +129,7 @@ const ShippingMethodScreen = ({ navigation, route }) => {
                 style={{
                   ...styles.label,
                   alignItems: 'flex-start',
+                  marginLeft: -15,
                 }}>
                 <AText fonts={FontStyle.semiBold} color="black">
                   Address
@@ -161,7 +151,12 @@ const ShippingMethodScreen = ({ navigation, route }) => {
               <View style={styles.line} />
 
               <View style={styles.circle} />
-              <View style={{ ...styles.label, alignItems: 'flex-end' }}>
+              <View
+                style={{
+                  ...styles.label,
+                  alignItems: 'flex-end',
+                  marginLeft: 24,
+                }}>
                 <AText fonts={FontStyle.semiBold} color="black">
                   Order Detail
                 </AText>
@@ -170,7 +165,6 @@ const ShippingMethodScreen = ({ navigation, route }) => {
           </View>
           <View style={{ marginHorizontal: 30, flex: 1 }}>
             <AddressWrapper>
-              {/* {userDetails.address_book.map((item, index) => ( */}
               <AText color="black" fonts={FontStyle.semiBold} large>
                 Billing Details
               </AText>
@@ -181,15 +175,15 @@ const ShippingMethodScreen = ({ navigation, route }) => {
                     color="black"
                     fonts={FontStyle.semiBold}
                     large>
-                    {defaultaddress.first_name}
+                    {defaultaddress.firstName}
                   </AText>
                 </RadioButtonWrapper>
                 <AText color={GREYTEXT} fonts={FontStyle.semiBold}>
                   {defaultaddress.phone}
                 </AText>
                 <AText color={GREYTEXT}>
-                  {defaultaddress.address_line1}, {defaultaddress.address_line2}
-                  , {defaultaddress.city}
+                  {defaultaddress.addressLine1}, {defaultaddress.addressLine2},{' '}
+                  {defaultaddress.city}
                 </AText>
                 <AText mb="10px" color={GREYTEXT}>
                   {defaultaddress.state}, {defaultaddress.pincode}
@@ -204,7 +198,6 @@ const ShippingMethodScreen = ({ navigation, route }) => {
                   color={'grey'}
                 />
               </View>
-              {/* ))} */}
               <AText color="black" fonts={FontStyle.semiBold} large>
                 Shipping Method
               </AText>
@@ -230,7 +223,7 @@ const ShippingMethodScreen = ({ navigation, route }) => {
                 title="Next"
                 round
                 onPress={() =>
-                  navigation.navigate('Checkout', {
+                  navigation.navigate(NavigationConstants.CHECKOUT_SCREEN, {
                     paymentMethod: paymentMethod,
                     cartAmount: cartAmount,
                     shippingValue: shippingValue,
@@ -247,15 +240,10 @@ const ShippingMethodScreen = ({ navigation, route }) => {
   );
 };
 
-const MainWrapper = styled.View`
-  flex: 1;
-  padding: 20px;
-`;
-const PaymentMethodImage = styled.Image`
-  height: 175px;
-  width: 100%;
-  margin-bottom: 25px;
-`;
+ShippingMethodScreen.propTypes = {
+  navigation: PropTypes.object,
+  route: PropTypes.object,
+};
 
 const AddressWrapper = styled.View`
   margin-bottom: 10px;
@@ -272,10 +260,8 @@ const RadioButtonWrapper = styled.TouchableOpacity`
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // paddingTop: 40,
     paddingBottom: 20,
     backgroundColor: Colors.whiteColor,
-    // paddingHorizontal: 30,
   },
   activedot: {
     top: 5,
@@ -291,7 +277,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingBottom: 20,
+    paddingBottom: 30,
+    marginTop: 30,
   },
   step: {
     position: 'relative',
@@ -324,9 +311,6 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
     marginVertical: 10,
     backgroundColor: '#fff',
-    // borderWidth: 1,
-    // borderColor: '#f7f7f7',
-    // boxShadow: 0 0 5px #eee,
     borderRadius: 8,
     elevation: 3,
   },

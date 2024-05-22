@@ -10,6 +10,7 @@ import RBSheet from 'react-native-raw-bottom-sheet';
 import { isEmpty } from '../../utils/helper';
 import { useIsFocused } from '@react-navigation/native';
 import { Text } from 'react-native';
+import PropTypes from 'prop-types';
 
 const CategoryScreen = ({ route, navigation }) => {
   const singleCatId = route.params.singleCategory.url;
@@ -146,6 +147,12 @@ const CategoryScreen = ({ route, navigation }) => {
     </>
   );
 };
+
+CategoryScreen.propTypes = {
+  navigation: PropTypes.object,
+  route: PropTypes.object,
+};
+
 const SortByOption = styled.TouchableOpacity`
   padding: 12px 15px;
 `;

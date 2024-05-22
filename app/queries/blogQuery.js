@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import gql from 'graphql-tag';
 const GET_BLOGS = gql`
   {
     blogs {
@@ -13,7 +13,7 @@ const GET_BLOGS = gql`
 `;
 
 const GET_BLOG = gql`
-  query($id: ID!) {
+  query ($id: ID!) {
     blog(id: $id) {
       id
       title
@@ -38,7 +38,7 @@ const GET_BLOGTAGS = gql`
 `;
 
 const GET_TAG_BLOGS = gql`
-  query($url: String!) {
+  query ($url: String!) {
     blogsbytagurl(tag_url: $url) {
       id
       title

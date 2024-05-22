@@ -11,42 +11,12 @@ import { AText } from '../../../theme-components';
 import { FontStyle, GREYTEXT } from '../../../utils/config';
 import URL from '../../../utils/baseurl';
 import { isEmpty } from '../../../utils/helper';
-const categories = [
-  {
-    name: 'Category 1',
-    image: require('../../../assets/images/question.png'),
-  },
-  {
-    name: 'Category 2',
-    image: require('../../../assets/images/paypal.png'),
-  },
-  {
-    name: 'Category 3',
-    image: require('../../../assets/images/section2.jpg'),
-  },
-  {
-    name: 'Category 3',
-    image: require('../../../assets/images/section2.jpg'),
-  },
-  {
-    name: 'Category 3',
-    image: require('../../../assets/images/section2.jpg'),
-  },
-  {
-    name: 'Category 3',
-    image: require('../../../assets/images/section2.jpg'),
-  },
-  {
-    name: 'Category 3',
-    image: require('../../../assets/images/section2.jpg'),
-  },
-  // add more categories here
-];
+import PropTypes from 'prop-types';
 function CategoryItem({ category, navigateNextScreen }) {
   return (
     <TouchableOpacity
       onPress={() => navigateNextScreen(category)}
-      activeOpacity={0.5}
+      activeOpacity={0.9}
       style={styles.categoryItem}>
       {/* {console.log(URL + category.image, 'imm')} */}
       <Image
@@ -55,9 +25,9 @@ function CategoryItem({ category, navigateNextScreen }) {
             ? URL + category.image
             : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
         }}
-        style={{ width: 50, height: 50, borderRadius: 30 }}
+        style={{ width: 60, height: 60, borderRadius: 30 }}
       />
-      <AText color={GREYTEXT} fonts={FontStyle.fontBold}>
+      <AText center small color={GREYTEXT} fonts={FontStyle.fontBold}>
         {category.name}
       </AText>
     </TouchableOpacity>
@@ -89,11 +59,18 @@ function Categories({ allCategories, navigateNextScreen }) {
     </View>
   );
 }
+
+Categories.propTypes = {
+  navigateNextScreen: PropTypes.func,
+  allCategories: PropTypes.array,
+};
+
 export default Categories;
 const styles = StyleSheet.create({
   categoryItem: {
     alignItems: 'center',
     paddingHorizontal: 10,
+    width: 80,
   },
   categoryName: {
     marginTop: 5,

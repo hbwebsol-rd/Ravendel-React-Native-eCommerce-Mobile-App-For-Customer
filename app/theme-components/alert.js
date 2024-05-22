@@ -16,7 +16,7 @@ const AlertError = () => {
       dispatch({
         type: ALERT_HIDE,
       });
-    }, 4000);
+    }, 2000);
   };
 
   useEffect(() => {
@@ -46,7 +46,9 @@ const AlertError = () => {
             justifyContent: 'center',
             backgroundColor: error ? Colors.red800 : Colors.green800,
           }}>
-          <Caption style={{ color: '#fff', fontSize: 14 }}>{message}</Caption>
+          <Caption style={{ color: '#fff', fontSize: 14 }}>
+            {typeof message === 'string' ? message : ''}
+          </Caption>
         </View>
       ) : null}
     </>

@@ -16,21 +16,27 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import StarRating from 'react-native-star-rating';
 import URL from '../../../utils/baseurl';
 import FastImage from 'react-native-fast-image';
-import { isEmpty } from '../../../utils/helper';
+import { formatCurrency, isEmpty } from '../../../utils/helper';
 import { ProductPriceText } from '../../components';
+import { useSelector } from 'react-redux';
+import PropTypes from 'prop-types';
 
 const windowWidth = Dimensions.get('window').width;
 const itemWidth = windowWidth * 0.4; // visible item width
 const itemHeight = itemWidth * 1.5; // visible item height
 
-function ImageSlider({ dataItems, navigatetonext }) {
+function ImageSlider({ dataItems, navigatetonext, title }) {
   const [selectedId, setSelectedId] = useState(null);
+  const { currencySymbol, currencyOptions } = useSelector(
+    (state) => state.settings,
+  );
 
   function renderItem({ item }) {
     return (
       <TouchableOpacity
         onPress={() => {
-          setSelectedId(item._id);
+          navigatetonext(item);
+          // setSelectedId(item._id);
         }}>
         <ImageBackground
           source={{
@@ -71,7 +77,12 @@ function ImageSlider({ dataItems, navigatetonext }) {
                 : item.name}
             </AText>
             <AText small fonts={FontStyle.fontBold}>
-              $ {item.pricing.sellprice + '.00'}
+              {formatCurrency(
+                item.pricing.sellprice,
+                currencyOptions,
+                currencySymbol,
+              )}
+              {/* $ {item.pricing.sellprice + '.00'} */}
             </AText>
             {/* <ProductPriceText fontsizesmall={true} Pricing={item.pricing} /> */}
           </View>
@@ -96,7 +107,7 @@ function ImageSlider({ dataItems, navigatetonext }) {
   return (
     <View style={styles.container}>
       <AText ml="30px" mb={'10px'} large fonts={FontStyle.fontBold}>
-        New Arrivals
+        {title}
       </AText>
       <FlatList
         data={dataItems}
@@ -111,6 +122,11 @@ function ImageSlider({ dataItems, navigatetonext }) {
 
 export default ImageSlider;
 
+ImageSlider.propTypes = {
+  dataItems: PropTypes.array,
+  navigatetonext: PropTypes.func,
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -122,7 +138,7 @@ const styles = StyleSheet.create({
     height: itemHeight,
     resizeMode: 'contain',
     borderRadius: 10,
-    marginHorizontal: (windowWidth * 0.1) / 2,
+    marginHorizontal: 8,
   },
   sideItemImage: {
     width: itemWidth * 0.8,
@@ -132,13 +148,6 @@ const styles = StyleSheet.create({
     opacity: 0.5,
     marginHorizontal: (windowWidth * 0.1) / 2,
   },
-  // centeredItemImage: {
-  //   width: centeredItemWidth,
-  //   height: centeredItemHeight,
-  //   resizeMode: 'contain',
-  //   borderRadius: 10,
-  //   marginHorizontal: windowWidth * 0.05,
-  // },
   overlay: {
     position: 'absolute',
     bottom: 0,
@@ -147,21 +156,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.5)',
     alignItems: 'center',
     justifyContent: 'center',
-    // borderTopLeftRadius: 10,
-    // borderTopRightRadius: 10,
   },
-  // text: {
-  //   fontSize: 16,
-  //   fontFamily: 'SegoeUI',
-  //   fontWeight: 600,
-  //   color: 'black',
-  //   fontWeight: 'bold',
-  //   // textAlign: 'center',
-  //   textShadowColor: 'rgba(0, 0, 0, 0.5)', // translucent black
-  //   textShadowOffset: { width: 2, height: 2 },
-  //   // textShadowRadius: 4,
-  //   marginBottom: 5,
-  // },
+
   textContainer: {
     position: 'absolute',
     bottom: 0,

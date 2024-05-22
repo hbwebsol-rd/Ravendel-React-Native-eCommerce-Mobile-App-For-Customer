@@ -7,6 +7,7 @@ import {
   CATEGORY_PRODUCT,
   GET_FEATURE_PRODUCT,
   GET_BRANDS,
+  GET_ALL_DATA,
 } from '../action/settingAction';
 
 const initialState = {
@@ -23,6 +24,15 @@ const initialState = {
   currencyOptions: [],
   currencySymbol: '',
   brands: [],
+  paymentSetting: {},
+  allData: {
+    brands: [],
+    featureData: [],
+    recentAddedProduct: [],
+    saleProduct: [],
+    ProductByCategory: [],
+  },
+  allSections: [],
   manage_stock: false,
 };
 
@@ -34,12 +44,12 @@ export default (state = initialState, action) => {
         themeSettings: action.payload.themeSettings,
         homeslider: action.payload.homeslider,
         homeData: action.payload.homeData,
-        loading: false,
         success: true,
         appTitle: action.payload.title,
         currencyOptions: action.payload.store.currency_options,
         currencySymbol: action.payload.currencySymbol,
         manage_stock: action.payload.store.inventory.manage_stock,
+        paymentSetting: action.payload.payment,
       };
     case GET_FEATURE_PRODUCT:
       return {
@@ -82,6 +92,13 @@ export default (state = initialState, action) => {
         ...state,
         loading: false,
         brands: action.payload,
+      };
+    case GET_ALL_DATA:
+      return {
+        ...state,
+        loading: false,
+        // allData: action.payload,
+        allSections: action.payload.allSection,
       };
     default: {
       return state;

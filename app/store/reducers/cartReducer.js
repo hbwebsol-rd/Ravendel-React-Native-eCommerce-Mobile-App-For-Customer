@@ -1,19 +1,32 @@
-// import AsyncStorage from '@react-native-community/async-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { CART_EMPTY, CART_FAIL, CART_LOADING, CHECK_CART, CHECK_LOCAL_STORAGE, COUPON_APPLIED, COUPON_REMOVED, REMOVE_ITEM_IN_CART, RESPONSE_HANDLE } from '../action/cartAction';
-import { REMOVE_ALL_CART_PRODUCT, UPDATE_CART_PRODUCT } from '../action/checkoutAction';
+import {
+  CART_EMPTY,
+  CART_FAIL,
+  CART_LOADING,
+  CHECK_CART,
+  CHECK_LOCAL_STORAGE,
+  COUPON_APPLIED,
+  COUPON_REMOVED,
+  REMOVE_ITEM_IN_CART,
+  RESPONSE_HANDLE,
+} from '../action/cartAction';
+import {
+  REMOVE_ALL_CART_PRODUCT,
+  UPDATE_CART_PRODUCT,
+} from '../action/checkoutAction';
 
 const initialState = {
-  loading:false,
+  loading: false,
   products: [],
-  cartId:'',
-  couponDiscount:0,
-  response:false,
-  cartChecked:false,
+  cartSummary: {},
+  cartId: '',
+  couponDiscount: 0,
+  response: false,
+  cartChecked: false,
 };
 
-const setDataInStorage = async product => {
+const setDataInStorage = async (product) => {
   try {
     await AsyncStorage.setItem('cartproducts', JSON.stringify(product));
   } catch (error) {
@@ -32,43 +45,45 @@ const clearCartStorage = async () => {
 export default (state = initialState, action) => {
   switch (action.type) {
     case CART_LOADING:
-      return{
+      return {
         ...state,
-        loading:true,
-        cartChecked:false
-      }
+        loading: true,
+        cartChecked: false,
+      };
     case CART_FAIL:
-      return{
+      return {
         ...state,
-        loading:false,
-      }
+        loading: false,
+      };
     case CART_EMPTY:
-      return{
+      return {
         ...state,
-        loading:false,
-        cartChecked:false
-      }
+        loading: false,
+        cartChecked: false,
+      };
 
     case 'CHECK_STORAGE':
       return {
         ...state,
         products: action.payload.cartProducts,
         cartId: action.payload.cartID,
-        loading:false,
-        cartChecked:true
+        cartSummary: action.payload.cartSummary,
+        loading: false,
+        cartChecked: true,
       };
     case CHECK_CART:
       return {
         ...state,
         cartId: action.payload.cartID,
         products: action.payload.cartProducts,
-        loading:false,
+        loading: false,
       };
     case CHECK_LOCAL_STORAGE:
       return {
         ...state,
         products: action.payload.cartProducts,
-        loading:false,
+        cartSummary: action.payload.cartSummary,
+        loading: false,
       };
 
     case 'ADD_VALUE':
@@ -95,36 +110,38 @@ export default (state = initialState, action) => {
       return {
         ...state,
         products: [],
-        couponDiscount:0,
-        response:false
+        couponDiscount: 0,
+        response: false,
       };
     case UPDATE_CART_PRODUCT:
       return {
         ...state,
-        products:action.payload ,
-        loading:false,
+        products: action.payload,
+        loading: false,
       };
     case COUPON_APPLIED:
       return {
         ...state,
-        couponDiscount:action.payload ,
-        loading:false,
+        couponDiscount: action.payload.couponDiscount,
+        products: action.payload.cartProducts,
+        cartSummary: action.payload.cartSummary,
+        loading: false,
       };
     case COUPON_REMOVED:
       return {
         ...state,
-        couponDiscount:0 ,
-        loading:false,
+        couponDiscount: 0,
+        loading: false,
       };
     case RESPONSE_HANDLE:
       return {
         ...state,
-        loading:false,
-        response:action.payload ,
-        cartChecked:false
+        loading: false,
+        response: action.payload,
+        cartChecked: false,
       };
-      case "USER_LOGOUT":
-        return {...initialState};
+    case 'USER_LOGOUT':
+      return { ...initialState };
     default: {
       return state;
     }

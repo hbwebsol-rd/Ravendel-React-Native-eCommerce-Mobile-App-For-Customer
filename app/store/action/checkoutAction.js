@@ -1,74 +1,101 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
-import { ADD_CHECKOUT, ADD_ORDER } from '../../queries/orderQuery';
+import {
+  ADD_CHECKOUT,
+  ADD_ORDER,
+  ADD_TOCART,
+  CHECK_ZIPCODE,
+  UPDATE_PAYMENT_STATUS,
+} from '../../queries/orderQuery';
 import { getValue, isEmpty } from '../../utils/helper';
 import { mutation, query } from '../../utils/service';
 import { ALERT_ERROR } from '../reducers/alert';
 import { updateCartAction } from './cartAction';
+import NavigationConstants from '../../navigation/NavigationConstants';
+import _ from 'lodash';
 
 export const checkoutDetailsAction =
-  (checoutDetailsData, cartId, navigation) => async (dispatch) => {
-    dispatch({
-      type: CHECKOUT_LOADING,
-    });
-    console.log(JSON.stringify(checoutDetailsData));
-    const response = await mutation(ADD_ORDER, checoutDetailsData);
-    console.log(JSON.stringify(response));
-    // .then(async (response) => {
+  (checkoutDetailsData, cartId, navigation) => async (dispatch) => {
+    dispatch({ type: CHECKOUT_LOADING });
+
     try {
-      if (response) {
-        if (
-          !isEmpty(response.data.addOrder) &&
-          response.data.addOrder.success
-        ) {
-          dispatch({
-            type: REMOVE_ALL_CART_PRODUCT,
-          });
-          await AsyncStorage.removeItem('cartproducts');
-          dispatch({
-            type: CHEKOUT_DETAILS,
-            payload: checoutDetailsData,
-          });
-          const cartData = {
-            id: cartId,
-            products: [],
-          };
-          dispatch(updateCartAction(cartData, checoutDetailsData.customer_id));
-          Alert.alert(
-            'Success',
-            'Congratulations! Your order has been placed successfully.',
-            [
-              {
-                text: 'Ok',
-                onPress: () => {
-                  // navigation.reset({
-                  //   index: 0,
-                  //   routes: [{ name: 'Home' }],
-                  // });
-                  navigation.navigate('Home', {
-                    checoutDetailsData,
-                  });
-                },
-                style: 'cancel',
-              },
-            ],
-            { cancelable: false },
-          );
-        } else {
-          dispatch({
-            type: CHECKOUT_LOADING_STOP,
-          });
-          dispatch({
-            type: ALERT_ERROR,
-            payload: 'Something went wrong. Please try again later.',
-          });
-        }
+      const response = await mutation(ADD_ORDER, checkoutDetailsData);
+      console.log(response, ' resssponse cart checkout');
+      if (
+        !isEmpty(response) &&
+        !isEmpty(response.data.addOrder) &&
+        response.data.addOrder.success
+      ) {
+        dispatch({ type: REMOVE_ALL_CART_PRODUCT });
+        await AsyncStorage.removeItem('cartproducts');
+        dispatch({ type: CHEKOUT_DETAILS, payload: checkoutDetailsData });
+
+        const cartData = { id: cartId, products: [] };
+        dispatch(updateCartAction(cartData, checkoutDetailsData.customer_id));
+        checkoutDetailsData.billing.paymentMethod === 'Cash On Delivery'
+          ? navigation.navigate(NavigationConstants.THANK_YOU_SCREEN)
+          : navigation.navigate(NavigationConstants.STRIPE_PAYMENT, {
+              url: response.data.addOrder.redirectUrl,
+            });
+      } else {
+        dispatch({ type: CHECKOUT_LOADING_STOP });
+        dispatch({
+          type: ALERT_ERROR,
+          payload: 'Something went wrong. Please try again later.',
+        });
       }
     } catch (error) {
-      // console.log('error', error);
+      dispatch({ type: CHECKOUT_LOADING_STOP });
       dispatch({
-        type: CHECKOUT_LOADING_STOP,
+        type: ALERT_ERROR,
+        payload: 'Something went wrong. Please try again later.',
       });
+    }
+  };
+
+export const checkPincodeValid =
+  (payload, navigation, navParams) => async (dispatch) => {
+    dispatch({ type: CHECKOUT_LOADING });
+
+    try {
+      const response = await query(CHECK_ZIPCODE, payload);
+
+      if (!isEmpty(response) && _.get(response, 'data.checkZipcode.success')) {
+        navigation.navigate('ShippingMethod', navParams);
+      } else {
+        dispatch({
+          type: ALERT_ERROR,
+          payload: _.get(
+            response,
+            'data.checkZipcode.message',
+            'Invalid zipcode.',
+          ),
+        });
+      }
+    } catch (error) {
+      console.log('error', error);
+      dispatch({ type: CART_FAIL });
+    }
+  };
+
+export const paymentStatus =
+  (paymentStatusData, navigation) => async (dispatch) => {
+    dispatch({ type: CHECKOUT_LOADING });
+
+    try {
+      const response = await mutation(UPDATE_PAYMENT_STATUS, paymentStatusData);
+      console.log(response, ' Cart payment Status');
+      if (!isEmpty(response)) {
+        navigation.navigate(NavigationConstants.THANK_YOU_SCREEN);
+      } else {
+        dispatch({ type: CHECKOUT_LOADING_STOP });
+        dispatch({
+          type: ALERT_ERROR,
+          payload: 'Something went wrong. Please try again later.',
+        });
+      }
+    } catch (error) {
+      dispatch({ type: CHECKOUT_LOADING_STOP });
       dispatch({
         type: ALERT_ERROR,
         payload: 'Something went wrong. Please try again later.',
