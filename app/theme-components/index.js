@@ -9,6 +9,7 @@ import AButton from './button';
 import MainLayout from './mainlayout';
 import TextInput from './inputtext';
 import RadioButton from './radiobutton';
+import ProductCard from './product_card';
 export {
   AContainer,
   AText,
@@ -21,4 +22,5 @@ export {
   MainLayout,
   TextInput,
   RadioButton,
+  ProductCard
 };

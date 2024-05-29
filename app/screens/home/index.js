@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   AText,
   AContainer,
@@ -52,6 +52,7 @@ import {
   APP_PRIMARY_COLOR,
   APP_SECONDARY_COLOR,
   FontStyle,
+  windowWidth,
 } from '../../utils/config';
 import Icon from 'react-native-vector-icons/Feather';
 import Categories from './Components.js/CategoriesList';
@@ -64,6 +65,7 @@ import Header from '../components/Header';
 import Styles from '../../Theme';
 import NavigationConstants from '../../navigation/NavigationConstants';
 import URL from '../../utils/baseurl';
+import Carousel from 'react-native-snap-carousel';
 
 const HomeScreen = ({ navigation }) => {
   // States and Variables
@@ -77,11 +79,14 @@ const HomeScreen = ({ navigation }) => {
   const userDetails = useSelector((state) => state.customer.userDetails);
   const loginState = useSelector((state) => state.login);
   const [refreshing, setRefreshing] = useState(false);
-  const { homeData, allSections } = useSelector((state) => state.settings);
+  const { homeData, allSections, homeslider } = useSelector(
+    (state) => state.settings,
+  );
 
   const settingLoading = useSelector((state) => state.settings.loading);
   const [allCategories, setAllCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const carouselRef = useRef(null);
 
   //Custom Functions
   const checkUserLoggedIn = async () => {
@@ -169,17 +174,8 @@ const HomeScreen = ({ navigation }) => {
 
   //Get URL of banners
   const getCategoryImage = (name) => {
-    const cat =
-      URL +
-      homeData
-        .filter((item) => {
-          if (item.label === name) {
-            return true;
-          }
-        })
-        .map((item) => {
-          return item.section_img;
-        })[0];
+    const category = homeData.find((item) => item.label === name);
+    const cat = category ? `${URL}${category.section_img}` : null;
     return cat;
   };
   const onRefresh = React.useCallback(async () => {
@@ -218,12 +214,25 @@ const HomeScreen = ({ navigation }) => {
       }
     }
   }, [cartId, cartChecked]);
-
+  const renderItem = ({ item, index }) => {
+    return (
+      <View>
+        <Image
+          style={{ width: windowWidth, height: 150, resizeMode: 'stretch' }}
+          source={{
+            uri: !isEmpty(item.image)
+              ? URL + item.image
+              : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
+          }}
+        />
+      </View>
+    );
+  };
   return (
     <View style={Styles.mainContainer}>
       {settingLoading ? <AppLoader /> : null}
       <StatusBar backgroundColor={APP_PRIMARY_COLOR} />
-      <Header showProfileIcon navigation={navigation} title={''} />
+      {/* <Header showProfileIcon navigation={navigation} title={''} /> */}
       <View style={styles.searchstyle}>
         <ARow mt={'10px'} row alignItems="center" position="relative">
           <Icon
@@ -254,6 +263,18 @@ const HomeScreen = ({ navigation }) => {
         refreshing={refreshing}
         withoutPadding
         nestedScrollEnabled={true}>
+        {homeslider && (
+          <Carousel
+            ref={carouselRef}
+            autoplayDelay={3000}
+            loop={true}
+            autoplay={true}
+            data={homeslider}
+            renderItem={renderItem}
+            sliderWidth={windowWidth}
+            itemWidth={windowWidth}
+          />
+        )}
         <Categories
           navigation
           navigateNextScreen={(item) => {
@@ -271,7 +292,7 @@ const HomeScreen = ({ navigation }) => {
                       <PopularPicksWrapper>
                         <PopularPicksImage
                           source={{
-                            uri: getCategoryImage('Featured Product'),
+                            uri: getCategoryImage(item.name),
                           }}
                         />
                       </PopularPicksWrapper>
@@ -300,7 +321,7 @@ const HomeScreen = ({ navigation }) => {
                       <PopularPicksWrapper>
                         <PopularPicksImage
                           source={{
-                            uri: item.section_url,
+                            uri: getCategoryImage(item.name),
                           }}
                         />
                       </PopularPicksWrapper>

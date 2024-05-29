@@ -54,6 +54,16 @@ const GET_PRODUCT = gql`
     productbyurl(url: $url) {
       data {
         _id
+        breadcrumb
+        attributes
+        variations
+        specifications {
+          key
+          value
+          group
+          attributeValueId
+          attributeId
+        }
         rating
         name
         url
@@ -194,27 +204,17 @@ const GET_SEARCH_PRODUCTS = gql`
 const GET_PRODUCT_REVIEWS = gql`
   query ($id: ID!) {
     productwisereview(productId: $id) {
-      data {
-        id
-        title
-        customerId {
-          id
-          firstName
-        }
-        productId {
-          _id
-          name
-        }
-        email
+      count
+      reviews {
         review
+        date
         rating
         status
-        date
-        updated
-      }
-      message {
-        message
-        success
+        title
+        customerId {
+          firstName
+          lastName
+        }
       }
     }
   }
@@ -301,10 +301,14 @@ export const GET_RELATED_PRODUCTS_QUERY = gql`
       quantity
       featured_product
       status
-      variant
       shipping
       taxClass
     }
+  }
+`;
+export const GET_ADDITIONAL_PRODUCTS_QUERY = gql`
+  query ($productId: ID!) {
+    additionalDetails(productId: $productId)
   }
 `;
 
@@ -322,6 +326,7 @@ const GET_ALL_FIELDS = gql`
         section_img
         display_type
         products {
+          _id
           name
           quantity
           rating

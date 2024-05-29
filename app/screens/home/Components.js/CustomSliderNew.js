@@ -9,7 +9,7 @@ import {
   Text,
   ImageBackground,
 } from 'react-native';
-import { AText } from '../../../theme-components';
+import { AText, ProductCard } from '../../../theme-components';
 import { FontStyle } from '../../../utils/config';
 import Feather from 'react-native-vector-icons/Feather';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -42,91 +42,30 @@ const MyCarousel = ({ dataItems, navigatetonext, title }) => {
   ]);
 
   const carouselRef = useRef(null);
-  console.log(dataItems, ' ditem');
   const _renderItem = ({ item, index }) => {
     return (
-      <TouchableOpacity
-        onPress={() => {
-          navigatetonext(item);
-          // setSelectedId(item._id);
-        }}>
-        <ImageBackground
-          source={{
-            uri: !isEmpty(item.feature_image)
-              ? URL + item.feature_image
-              : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
-            priority: FastImage.priority.normal,
-          }}
-          style={styles.itemImage}
-          imageStyle={{ borderRadius: 10 }}
-          // blurRadius={10}
-        >
-          <View style={styles.blurWrap}>
-            <ImageBackground
-              source={{
-                uri: !isEmpty(item.feature_image)
-                  ? URL + item.feature_image
-                  : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
-                priority: FastImage.priority.normal,
-              }}
-              blurRadius={Platform.OS === 'ios' ? 20 : 20}
-              style={styles.blurImageStyle}
-              imageStyle={{
-                borderRadius: 10,
-                resizeMode: 'cover',
-              }}></ImageBackground>
-          </View>
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => {
-              navigatetonext(item);
-            }}
-            style={styles.overlay}></TouchableOpacity>
-          <View style={styles.textContainer}>
-            <AText mb="5px" small fonts={FontStyle.fontBold}>
-              {item.name.length > 14
-                ? item.name.substring(0, 14) + '...'
-                : item.name}
-            </AText>
-            <AText small fonts={FontStyle.fontBold}>
-              {formatCurrency(
-                item.pricing.sellprice,
-                currencyOptions,
-                currencySymbol,
-              )}
-              {/* $ {item.pricing.sellprice + '.00'} */}
-            </AText>
-            {/* <ProductPriceText fontsizesmall={true} Pricing={item.pricing} /> */}
-          </View>
-          <View style={styles.textContainer2}>
-            <TouchableOpacity style={styles.iconcontainer}>
-              <Icon name="shopping-cart" color={'black'} size={14} />
-            </TouchableOpacity>
-            <StarRating
-              disabled={true}
-              maxStars={5}
-              rating={3.5}
-              fullStarColor={'#FFDB20'}
-              emptyStarColor={'gray'}
-              starSize={10}
-            />
-          </View>
-        </ImageBackground>
-      </TouchableOpacity>
+      <ProductCard
+        category={item}
+        displayImage={item.feature_image}
+        navigateNextScreen={() => navigatetonext(item)}
+      />
     );
   };
 
   return (
-    <View style={{ width: '100%' }}>
+    <View style={styles.container}>
+      <AText mb={'10px'} large fonts={FontStyle.fontBold}>
+        {title}
+      </AText>
       <Carousel
         ref={carouselRef}
         data={dataItems}
         renderItem={_renderItem}
         sliderWidth={windowWidth}
         itemWidth={itemWidth}
-        firstItem={1}
+        firstItem={0}
         lockScrollWhileSnapping={true}
-        autoplay={true}
+        autoplay={false}
       />
     </View>
   );
@@ -143,8 +82,9 @@ const styles = StyleSheet.create({
   // },
   container: {
     flex: 1,
-    justifyContent: 'center',
-    // alignItems: 'center',
+    padding: 10,
+    width: '100%',
+    alignSelf: 'center',
   },
   itemImage: {
     width: itemWidth,
@@ -153,7 +93,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginHorizontal: 8,
   },
-
+  itemView: {
+    height: 290,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   overlay: {
     position: 'absolute',
     bottom: 0,
@@ -165,7 +109,7 @@ const styles = StyleSheet.create({
   },
 
   textContainer: {
-    position: 'absolute',
+    // position: 'absolute',
     bottom: 0,
     left: 0,
     // justifyContent: 'center',
@@ -192,20 +136,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  blurImageStyle: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-    bottom: 0,
-    justifyContent: 'flex-end',
+  imageStyle: {
+    width: '97%',
+    height: '77%',
+    borderRadius: 10,
+    resizeMode: 'cover',
+    // position: 'absolute',
+    // bottom: 0,
+    // justifyContent: 'flex-end',
   },
-  blurWrap: {
-    height: '25%', //Here we need to specify the height of blurred part
-    overflow: 'hidden',
-    width: '100%',
-    position: 'absolute',
-    bottom: 0,
-  },
+  blurWrap: {},
 });
 
 const itemWidth = 200; // Replace with your actual item width

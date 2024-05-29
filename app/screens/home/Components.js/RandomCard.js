@@ -7,7 +7,7 @@ import {
   Text,
   TouchableOpacity,
 } from 'react-native';
-import { AText } from '../../../theme-components';
+import { AText, ProductCard } from '../../../theme-components';
 import { FontStyle } from '../../../utils/config';
 import { formatCurrency, isEmpty } from '../../../utils/helper';
 import URL from '../../../utils/baseurl';
@@ -17,6 +17,7 @@ import { ImageBackground } from 'react-native';
 import { useSelector } from 'react-redux';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import StarRating from 'react-native-star-rating';
+import { ProductPriceText } from '../../components';
 
 const windowWidth = Dimensions.get('window').width;
 const itemWidth = windowWidth * 0.45; // visible item width
@@ -39,73 +40,11 @@ const CardContainer = ({ dataItems, navigatetonext, title }) => {
         }}>
         {dataItems.map((item, index) => {
           return (
-            <TouchableOpacity
-              onPress={() => {
-                navigatetonext(item);
-                // setSelectedId(item._id);
-              }}>
-              <ImageBackground
-                source={{
-                  uri: !isEmpty(item.feature_image)
-                    ? URL + item.feature_image
-                    : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
-                  priority: FastImage.priority.normal,
-                }}
-                style={styles.itemImage}
-                imageStyle={{ borderRadius: 10 }}
-                // blurRadius={10}
-              >
-                <View style={styles.blurWrap}>
-                  <ImageBackground
-                    source={{
-                      uri: !isEmpty(item.feature_image)
-                        ? URL + item.feature_image
-                        : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
-                      priority: FastImage.priority.normal,
-                    }}
-                    blurRadius={Platform.OS === 'ios' ? 20 : 20}
-                    style={styles.blurImageStyle}
-                    imageStyle={{
-                      borderRadius: 10,
-                      resizeMode: 'cover',
-                    }}></ImageBackground>
-                </View>
-                <TouchableOpacity
-                  activeOpacity={0.9}
-                  onPress={() => {
-                    navigatetonext(item);
-                  }}
-                  style={styles.overlay}></TouchableOpacity>
-                <View style={styles.textContainer}>
-                  <AText mb="5px" small fonts={FontStyle.fontBold}>
-                    {item.name.length > 14
-                      ? item.name.substring(0, 14) + '...'
-                      : item.name}
-                  </AText>
-                  <AText small fonts={FontStyle.fontBold}>
-                    {formatCurrency(
-                      item.pricing.sellprice,
-                      currencyOptions,
-                      currencySymbol,
-                    )}
-                    {/* $ {item.pricing.sellprice + '.00'} */}
-                  </AText>
-                </View>
-                <View style={styles.textContainer2}>
-                  <TouchableOpacity style={styles.iconcontainer}>
-                    <Icon name="shopping-cart" color={'black'} size={14} />
-                  </TouchableOpacity>
-                  <StarRating
-                    disabled={true}
-                    maxStars={5}
-                    rating={3.5}
-                    fullStarColor={'#FFDB20'}
-                    emptyStarColor={'gray'}
-                    starSize={10}
-                  />
-                </View>
-              </ImageBackground>
-            </TouchableOpacity>
+            <ProductCard
+              category={item}
+              displayImage={item.feature_image}
+              navigateNextScreen={() => navigatetonext(item)}
+            />
           );
         })}
       </View>
@@ -140,12 +79,14 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '80%',
   },
-  itemImage: {
+  itemView: {
     width: itemWidth,
     height: itemHeight,
-    resizeMode: 'contain',
     borderRadius: 10,
     marginBottom: 10,
+    paddingTop: 4,
+    justifyContent: 'space-between',
+    alignItems: 'center',
     // marginHorizontal: (windowWidth * 0.1) / 2,
   },
 
@@ -160,9 +101,6 @@ const styles = StyleSheet.create({
   },
 
   textContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
     marginHorizontal: 10,
     marginBottom: 10,
   },
@@ -185,11 +123,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   blurImageStyle: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-    bottom: 0,
-    justifyContent: 'flex-end',
+    width: '97%',
+    height: '77%',
+    borderRadius: 10,
+    resizeMode: 'cover',
+  },
+  imageStyle: {
+    width: '97%',
+    height: '77%',
+    borderRadius: 10,
+    resizeMode: 'cover',
+    // position: 'absolute',
+    // bottom: 0,
+    // justifyContent: 'flex-end',
   },
   blurWrap: {
     height: '25%', //Here we need to specify the height of blurred part

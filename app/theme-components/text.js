@@ -15,7 +15,11 @@ const AText = styled.Text`
   border-bottom-width: ${(props) => props.bbw ?? '0px'};
   border-bottom-color: ${(props) => props.bbc ?? APP_PRIMARY_COLOR};
   text-decoration-line: ${(props) =>
-    props.lineThrough ? 'underline' : 'none'};
+    props.underLine
+      ? 'underline'
+      : props.lineThrough
+      ? 'line-through'
+      : 'none'};
   font-family: ${(props) => props.fonts ?? 'SegoeUI'};
   z-index: ${(props) => props.zindex ?? '1'};
   ${({
@@ -71,10 +75,12 @@ const AText = styled.Text`
         `text-align: left`;
     }
   }}
-    ${({ uppercase }) => {
+    ${({ uppercase,capitalize }) => {
     switch (true) {
       case uppercase:
         return `text-transform: uppercase`;
+      case capitalize:
+        return `text-transform: capitalize`;
       default:
         `text-transform: inherit`;
     }

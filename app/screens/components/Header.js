@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 
 const Header = ({ navigation, title, showProfileIcon }) => {
   function handlePress() {
-    navigation.openDrawer();
+    // navigation.openDrawer();
   }
   return (
     <View
@@ -17,10 +17,10 @@ const Header = ({ navigation, title, showProfileIcon }) => {
         ...styles.header,
         justifyContent: showProfileIcon ? 'space-between' : 'flex-start',
       }}>
-      <TouchableOpacity style={{ marginTop: 10 }} onPress={handlePress}>
+      {/* <TouchableOpacity style={{ marginTop: 10 }} onPress={handlePress}>
         <View style={Styles.bar1}></View>
         <View style={Styles.bar2}></View>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       <AText fonts={FontStyle.semiBold} ml="20px">
         {title}
       </AText>

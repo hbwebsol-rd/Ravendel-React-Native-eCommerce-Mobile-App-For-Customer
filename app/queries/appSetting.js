@@ -86,27 +86,6 @@ const GET_APP_SETTING = gql`
         s3_key
       }
       appearance {
-        home {
-          slider {
-            image
-            link
-            open_in_tab
-          }
-          add_section_in_home {
-            feature_product
-            recently_added_products
-            most_viewed_products
-            recently_bought_products
-            product_recommendation
-            products_on_sales
-            product_from_specific_categories
-          }
-          add_section_web {
-            label
-            visible
-            category
-          }
-        }
         theme {
           primary_color
           playstore
@@ -121,6 +100,11 @@ const GET_APP_SETTING = gql`
             visible
             url
             category
+          }
+          slider {
+            image
+            link
+            open_in_tab
           }
         }
       }

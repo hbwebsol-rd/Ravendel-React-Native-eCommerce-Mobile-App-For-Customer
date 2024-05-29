@@ -48,7 +48,7 @@ function CategoryList({ allCategories, navigateNextScreen }) {
 }
 function Categories({ allCategories, navigateNextScreen }) {
   return (
-    <View style={{ marginHorizontal: 30 }}>
+    <View style={{ paddingHorizontal: 10, marginTop: 30 }}>
       <AText mb={'10px'} large fonts={FontStyle.fontBold}>
         Categories
       </AText>
@@ -70,7 +70,8 @@ const styles = StyleSheet.create({
   categoryItem: {
     alignItems: 'center',
     paddingHorizontal: 10,
-    width: 80,
+    minwidth: 80,
+    maxWidth: 100,
   },
   categoryName: {
     marginTop: 5,
