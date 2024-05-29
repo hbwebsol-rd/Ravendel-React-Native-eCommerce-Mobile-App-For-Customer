@@ -3,6 +3,7 @@ import { AText, ARow, ACol } from '../../../theme-components';
 import styled from 'styled-components/native';
 import URL from '../../../utils/baseurl';
 import { isEmpty } from '../../../utils/helper';
+import PropTypes from 'prop-types';
 
 const HomeBrandViews = ({ allbrands, navigateNextScreen, navigation }) => {
   const CategoryShowView = React.memo(() => {
@@ -40,6 +41,11 @@ const HomeBrandViews = ({ allbrands, navigateNextScreen, navigation }) => {
   );
 };
 
+HomeBrandViews.propTypes = {
+  allbrands: PropTypes.array,
+  navigateNextScreen: PropTypes.func,
+};
+
 const CategoriesListingWrapper = styled.TouchableOpacity`
   margin: 5px 0 0px 0;
 `;
@@ -47,7 +53,7 @@ const CategoriesListingWrapper = styled.TouchableOpacity`
 const CategoriesImageWrapper = styled.View`
   width: 100px;
   height: 100px;
-  border-radius: 100px;
+  // border-radius: 100px;
   overflow: hidden;
   margin: 2px auto;
 `;
