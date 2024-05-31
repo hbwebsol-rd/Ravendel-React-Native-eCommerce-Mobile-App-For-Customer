@@ -5,21 +5,19 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import styled from 'styled-components/native';
 import {
   AText,
-  AContainer,
-  AHeader,
   ARow,
-  ACol,
   AppLoader,
   TextInput,
   AButton,
+  ProductCard,
 } from '../../theme-components';
 import { useDispatch, useSelector } from 'react-redux';
 import URL from '../../utils/baseurl';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { CommonActions, useIsFocused } from '@react-navigation/native';
+import IonIcon from 'react-native-vector-icons/Ionicons';
+
 import FastImage from 'react-native-fast-image';
 import {
   capitalizeFirstLetter,
@@ -28,15 +26,17 @@ import {
 } from '../../utils/helper';
 import {
   ActivityIndicator,
-  // FlatList,
+  FlatList,
+  Image,
   ImageBackground,
-  // ScrollView,
+  Modal,
+  Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { ScrollView, FlatList } from 'react-native-gesture-handler';
 import AIcon from 'react-native-vector-icons/AntDesign';
 import {
   APP_PRIMARY_COLOR,
@@ -51,6 +51,7 @@ import {
   BottomSheetModal,
   BottomSheetModalProvider,
 } from '@gorhom/bottom-sheet';
+
 import NavigationConstants from '../../navigation/NavigationConstants';
 import PropTypes from 'prop-types';
 import BrandFilter from '../components/BrandFilter';
@@ -62,8 +63,6 @@ const SubCategoriesScreen = ({ navigation, route }) => {
   const [amountRange, setAmountRange] = useState([0, 10000]);
   const [loader, setLoader] = useState(false);
 
-  const bottomSheetModalRef = useRef(null);
-
   // variables
   const snapPoints = useMemo(() => ['60%'], []); // For Bottomsheet Modal
   const { currencyOptions, currencySymbol } = useSelector(
@@ -71,7 +70,8 @@ const SubCategoriesScreen = ({ navigation, route }) => {
   );
   // callbacks
   const handlePresentModalPress = useCallback(() => {
-    bottomSheetModalRef.current?.present();
+    setFilterModal(!filterModal);
+    // bottomSheetModalRef.current?.present();
   }, []);
 
   const handleSheetChanges = useCallback((index) => {
@@ -101,6 +101,9 @@ const SubCategoriesScreen = ({ navigation, route }) => {
   const [ActiveBrand, setActiveBrand] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState('');
+  const [filterModal, setFilterModal] = useState(false);
+  const [filterList, setFilterList] = useState([]);
+  const [filterSelect, setFilterSelect] = useState(0);
   const [sortBy, setSortBy] = useState({
     field: 'date',
     type: 'desc',
@@ -109,7 +112,10 @@ const SubCategoriesScreen = ({ navigation, route }) => {
   const handleinpiut = (e) => {
     setInpvalue(e);
   };
-
+  console.log(filterList[filterSelect], 'filterSelect');
+  useEffect(() => {
+    setFilterList(filterData);
+  }, [filterData]);
   const handleLoadMore = () => {
     setLoader(true);
     const filter = {
@@ -248,14 +254,16 @@ const SubCategoriesScreen = ({ navigation, route }) => {
       limit: 10,
     };
     dispatch(catProductAction(filter, true));
-    bottomSheetModalRef.current?.dismiss();
+    setFilterModal(false);
+    // bottomSheetModalRef.current?.dismiss();
   };
 
   const handleReset = () => {
     setActiveBrand([]);
     setStarCount(0);
     setAmountRange[(0, 10000)];
-    bottomSheetModalRef.current?.dismiss();
+    setFilterModal(false);
+    // bottomSheetModalRef.current?.dismiss();
     const filter = {
       mainFilter: {
         categoryUrl: selectedCatId,
@@ -268,68 +276,20 @@ const SubCategoriesScreen = ({ navigation, route }) => {
   };
   function renderItem({ item }) {
     return (
-      <TouchableOpacity
-        onPress={() => {
+      <ProductCard
+        category={item}
+        displayImage={item.feature_image}
+        fontsizesmall={true}
+        showRating={true}
+        showItemLeft={true}
+        productWidth={windowWidth * 0.48}
+        navigateNextScreen={() => {
           navigation.navigate(NavigationConstants.SINGLE_PRODUCT_SCREEN, {
             productID: item._id,
             productUrl: item.url,
           });
         }}
-        style={styles.cardstyle}>
-        <ImageBackground
-          source={{
-            uri: !isEmpty(item.feature_image)
-              ? URL + item.feature_image
-              : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
-            priority: FastImage.priority.normal,
-          }}
-          style={styles.centeredItemImage}
-          imageStyle={{ borderRadius: 10, resizeMode: 'contain' }}>
-          <View style={styles.blurWrap}>
-            <ImageBackground
-              source={{
-                uri: !isEmpty(item.feature_image)
-                  ? URL + item.feature_image
-                  : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
-                priority: FastImage.priority.normal,
-              }}
-              blurRadius={Platform.OS === 'ios' ? 20 : 20}
-              style={styles.blurImageStyle}
-              imageStyle={{
-                borderRadius: 10,
-                resizeMode: 'cover',
-              }}></ImageBackground>
-          </View>
-          <TouchableOpacity activeOpacity={0.9} style={styles.overlay} />
-          <View style={styles.textContainer}>
-            <AText mb="5px" small fonts={FontStyle.fontBold}>
-              {item.name.length > 14
-                ? item.name.substring(0, 14) + '...'
-                : item.name}
-            </AText>
-            <AText small fonts={FontStyle.fontBold} style={styles.text}>
-              {formatCurrency(
-                item.pricing.sellprice,
-                currencyOptions,
-                currencySymbol,
-              )}
-            </AText>
-          </View>
-          <View style={styles.textContainer2}>
-            <TouchableOpacity style={styles.iconcontainer}>
-              <Icon name="shopping-cart" color={'black'} size={14} />
-            </TouchableOpacity>
-            <StarRating
-              disabled={true}
-              maxStars={5}
-              rating={item.rating}
-              fullStarColor={'#FFDB20'}
-              emptyStarColor={'gray'}
-              starSize={10}
-            />
-          </View>
-        </ImageBackground>
-      </TouchableOpacity>
+      />
     );
   }
 
@@ -373,19 +333,19 @@ const SubCategoriesScreen = ({ navigation, route }) => {
               name="arrowleft"
               size={22}
             />
-            <AText fonts={FontStyle.semiBold} ml="20px">
+            <AText fonts={FontStyle.fontBold} ml="20px">
               {capitalizeFirstLetter(singleCat.url).replace(/-/g, ' ')}
             </AText>
           </View>
           <ARow
             ml="30px"
             mr="30px"
-            mt={'50px'}
+            mt={'10px'}
             row
             justifyContent="space-between"
             alignItems="center"
             position="relative">
-            <View style={{ width: '65%', justifyContent: 'center' }}>
+            <View style={{ width: '85%', justifyContent: 'center' }}>
               <Icon
                 style={styles.iconstyle}
                 name={'search'}
@@ -393,31 +353,33 @@ const SubCategoriesScreen = ({ navigation, route }) => {
                 color={'black'}
               />
               <TextInput
-                height={30}
+                height={40}
                 bc={'#E0E0E0'}
                 value={inpvalue}
                 onchange={handleinpiut}
                 padding={0}
                 pl={35}
-                inputBgColor={Colors.whiteColor}
+                inputBgColor={'#EFF0F0'}
                 fs={12}
-                placeholder={'Search'}
-                placeholdercolor={'black'}
+                placeholder={'Search..'}
                 br={30}
-                color={Colors.blackColor}
+                placeholdercolor={'#959696'}
               />
             </View>
             <TouchableOpacity
               onPress={() => handlePresentModalPress()}
-              style={styles.filterstyle}>
-              <AIcon name={'filter'} size={20} color={'black'} />
-              <AText color="black" ml="10px">
-                Filter
-              </AText>
+              style={[
+                styles.filterstyle,
+                { backgroundColor: APP_PRIMARY_COLOR },
+              ]}>
+              <Image
+                style={{ resizeMode: 'contain', width: 15 }}
+                source={require('../../assets/images/filter.png')}
+              />
             </TouchableOpacity>
           </ARow>
           {/* <HeaderContent /> */}
-          <View style={{ paddingHorizontal: 30 }}>
+          <View style={{ paddingHorizontal: 15 }}>
             <ScrollView
               contentContainerStyle={{
                 marginTop: 20,
@@ -429,46 +391,44 @@ const SubCategoriesScreen = ({ navigation, route }) => {
               keyboardShouldPersistTaps="always"
               horizontal={true}
               showsHorizontalScrollIndicator={false}>
-              <AButton
-                semi
-                mr="8px"
-                title={'All'}
+              <TouchableOpacity
                 onPress={() => handleselectedCat('All', null)}
-                bgColor={
-                  'All' == selectedCat ? APP_PRIMARY_COLOR : 'transparent'
-                }
-                color={'All' == selectedCat ? 'white' : 'black'}
-                round
-                minor={windowWidth < 330 ? true : false}
-                small={windowWidth < 400 && windowWidth > 330 ? true : false}
-                extramedium={windowWidth > 400 ? true : false}
-                xtrasmall
-                borderColor={'transparent'}
-              />
+                style={{
+                  borderRadius: 15,
+                  backgroundColor:
+                    'All' == selectedCat ? APP_PRIMARY_COLOR : 'transparent',
+                  paddingHorizontal: 12,
+                  paddingVertical: 5,
+                  margin: 5,
+                }}>
+                <AText
+                  color={'All' == selectedCat ? '#fff' : 'black'}
+                  font={FontStyle.semiBold}
+                  small>
+                  All
+                </AText>
+              </TouchableOpacity>
+
               {withChild.map((item) => (
-                <>
-                  <AButton
-                    semi
-                    mr="8px"
-                    key={item.id}
-                    title={item.name}
-                    onPress={() => handleselectedCat(item.url, item.id)}
-                    bgColor={
+                <TouchableOpacity
+                  onPress={() => handleselectedCat(item.url, item.id)}
+                  style={{
+                    borderRadius: 15,
+                    backgroundColor:
                       item.url == selectedCat
                         ? APP_PRIMARY_COLOR
-                        : 'transparent'
-                    }
-                    color={item.url == selectedCat ? 'white' : 'black'}
-                    round
-                    minor={windowWidth < 330 ? true : false}
-                    small={
-                      windowWidth < 400 && windowWidth > 330 ? true : false
-                    }
-                    extramedium={windowWidth > 400 ? true : false}
-                    xtrasmall
-                    borderColor={'transparent'}
-                  />
-                </>
+                        : 'transparent',
+                    paddingHorizontal: 12,
+                    paddingVertical: 5,
+                    margin: 5,
+                  }}>
+                  <AText
+                    color={item.url == selectedCat ? '#fff' : 'black'}
+                    font={FontStyle.semiBold}
+                    small>
+                    {item.name}
+                  </AText>
+                </TouchableOpacity>
               ))}
             </ScrollView>
           </View>
@@ -483,7 +443,7 @@ const SubCategoriesScreen = ({ navigation, route }) => {
               marginTop: 10,
               flexDirection: 'column',
               margin: 'auto',
-              marginHorizontal: 30,
+              marginHorizontal: 5,
               paddingBottom: 20,
             }}
             ListEmptyComponent={() => (
@@ -515,76 +475,151 @@ const SubCategoriesScreen = ({ navigation, route }) => {
           />
         </View>
 
-        <BottomSheetModal
+        <Modal
           // enableDismissOnClose={false}
-          ref={bottomSheetModalRef}
+          visible={filterModal}
           snapPoints={snapPoints}
           onChange={handleSheetChanges}
-          containerStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
-          style={{ flex: 1, elevation: 10, paddingHorizontal: 15 }}>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <View
-              style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <AText fonts={FontStyle.semiBold}>Filter</AText>
-              <TouchableOpacity onPress={() => handleReset()}>
-                <AText fonts={FontStyle.semiBold}>Reset</AText>
-              </TouchableOpacity>
-            </View>
-            {filterData &&
-              filterData.map((item) =>
-                item.field === 'brand' ? (
-                  <BrandFilter
-                    ActiveBrand={ActiveBrand}
-                    setActiveBrand={setActiveBrand}
-                    data={item}
-                  />
-                ) : item.field === 'pricing.sellprice' ? (
-                  <RangeFilter setAmountRange={setAmountRange} data={item} />
-                ) : item.field === 'rating' ? (
-                  <RatingFilter
-                    starCount={starCount}
-                    onStarRatingPress={onStarRatingPress}
-                    data={item}
-                  />
-                ) : null,
-              )}
+          contentContainerStyle={{
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          }}
+          style={{ flex: 1, flexDirection: 'row' }}>
+          <View style={styles.filterModalHeader}>
+            <TouchableOpacity
+              style={{ marginEnd: 10 }}
+              onPress={() => handleReset()}>
+              <AIcon
+                onPress={() => setFilterModal(false)}
+                name="arrowleft"
+                size={20}
+              />
+            </TouchableOpacity>
+            <AText fonts={FontStyle.semiBold}>Filter</AText>
+          </View>
+          <View style={styles.filterBodyStyle}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              style={styles.filterListView}>
+              {!isEmpty(filterList) && filterList.length > 0
+                ? filterList.map((category, index) => {
+                    return (
+                      <Pressable
+                        activeOpacity={0.9}
+                        style={[
+                          styles.filterListingWrapper,
+                          filterSelect == index
+                            ? { backgroundColor: '#fff', width: '100%' }
+                            : {},
+                        ]}
+                        onPress={() => {
+                          setFilterSelect(index);
+                        }}>
+                        <AText uppercase xtrasmall color="#000" center>
+                          {category.heading}
+                        </AText>
+                      </Pressable>
+                    );
+                  })
+                : null}
+            </ScrollView>
+            <ScrollView
+              style={{
+                width: '60%',
+                flexDirection: 'column',
+                backgroundColor: Colors.whiteColor,
+                marginTop: 12,
+              }}
+              showsVerticalScrollIndicator={false}>
+              {filterSelect && !isEmpty(filterList[filterSelect])
+                ? filterList[filterSelect].type == 'array' ||
+                  filterList[filterSelect].type == 'choice'
+                  ? filterList[filterSelect].data &&
+                    filterList[filterSelect].data.map((item, index) => (
+                      <Pressable
+                        activeOpacity={0.9}
+                        style={styles.filterListDatastyle}
+                        onPress={() => {
+                          const newFilterList = JSON.parse(
+                            JSON.stringify(filterList),
+                          );
+                          if (filterList[filterSelect].type == 'array') {
+                            newFilterList[filterSelect].data[index].select =
+                              !newFilterList[filterSelect].data[index].select;
+                          } else {
+                            newFilterList[filterSelect].data.map((key, i) => {
+                              key.select = i == index;
+                            });
+                          }
+                          setFilterList(newFilterList);
+                        }}>
+                        {item.select ? (
+                          <IonIcon
+                            color={APP_PRIMARY_COLOR}
+                            name={
+                              filterList[filterSelect].type == 'choice'
+                                ? 'radio-button-on'
+                                : 'checkbox-outline'
+                            }
+                            style={{ marginHorizontal: 5 }}
+                            size={20}
+                          />
+                        ) : (
+                          <IonIcon
+                            color={APP_PRIMARY_COLOR}
+                            style={{ marginHorizontal: 5 }}
+                            name={
+                              filterList[filterSelect].type == 'choice'
+                                ? 'radio-button-off'
+                                : 'square-outline'
+                            }
+                            size={20}
+                          />
+                        )}
+                        <AText xtrasmall color="#000" center>
+                          {item.label}
+                        </AText>
+                      </Pressable>
+                    ))
+                  : null
+                : null}
 
-            <AText
-              color={Colors.blackColor}
-              mt={'10px'}
-              fonts={FontStyle.semiBold}>
-              Sort By
-            </AText>
-            <View style={{ width: '35%' }}>
-              {sortData.map((item) => (
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <TouchableOpacity
-                    onPress={() => setSortBy(item.sortData)}
-                    style={{
-                      marginRight: 5,
-                      height: 15,
-                      width: 15,
-                      borderWidth: 1,
-                      borderColor: Colors.blackColor,
-                      borderRadius: 8,
-                      backgroundColor:
-                        sortBy.field == item.sortData.field &&
-                        sortBy.type == item.sortData.type
-                          ? APP_PRIMARY_COLOR
-                          : Colors.transparentColor,
-                    }}></TouchableOpacity>
-                  <AText>{item.name}</AText>
-                </View>
-              ))}
-            </View>
-            <AButton
-              mt={'20px'}
-              title={'Apply Filter'}
-              round
-              onPress={() => handleFilter()}
-            />
-          </ScrollView>
-        </BottomSheetModal>
+              {/* <AText
+                color={Colors.blackColor}
+                mt={'10px'}
+                fonts={FontStyle.semiBold}>
+                Sort By
+              </AText>
+              <View style={{ width: '35%' }}>
+                {sortData.map((item) => (
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <TouchableOpacity
+                      onPress={() => setSortBy(item.sortData)}
+                      style={{
+                        marginRight: 5,
+                        height: 15,
+                        width: 15,
+                        borderWidth: 1,
+                        borderColor: Colors.blackColor,
+                        borderRadius: 8,
+                        backgroundColor:
+                          sortBy.field == item.sortData.field &&
+                          sortBy.type == item.sortData.type
+                            ? APP_PRIMARY_COLOR
+                            : Colors.transparentColor,
+                      }}></TouchableOpacity>
+                    <AText>{item.name}</AText>
+                  </View>
+                ))}
+              </View>
+              <AButton
+                mt={'20px'}
+                title={'Apply Filter'}
+                round
+                onPress={() => handleFilter()}
+              /> */}
+            </ScrollView>
+          </View>
+        </Modal>
       </BottomSheetModalProvider>
     </>
   );
@@ -618,15 +653,13 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    position: 'absolute',
-    width: '100%',
+    width: '90%',
+    alignSelf: 'center',
     justifyContent: 'flex-start',
     alignItems: 'center',
     left: 0,
     right: 0,
     marginTop: 10,
-    paddingHorizontal: 30,
-    zIndex: 10,
   },
   cardstyle: {
     width: '48%',
@@ -634,6 +667,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     borderRadius: 10,
     elevation: 5,
+    backgroundColor: '#fff',
   },
   iconstyle: {
     marginRight: 5,
@@ -641,17 +675,58 @@ const styles = StyleSheet.create({
     left: 10,
     zIndex: 2,
   },
-  filterstyle: {
+  filterBodyStyle: {
     flexDirection: 'row',
+    flex: 1,
+    // width:'100%',
+    // justifyContent: 'space-between',
+    // alignSelf: 'center',
+  },
+  filterListView: {
+    width: '10%',
+    backgroundColor: APP_SECONDARY_COLOR,
+    marginTop: 4,
+  },
+  filterListingWrapper: {
+    // marginVertical: 10,
+    marginBottom: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.whiteColor,
-    borderRadius: 30,
-    height: 30,
-    width: '30%',
-    borderWidth: 0.5,
-    borderColor: '#E0E0E0',
+    padding: 10,
+    paddingVertical: 15,
+    alignSelf: 'center',
+  },
+  filterModalHeader: {
+    flexDirection: 'row',
+    shadowColor: '#000',
+    alignItems: 'center',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+
+    elevation: 3,
+    paddingHorizontal: 15,
+    paddingVertical: 20,
+    backgroundColor: '#fff',
+  },
+  filterstyle: {
     justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: APP_PRIMARY_COLOR,
+    borderRadius: 70,
+    height: 40,
+    width: 40,
+    justifyContent: 'center',
+  },
+  filterListDatastyle: {
+    flexDirection: 'row',
+    marginBottom: 10,
+    marginHorizontal: 10,
+    alignItems: 'center',
+    flexWrap: 'wrap',
   },
   centeredItemImage: {
     width: '100%',

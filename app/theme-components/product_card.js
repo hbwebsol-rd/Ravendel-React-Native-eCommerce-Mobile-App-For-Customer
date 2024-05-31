@@ -16,34 +16,45 @@ import PropTypes from 'prop-types';
 import { ProductPriceText } from '../screens/components';
 import FastImage from 'react-native-fast-image';
 import StarRating from 'react-native-star-rating';
+import { useSelector } from 'react-redux';
 
 const windowWidth = Dimensions.get('window').width;
-const itemWidth = windowWidth * 0.45; // visible item width
-const itemHeight = itemWidth * 1.5; // visible item height
 
 function ProductCard({
   category,
   displayImage,
   navigateNextScreen,
-  showRating,
-  showItemLeft,
+  productWidth,
 }) {
-  console.log(category, 'category');
+  const itemWidth = productWidth ?? windowWidth * 0.46;
+  const itemHeight = itemWidth * 1.5; // visible item height
+
+  const { stock_display_format, stock_left_quantity } = useSelector(
+    (state) => state.settings,
+  );
   return (
     <TouchableOpacity
-      style={styles.itemView}
+      style={[
+        styles.itemView,
+        {
+          width: itemWidth,
+          height: itemHeight,
+        },
+      ]}
       onPress={() => {
         navigateNextScreen(category);
         // setSelectedId(item._id);
       }}>
-      {showItemLeft && (
+      {(stock_display_format == 'leftStock' &&
+        category.quantity <= stock_left_quantity) ||
+      stock_display_format == 'inStock' ? (
         //  && category.quantity < 5
         <View style={[styles.overlay]}>
           <AText color={'#fff'} xtrasmall fonts={FontStyle.fontBold}>
             {category.quantity} left
           </AText>
         </View>
-      )}
+      ) : null}
       <Image
         source={{
           uri: !isEmpty(displayImage)
@@ -53,21 +64,20 @@ function ProductCard({
         }}
         style={styles.imageStyle}
       />
-      {showRating && (
-        //  && category.quantity < 5
+      {category.rating > 0 ? (
         <View style={[styles.ratingOverlay]}>
           <StarRating
             disabled={true}
             maxStars={1}
             rating={1}
-            fullStarColor={APP_PRIMARY_COLOR}
+            fullStarColor={'#ffb400'}
             starSize={14}
           />
           <AText xtrasmall ml={'5px'} fonts={FontStyle.fontBold}>
             {category.rating}
           </AText>
         </View>
-      )}
+      ) : null}
       <View style={styles.textContainer}>
         <AText numberOfLines={2} mb="5px" small fonts={FontStyle.fontBold}>
           {category.name}
@@ -84,25 +94,7 @@ ProductCard.propTypes = {
 
 export default ProductCard;
 const styles = StyleSheet.create({
-  // title: {
-  //   fontSize: 24,
-  // },
-  container: {
-    flex: 1,
-    padding: 10,
-    width: '100%',
-    alignSelf: 'center',
-  },
-  itemImage: {
-    width: itemWidth,
-    height: 300,
-    resizeMode: 'contain',
-    borderRadius: 10,
-    marginHorizontal: 8,
-  },
   itemView: {
-    width: itemWidth,
-    height: itemHeight,
     borderRadius: 10,
     marginBottom: 10,
     paddingTop: 4,
@@ -117,7 +109,8 @@ const styles = StyleSheet.create({
     right: 10,
     // width: 20,
     overflow: 'hidden',
-    padding: 2,
+    paddingHorizontal: 5,
+    paddingVertical: 4,
     borderRadius: 7,
     zIndex: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.5)',
@@ -127,11 +120,13 @@ const styles = StyleSheet.create({
   },
   ratingOverlay: {
     position: 'absolute',
-    bottom: 78,
+    bottom: 67,
     left: 10,
     // width: 20,
+    borderRadius:5,
     overflow: 'hidden',
     paddingHorizontal: 5,
+    paddingVertical: 4,
     flexDirection: 'row',
     zIndex: 1,
     // backgroundColor: 'rgba(255, 255, 255, 0.5)',
@@ -141,32 +136,11 @@ const styles = StyleSheet.create({
   },
 
   textContainer: {
-    // position: 'absolute',
     overflow: 'hidden',
     width: '100%',
-    // justifyContent: 'center',
-    // alignItems: 'center',
     marginBottom: 10,
   },
-  textContainer2: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    textAlign: 'right',
-    marginHorizontal: 5,
-    // justifyContent: 'flex-end',
-    alignItems: 'flex-end',
-    marginBottom: 10,
-  },
-  iconcontainer: {
-    marginBottom: 10,
-    width: 22,
-    height: 22,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+
   imageStyle: {
     width: '97%',
     height: '77%',

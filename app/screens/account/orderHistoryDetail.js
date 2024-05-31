@@ -86,7 +86,7 @@ const OrderDetailScreen = ({ navigation, route }) => {
                     <NextItem>
                       <AText
                         color={fontColor}
-                        lineThrough={product.qty > 1 ? true : false}>
+                        underLine={product.qty > 1 ? true : false}>
                         {formatCurrency(
                           product.cost,
                           currencyOptions,

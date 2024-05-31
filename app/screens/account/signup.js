@@ -233,7 +233,7 @@ const SignupScreen = ({ navigation, handleActiveTab }) => {
           onPress={() => formik.setFieldValue('policy', !formik.values.policy)}
         />
         <TouchableOpacity activeOpacity={0.5} onPress={() => openLink()}>
-          <AText lineThrough small color="#9F9F9F">
+          <AText underLine small color="#9F9F9F">
             I agree to terms and policy
           </AText>
         </TouchableOpacity>

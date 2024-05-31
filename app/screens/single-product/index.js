@@ -24,7 +24,6 @@ import {
   ACol,
   AppLoader,
   AButton,
-  AHeader,
   ProductCard,
 } from '../../theme-components';
 import styled from 'styled-components/native';
@@ -33,12 +32,8 @@ import AIcon from 'react-native-vector-icons/AntDesign';
 import GalleryImagesSlider from './galleryImages';
 import HTMLView from 'react-native-htmlview';
 import {
-  Animated,
-  Button,
-  Dimensions,
   Modal,
   StyleSheet,
-  Text,
   TouchableOpacity,
   FlatList,
   TextInput,
@@ -46,26 +41,24 @@ import {
 } from 'react-native';
 import StarRating from 'react-native-star-rating';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { formatCurrency, isEmpty } from '../../utils/helper';
+import { isEmpty } from '../../utils/helper';
 import { useIsFocused } from '@react-navigation/native';
 import { ProductPriceText } from '../components';
-import { DataTable } from 'react-native-paper';
 import { View } from 'react-native-animatable';
 import moment from 'moment';
 import { reviewValidationSchema } from '../checkout/validationSchema';
 import { Formik } from 'formik';
 import { APP_PRIMARY_COLOR, FontStyle } from '../../utils/config';
 import Colors from '../../constants/Colors';
-import { Image } from 'react-native';
-import { ImageBackground } from 'react-native';
-import FastImage from 'react-native-fast-image';
-import URL from '../../utils/baseurl';
+import ImageSliderNew from '../home/Components.js/CustomSliderNew';
+
 import {
   BottomSheetModal,
   BottomSheetModalProvider,
 } from '@gorhom/bottom-sheet';
 import NavigationConstants from '../../navigation/NavigationConstants';
 import PropTypes from 'prop-types';
+import LevelWiseRating from './Components/levelWiseRating';
 
 var reviewObject = {
   title: '',
@@ -287,12 +280,12 @@ const SingleProductScreen = ({ navigation, route }) => {
 
   const cleanHTMLContent = (html) => {
     // Remove extra spaces
-    let cleanedHtml = html.replace(/\s+/g, ' ').trim();
+    let cleanedHtml = html.trim();
     // Remove span tags but keep their content
-    cleanedHtml = cleanedHtml.replace(/<\/?span[^>]*>/g, '');
+    // cleanedHtml = cleanedHtml.replace(/<\/?span[^>]*>/g, '');
     return cleanedHtml;
   };
-  console.log(RelatedProducts, 'RelatedProducts');
+
   const groupedSpecifications =
     !isEmpty(SingleProduct.specifications) &&
     SingleProduct.specifications.reduce((groups, spec) => {
@@ -302,6 +295,9 @@ const SingleProductScreen = ({ navigation, route }) => {
       return groups;
     }, {});
   const groupedSpecificationData = groupedSpecifications;
+  const ratingPercentage = (ratingNo) =>
+    !isEmpty(SingleProduct.ratingCount) &&
+    Math.round((ratingNo / SingleProduct.ratingCount) * 100);
 
   return (
     <BottomSheetModalProvider>
@@ -335,21 +331,25 @@ const SingleProductScreen = ({ navigation, route }) => {
               style={{ flex: 1 }}>
               <ScrollView
                 keyboardShouldPersistTaps={'always'}
-                contentContainerStyle={{ flexGrow: 1 }}
-                style={{ flex: 1, flexGrow: 1 }}>
+                contentContainerStyle={{ flexGrow: 1, paddingBottom: 70 }}
+                style={{ flex: 1, flexGrow: 1, paddingBottom: 50 }}>
                 {/* <ProductPriceText Pricing={SingleProduct.pricing} /> */}
                 {/* ===============Product Name============= */}
                 <View style={styles.headerContainerStyle}>
                   <View style={styles.productNameHeaderView}>
-                    <AText medium color={'black'} fonts={FontStyle.semiBold}>
+                    <AText big1 color={'black'} fonts={FontStyle.semiBold}>
                       {SingleProduct.name}
                     </AText>
-                    <AText small color={'#72787e'} fonts={FontStyle.semiBold}>
+                    <AText
+                      small
+                      mt={'5px'}
+                      color={'#72787e'}
+                      fonts={FontStyle.semiBold}>
                       {SingleProduct.short_description}
                     </AText>
                   </View>
                   <View style={styles.ratingPriceAndStockViewStyle}>
-                    <View>
+                    <View style={{ width: '70%' }}>
                       {!isEmpty(SingleProduct.rating) &&
                       SingleProduct.rating > 0 ? (
                         <View style={styles.starstyle}>
@@ -364,19 +364,19 @@ const SingleProductScreen = ({ navigation, route }) => {
                             maxStars={1}
                             rating={1}
                             fullStarColor={APP_PRIMARY_COLOR}
-                            starSize={14}
+                            starSize={16}
                           />
                         </View>
                       ) : null}
-                      <ProductPriceText
-                        fontsizesmall={true}
-                        Pricing={SingleProduct.pricing}
-                      />
+                      <ProductPriceText Pricing={SingleProduct.pricing} />
                     </View>
-                    <View>
+                    <View
+                      style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
                       <AText
-                        right
-                        xtrasmall
+                        small
                         color={SingleProduct.quantity > 0 ? '#1FAD08' : 'red'}
                         fonts={FontStyle.fontBold}>
                         {SingleProduct.quantity > 0
@@ -394,15 +394,13 @@ const SingleProductScreen = ({ navigation, route }) => {
                               cartQuantity > 1 &&
                                 setCartQuantity(cartQuantity - 1);
                             }}>
-                            <AIcon
-                              color={'#000'}
-                              size={22}
-                              name="minussquareo"
-                            />
+                            <AIcon color={'#000'} size={15} name="minus" />
                           </TouchableOpacity>
-                          <AText medium bold ml="7px" mr="7px">
-                            {cartQuantity}
-                          </AText>
+                          <View style={[styles.quantityBtnStyle]}>
+                            <AText medium bold>
+                              {cartQuantity}
+                            </AText>
+                          </View>
                           <TouchableOpacity
                             activeOpacity={0.9}
                             style={styles.quantityBtnStyle}
@@ -412,62 +410,54 @@ const SingleProductScreen = ({ navigation, route }) => {
                                 !manage_stock) &&
                                 setCartQuantity(cartQuantity + 1);
                             }}>
-                            <AIcon
-                              color={'#000'}
-                              size={22}
-                              name="plussquareo"
-                            />
+                            <AIcon color={'#000'} size={15} name="plus" />
                           </TouchableOpacity>
                         </View>
                       )}
                     </View>
                   </View>
-                  {!isEmpty(SingleProduct.attributes)
-                    ? SingleProduct.attributes.map((item) => (
-                        <View>
-                          <AText
-                            medium
-                            color={'black'}
-                            fonts={FontStyle.semiBold}>
-                            {item.name}
-                          </AText>
-                          <View style={styles.attributeView}>
-                            {!isEmpty(item.values) &&
-                              item.values.map((key) => (
-                                <TouchableOpacity
-                                  style={styles.attributeBoxStyle}>
-                                  <AText
-                                    small
-                                    color={'black'}
-                                    fonts={FontStyle.fontRegular}>
-                                    {key.name}
-                                  </AText>
-                                </TouchableOpacity>
-                              ))}
-                          </View>
-                        </View>
-                      ))
-                    : null}
                 </View>
+
+                {!isEmpty(SingleProduct.attributes)
+                  ? SingleProduct.attributes.map((item) => (
+                      <View style={styles.containerViewStyle}>
+                        <AText large fonts={FontStyle.fontBold} mb="10px">
+                          {item.name}
+                        </AText>
+                        <View style={styles.attributeView}>
+                          {!isEmpty(item.values) &&
+                            item.values.map((key) => (
+                              <TouchableOpacity
+                                style={styles.attributeBoxStyle}>
+                                <AText
+                                  center
+                                  small
+                                  color={'black'}
+                                  fonts={FontStyle.fontRegular}>
+                                  {key.name.trim()}
+                                </AText>
+                              </TouchableOpacity>
+                            ))}
+                        </View>
+                      </View>
+                    ))
+                  : null}
 
                 {/* ================ Product short description================== */}
                 {!isEmpty(SingleProduct.description) && (
-                  <>
-                    <AText
-                      ml={'15px'}
-                      fonts={FontStyle.semiBold}
-                      mb="5px"
-                      medium>
+                  <View style={styles.containerViewStyle}>
+                    <AText large fonts={FontStyle.fontBold} mb="10px">
                       Product Details
                     </AText>
                     <HTMLView
-                      lineBreak={'\n'}
-                      paragraphBreak={'\n'}
+                      // lineBreak={'\n'}
+                      // paragraphBreak={'\n'}
                       stylesheet={htmlStyles}
-                      style={{ marginHorizontal: 17 }}
+                      style={{ marginHorizontal: 5 }}
                       value={cleanHTMLContent(SingleProduct.description)}
                     />
-                  </>
+                    <View style={styles.boderLineView} />
+                  </View>
                 )}
                 {/* <AText ml="30px" mt={'5px'} mb={'20px'} bold>
                   SKU:{SingleProduct.sku}
@@ -478,7 +468,7 @@ const SingleProductScreen = ({ navigation, route }) => {
                 {!isEmpty(SingleProduct.specifications) &&
                   SingleProduct.specifications.length > 0 && (
                     <View style={styles.containerViewStyle}>
-                      <AText fonts={FontStyle.semiBold} mb="5px" medium>
+                      <AText large fonts={FontStyle.fontBold} mb="10px">
                         Specifications
                       </AText>
 
@@ -511,7 +501,12 @@ const SingleProductScreen = ({ navigation, route }) => {
                               {index !==
                               Object.keys(groupedSpecificationData).length -
                                 1 ? (
-                                <View style={styles.boderLineView} />
+                                <View
+                                  style={{
+                                    ...styles.boderLineView,
+                                    marginVertical: 10,
+                                  }}
+                                />
                               ) : null}
                             </View>
                           </>
@@ -522,7 +517,7 @@ const SingleProductScreen = ({ navigation, route }) => {
 
                 {/* ==================ZipCode Verification=================== */}
                 <View style={styles.containerViewStyle}>
-                  <AText fonts={FontStyle.semiBold} mb="5px" medium>
+                  <AText medium fonts={FontStyle.semiBold} mb="10px">
                     Check delivery at your location
                   </AText>
                   <View style={styles.pinCodeViewStyle}>
@@ -530,6 +525,7 @@ const SingleProductScreen = ({ navigation, route }) => {
                       placeholder="Enter Pincode"
                       value={pinCode}
                       style={{ fontSize: 12 }}
+                      maxLength={20}
                       onChangeText={(text) => setPinCode(text)}
                     />
                     <TouchableOpacity
@@ -548,136 +544,135 @@ const SingleProductScreen = ({ navigation, route }) => {
                   </View>
                 </View>
                 {/* ==================simmilar product=================== */}
-                {!isEmpty(RelatedProducts) ? (
-                  <View style={styles.containerViewStyle}>
-                    <AText
-                      medium
-                      color={Colors.blackColor}
-                      large
-                      fonts={FontStyle.fontBold}
-                      mb="10px">
-                      People who bought this also bought
-                    </AText>
-                    <FlatList
-                      numColumns={2}
-                      data={RelatedProducts}
-                      snapToAlignment="center"
-                      keyExtractor={(item) => item._id}
-                      renderItem={renderItem}
-                      columnWrapperStyle={{ justifyContent: 'space-between' }}
-                    />
-                  </View>
+                {!isEmpty(RelatedProducts) &&
+                !isEmpty(RelatedProducts[1].products) ? (
+                  <ImageSliderNew
+                    title={'People who bought this also bought'}
+                    dataItems={RelatedProducts[1].products}
+                    navigatetonext={(item) => {
+                      setProductIds(item._id);
+                      setProductUrls(item.url);
+                    }}
+                  />
+                ) : null}
+                {!isEmpty(RelatedProducts) &&
+                !isEmpty(RelatedProducts[0].products) ? (
+                  <ImageSliderNew
+                    title={'Similar Products'}
+                    dataItems={RelatedProducts[0].products}
+                    navigatetonext={(item) => {
+                      setProductIds(item._id);
+                      setProductUrls(item.url);
+                    }}
+                  />
                 ) : null}
                 {/* ==================simmilar product=================== */}
 
                 {/* ===============Product Reviews============= */}
-                <View style={styles.containerViewStyle}>
-                  <AText fonts={FontStyle.semiBold} mt="10px" mb="5px" medium>
-                    Customer Reviews
-                  </AText>
+                {!isEmpty(SingleProduct.levelWiseRating) &&
+                SingleProduct.ratingCount > 0 ? (
+                  <View style={styles.containerViewStyle}>
+                    <AText large fonts={FontStyle.fontBold} mb="10px">
+                      Rating and Reviews
+                    </AText>
+                    <LevelWiseRating
+                      levelWiseRating={SingleProduct.levelWiseRating}
+                      rating={SingleProduct.rating}
+                      ratingCount={SingleProduct.ratingCount}
+                    />
 
-                  {ReviewProduct &&
-                  ReviewProduct.filter((review) => review.status === 'approved')
-                    .length > 0 ? (
+                    {ReviewProduct &&
                     ReviewProduct.filter(
                       (review) => review.status === 'approved',
-                    ).map((singleReview) => (
-                      <View style={styles.reviewContainerStyle}>
-                        <View style={[styles.starstyle, { borderWidth: 0 }]}>
-                          <AText
-                            medium
-                            color={'#72787e'}
-                            fonts={FontStyle.semiBold}>
-                            {singleReview.rating}
-                          </AText>
-                          <StarRating
-                            disabled={true}
-                            maxStars={1}
-                            rating={1}
-                            fullStarColor={APP_PRIMARY_COLOR}
-                            starSize={14}
-                          />
-                        </View>
-                        <View style={{ width: '85%' }}>
-                          <View style={styles.reviewStyle}>
-                            <AText capitalize bold small>
-                              {singleReview.title}
-                            </AText>
-                            <AText semiminor color={'#8A8A8A'}>
-                              {!isEmpty(singleReview.customerId.firstName)
-                                ? singleReview.customerId.firstName + ` | `
-                                : ''}
-                              {moment(singleReview.date).format('ll')}
-                            </AText>
+                    ).length > 0 ? (
+                      <>
+                        <AText
+                          fonts={FontStyle.semiBold}
+                          mt="10px"
+                          mb="5px"
+                          medium>
+                          Customer Reviews
+                        </AText>
+                        {ReviewProduct.filter(
+                          (review) => review.status === 'approved',
+                        ).map((singleReview) => (
+                          <View style={styles.reviewContainerStyle}>
+                            <View
+                              style={[styles.starstyle, { borderWidth: 0 }]}>
+                              <AText
+                                medium
+                                color={'#72787e'}
+                                fonts={FontStyle.semiBold}>
+                                {singleReview.rating}
+                              </AText>
+                              <StarRating
+                                disabled={true}
+                                maxStars={1}
+                                rating={1}
+                                fullStarColor={'#DDAC17'}
+                                starSize={14}
+                              />
+                            </View>
+                            <View style={{ width: '85%' }}>
+                              <View style={styles.reviewStyle}>
+                                <AText capitalize bold small>
+                                  {singleReview.title}
+                                </AText>
+                                <AText semiminor color={'#8A8A8A'}>
+                                  {!isEmpty(singleReview.customerId.firstName)
+                                    ? singleReview.customerId.firstName + ` | `
+                                    : ''}
+                                  {moment(singleReview.date).format('ll')}
+                                </AText>
+                              </View>
+                              <AText xtrasmall>{singleReview.review} </AText>
+                            </View>
                           </View>
-                          <AText xtrasmall>{singleReview.review} </AText>
-                        </View>
-                      </View>
-                    ))
-                  ) : (
-                    <>
-                      <AText
-                        bbc={Colors.blackColor}
-                        bbw={'0.5px'}
-                        pb="8px"
-                        small
-                        center>
-                        There are no reviews yet. Be the first one to write one.
-                      </AText>
-                    </>
-                  )}
-                </View>
-                {/* 
-                <View style={styles.banner}>
-                  <Checkpoints
-                    title="Happy Customers"
-                    image={require('../../assets/images/feedback.png')}
-                  />
-                  <Checkpoints
-                    title="Genuine Product"
-                    image={require('../../assets/images/award.png')}
-                  />
-                  <Checkpoints
-                    title="Secure Checkout"
-                    image={require('../../assets/images/carttick.png')}
-                  />
-                </View> */}
-
-                {/* <View
-                  style={{
-                    marginHorizontal: 30,
-                    marginTop: 15,
-                    marginBottom: 30,
-                  }}>
-                  <AText medium>Returns</AText>
-                  <AText small>
-                    This products is not returnable for full details on out
-                    return poliies please{' '}
-                    <AText color={Colors.blue} underLine small>
-                      click here
-                    </AText>
-                  </AText>
-                </View> */}
-
-                <AddToCartWrapper>
-                  {(!isEmpty(SingleProduct.quantity) &&
-                    SingleProduct.quantity > 0) ||
-                  !manage_stock ? (
-                    <AButton
-                      title={itemInCart ? 'Added' : 'Add to Cart'}
-                      round
-                      onPress={() => addToCart()}
-                    />
-                  ) : (
-                    <AButton
-                      title={'Out of Stock'}
-                      block
-                      round
-                      // onPress={() => addToCart()}
-                    />
-                  )}
-                </AddToCartWrapper>
+                        ))}
+                      </>
+                    ) : (
+                      <>
+                        <AText
+                          bbc={Colors.blackColor}
+                          bbw={'0.5px'}
+                          pb="8px"
+                          small
+                          center>
+                          There are no reviews yet. Be the first one to write
+                          one.
+                        </AText>
+                      </>
+                    )}
+                  </View>
+                ) : null}
               </ScrollView>
+              <View style={styles.addToCartWrapper}>
+                {(!isEmpty(SingleProduct.quantity) &&
+                  SingleProduct.quantity > 0) ||
+                !manage_stock ? (
+                  <TouchableOpacity
+                    style={{
+                      ...styles.addCartBtnStyle,
+                      backgroundColor: APP_PRIMARY_COLOR,
+                    }}
+                    onPress={() => addToCart()}>
+                    <AText color={'#fff'} font={FontStyle.fontBold} center>
+                      {itemInCart ? 'Added' : 'Add to Cart'}
+                    </AText>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    style={{
+                      ...styles.addCartBtnStyle,
+                      backgroundColor: APP_PRIMARY_COLOR,
+                    }}
+                    onPress={() => {}}>
+                    <AText color={'#fff'} font={FontStyle.fontBold} center>
+                      Out of Stock
+                    </AText>
+                  </TouchableOpacity>
+                )}
+              </View>
             </BottomSheetModal>
           </View>
 
@@ -801,32 +796,15 @@ const htmlStyles = StyleSheet.create({
     margin: 0,
     padding: 0,
   },
+  li: {
+    margin: 0,
+  },
+  ul: {
+    marginTop: 0,
+  },
   // Other styles as needed
 });
 
-const QtyWrapper = styled.View`
-  height: 30px;
-  overflown: hidden;
-  // width: 110px;
-  margin: 10px 0px;
-  background: white;
-  flex-direction: row;
-  justify-content: flex-end;
-  align-items: center;
-  // border-width: 0.5px;
-`;
-const QtyButton = styled.TouchableOpacity`
-  background: #fff;
-  height: 100%;
-  width: 28px;
-  justify-content: center;
-  align-items: center;
-  padding: 0px;
-`;
-const CustomWrapper = styled.View`
-  margin: 5px 0 0px 0;
-  flex-direction: row;
-`;
 const ModalWrapper = styled.ScrollView`
   background-color: rgba(0, 0, 0, 0.5);
   position: relative;
@@ -891,61 +869,7 @@ const GallerySliderWrapper = styled.View`
   height: 60%;
   background: white;
 `;
-const ProductName = styled.View`
-  padding: 0px 0;
-  width: 55%;
-`;
-const CollapseWrapper = styled.View`
-  flex: 1;
-  margin-horizontal: 30px;
-`;
-const CollapseContainer = styled.View`
-  background-color: ${Colors.whiteColor};
-  padding: 10px 10px 20px 10px;
-  border-radius: 15px;
-`;
-const CollapseTitle = styled.TouchableOpacity`
-  flex: 1;
-  justify-content: space-between;
-  align-items: center;
-  flex-direction: row;
-  padding: 5px 0;
-  border-bottom-color: #000;
-  border-bottom-width: 0.5px;
-  margin: 5px 0px;
-`;
-const CollapseIcon = styled.Text`
-  align-self: flex-end;
-`;
-const AddToCartWrapper = styled.View`
-  background: transparent;
-  padding-top: 5px;
-  width: 70%;
-  align-self: center;
-  position: absolute;
-  bottom: 10;
-`;
-const ReviewWrapper = styled.View`
-  background: #fff;
-  padding-horizontal: 5px;
-  padding-vertical: 7px;
-  margin: 5px 0px;
-`;
-const Reviewrating = styled.View`
-  padding-horizontal: 5px;
-  padding-vertical: 3px;
-  border-radius: 7px;
-  justify-content: center;
-  align-items: center;
-  align-self: flex-start;
-  margin-end: 7px;
-`;
-const ReveiwHeading = styled.View`
-  justify-content: center;
-  align-items: center;
-  flex-direction: row;
-  align-self: flex-start;
-`;
+
 const NotFoundWrapper = styled.View`
   height: 200px;
   width: 100%;
@@ -974,10 +898,12 @@ const styles = StyleSheet.create({
   },
   quantityBtnStyle: {
     // background: '#fff',
-    width: '28',
+    width: 30,
+    height: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 0,
+    borderWidth: 1,
+    margin: 2,
   },
   header: {
     flexDirection: 'row',
@@ -995,32 +921,44 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
   },
   pinCodeViewStyle: {
-    width: '60%',
-    height: 42,
+    width: '80%',
+    height: 40,
     borderWidth: 1,
     borderColor: '#D4D4D4',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginVertical: 7,
+    marginHorizontal: 10,
+    paddingHorizontal: 5,
   },
   pinCodeCheckBtnStyle: {
     width: '30%',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 7,
-    paddingHorizontal: 5,
-    paddingVertical: 4,
+    borderRadius: 3,
+    padding: 5,
   },
   ratingPriceAndStockViewStyle: {
     width: '100%',
     marginTop: 5,
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
   },
   attributeView: {
     flexDirection: 'row',
-    marginVertical: 10,
+    marginVertical: 7,
+  },
+  attributeBoxStyle: {
+    borderWidth: 1,
+    borderColor: '#636363',
+    marginHorizontal: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    paddingVertical: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   specificationGroupStyle: {
     flexDirection: 'row',
@@ -1033,13 +971,12 @@ const styles = StyleSheet.create({
   specificationRowStyle: {
     width: '40%',
     marginStart: 7,
-    marginBottom: 10,
+    marginBottom: 20,
   },
   boderLineView: {
-    backgroundColor: '#6D6D6D',
-    height: 1,
+    backgroundColor: '#E9E9E9',
+    height: 2,
     width: '95%',
-    marginStart: 5,
     alignSelf: 'center',
   },
   reviewContainerStyle: {
@@ -1054,15 +991,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '100%',
   },
-  attributeBoxStyle: {
-    borderWidth: 1,
-    borderColor: '#636363',
-    marginHorizontal: 7,
-    paddingHorizontal: 5,
-    paddingVertical: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   banner: {
     height: 120,
     backgroundColor: Colors.lightBlue,
@@ -1074,21 +1002,8 @@ const styles = StyleSheet.create({
   },
   containerViewStyle: {
     flex: 1,
+    marginVertical: 10,
     marginHorizontal: 15,
-  },
-  ratingPriceAndStockView: {
-    zIndex: 10,
-    bottom: 0,
-    position: 'absolute',
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    backgroundColor: 'white',
-    paddingBottom: 30,
-    // paddingHorizontal: 30,
-    paddingTop: 20,
-    width: '100%',
-    flex: 1,
-    elevation: 6,
   },
   starstyle: {
     flexDirection: 'row',
@@ -1102,70 +1017,57 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     marginVertical: 7,
   },
-  cardstyle: {
-    width: '48%',
-    height: 236,
-    marginBottom: 30,
-    borderRadius: 10,
-    elevation: 5,
-  },
-
-  centeredItemImage: {
-    width: '100%',
-    height: '100%',
-    // resizeMode: 'contain',
-    borderRadius: 10,
-    // marginHorizontal: windowWidth * 0.05,
-  },
-  overlay: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    height: '25%',
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+  ratingContainerView: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
+    width: '100%',
+    justifyContent: 'space-evenly',
   },
-  textContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    marginHorizontal: 10,
-    marginBottom: 10,
-  },
-  textContainer2: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    textAlign: 'right',
-    marginHorizontal: 10,
-    alignItems: 'flex-end',
-    marginBottom: 10,
-  },
-  iconcontainer: {
-    marginBottom: 5,
-    width: 22,
-    height: 22,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+  ratingView: {
+    width: '30%',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  blurImageStyle: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-    bottom: 0,
-    justifyContent: 'flex-end',
-  },
-  blurWrap: {
-    height: '25%', //Here we need to specify the height of blurred part
+  levelWiseRatingContainerStyle: {
+    flexDirection: 'row',
+    alignItems: 'center',
     overflow: 'hidden',
+    marginVertical: 5,
+  },
+  levelWiseStarstyle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    width: 45,
+    paddingHorizontal: 2,
+    justifyContent: 'space-evenly',
+  },
+  progressbarContainerStyle: {
+    backgroundColor: '#D9D9D9',
+    marginVertical: 5,
+    width: '70%',
+    borderRadius: 10,
+    height: 4,
+  },
+  filledProgressbarStyle: {
+    backgroundColor: '#D9D9D9',
+    borderRadius: 10,
+    height: 4,
+  },
+  addToCartWrapper: {
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    paddingTop: 5,
     width: '100%',
+    alignSelf: 'center',
     position: 'absolute',
-    bottom: 0,
+    bottom: 1,
+  },
+  addCartBtnStyle: {
+    width: '70%',
+    borderRadius: 25,
+    paddingVertical: 15,
+    alignSelf: 'center',
   },
 });
 export default SingleProductScreen;

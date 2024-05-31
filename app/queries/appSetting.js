@@ -31,6 +31,7 @@ const GET_APP_SETTING = gql`
           }
           notification_recipients
           low_stock_threshold
+          left_quantity
           stock_display_format
         }
       }

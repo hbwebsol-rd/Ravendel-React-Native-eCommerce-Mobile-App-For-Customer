@@ -103,7 +103,7 @@ const Textinputs = ({
               fonts={FontStyle.fontRegular}
               color={'#156ABF'}
               xtrasmall
-              lineThrough>
+              underLine>
               {sideheading}
             </AText>
           </TouchableWithoutFeedback>

@@ -11,7 +11,7 @@ const MyComponent = ({ navigation }) => {
       <TouchableOpacity
         onPress={() => navigation.navigate(NavigationConstants.HOME_SCREEN)}
         style={{ position: 'absolute', zIndex: 5, bottom: 20 }}>
-        <AText color={Colors.blue} lineThrough>
+        <AText color={Colors.blue} underLine>
           Return to Dashboard
         </AText>
       </TouchableOpacity>

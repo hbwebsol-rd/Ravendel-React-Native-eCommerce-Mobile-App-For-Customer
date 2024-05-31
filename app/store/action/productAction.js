@@ -7,6 +7,7 @@ import {
   GET_RELATED_PRODUCTS_QUERY,
   GET_FILTEREDPRODUCTS_WITH_PAGINATION,
   GET_SEARCH_PRODUCTS,
+  GET_ADDITIONAL_PRODUCTS_QUERY,
 } from '../../queries/productQuery';
 import { isEmpty } from '../../utils/helper';
 import { mutation, query } from '../../utils/service';
@@ -184,13 +185,12 @@ export const catProductSearchAction =
 
 export const catRecentProductAction = (recentPayload) => async (dispatch) => {
   try {
-    const response = await query(GET_RELATED_PRODUCTS_QUERY, recentPayload);
-    console.log(response, 'Similar Products Data');
+    const response = await query(GET_ADDITIONAL_PRODUCTS_QUERY, recentPayload);
 
-    if (!isEmpty(_.get(response, 'data.relatedProducts'))) {
+    if (!isEmpty(_.get(response, 'data.additionalDetails'))) {
       return dispatch({
         type: RELATED_CAT_PRODUCTS,
-        payload: _.get(response, 'data.relatedProducts', []),
+        payload: _.get(response, 'data.additionalDetails', []),
       });
     } else {
       dispatch({ type: PRODUCT_FAIL });
@@ -215,7 +215,7 @@ export const productReviewsAction = (id) => async (dispatch) => {
     if (isEmpty(_.get(response, 'data.productwise_Review'))) {
       return dispatch({
         type: PRODUCT_REVIEWS,
-        payload: _.get(response, 'data.productwisereview.data', []),
+        payload: _.get(response, 'data.productwisereview.reviews', []),
       });
     }
   } catch (error) {

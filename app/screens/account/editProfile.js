@@ -19,6 +19,7 @@ import { editProfileValidationSchema } from '../checkout/validationSchema';
 import { APP_SECONDARY_COLOR, FontStyle, GREYTEXT } from '../../utils/config';
 import AIcon from 'react-native-vector-icons/AntDesign';
 import Colors from '../../constants/Colors';
+import { TextInput } from 'react-native-paper';
 
 const EditProfileScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -95,7 +96,12 @@ const EditProfileScreen = ({ navigation }) => {
           )}
         </View>
         <View style={styles.container}>
-          <TextInputArea
+          <TextInput
+            mode={'outlined'}
+            label={'First Name'}
+            outlineColor="#E2E9E1"
+            selectionColor="#E2E9E1"
+            style={styles.textInputStyle}
             placeholder="First Name"
             value={formik.values.first_name}
             onChangeText={formik.handleChange('first_name')}
@@ -106,7 +112,12 @@ const EditProfileScreen = ({ navigation }) => {
             </AText>
           )}
 
-          <TextInputArea
+          <TextInput
+            mode={'outlined'}
+            label={'Last Name'}
+            outlineColor="#E2E9E1"
+            selectionColor="#E2E9E1"
+            style={styles.textInputStyle}
             placeholder="Last Name"
             value={formik.values.last_name}
             onChangeText={formik.handleChange('last_name')}
@@ -118,7 +129,12 @@ const EditProfileScreen = ({ navigation }) => {
             </AText>
           )}
 
-          <TextInputArea
+          <TextInput
+            mode={'outlined'}
+            label={'Email'}
+            outlineColor="#E2E9E1"
+            selectionColor="#E2E9E1"
+            style={styles.textInputStyle}
             placeholder="Email"
             value={formik.values.email}
             keyboardType={'email-address'}
@@ -131,7 +147,12 @@ const EditProfileScreen = ({ navigation }) => {
             </AText>
           )}
 
-          <TextInputArea
+          <TextInput
+            mode={'outlined'}
+            label={'Mobile Number'}
+            outlineColor="#E2E9E1"
+            selectionColor="#E2E9E1"
+            style={styles.textInputStyle}
             placeholder="Phone no."
             value={formik.values.phone}
             keyboardType={'numeric'}
@@ -143,96 +164,19 @@ const EditProfileScreen = ({ navigation }) => {
               {formik.errors.phone}{' '}
             </AText>
           )}
-
-          <AButton
-            mt="60px"
-            round
-            onPress={formik.handleSubmit}
-            title="Save Changes"
-          />
+          <View style={{ width: '70%',justifyContent:'center',alignItems:'center' }}>
+            <AButton
+              mt="60px"
+              round
+              onPress={formik.handleSubmit}
+              title="Save Changes"
+            />
+          </View>
         </View>
       </View>
     </>
   );
 };
-const TextInputArea = styled.TextInput`
-  font-size:12;
-  border-color: gray;
-  border-bottom-width: 1px;
-  border-bottom-color: ${APP_SECONDARY_COLOR};
-  //   background: #e7e7e7;
-  color:${GREYTEXT}
-  width: 100%;
-  margin-bottom: 10px;
-  border-radius: 5px;
-  align-self: center;
-  padding: 9px;
-`;
-const ProfileImage = styled.Image`
-  width: 80px;
-  height: 60px;
-  resize-mode: contain;
-`;
-const ImageWrapper = styled.View`
-    flex-direction:row
-    align-self:center;
-    justify-content: space-evenly;
-    align-items: center;
-    margin-bottom:25px;
-`;
-const ImageButton = styled.TouchableOpacity`
-  align-self: center;
-  justify-content: center;
-  align-items: center;
-`;
-const EditButton = styled.TouchableOpacity`
-  position: absolute;
-  top: 30px;
-  right: -7px;
-`;
-
-const ItemWrapper = styled.View`
-  border-radius: 10;
-  padding-horizontal: 40px;
-  padding-bottom: 30px;
-  margin-horizontal: 30px;
-  margin-top: 120px;
-  //   height: 50%;
-  justify-content: center;
-  width: 90%;
-  align-self: center;
-  background-color: white;
-`;
-
-const UpperCurve = styled.View`
-  height: 180px;
-  width: 100%;
-  background: #312f2d;
-  border-bottom-left-radius: 30px;
-  border-bottom-right-radius: 30px;
-  align-self: center;
-`;
-const ProfileView = styled.View`
-    height:180px;
-    flex-direction:row;
-    width:85%;
-    align-items: center;
-    justify-content:center;
-    background:#f7f7f7;
-    border-radius:10px;
-    position:absolute;
-    top:100px;
-    z-index:1;
-    align-self:center;
-    shadow-color: #000;
-    shadow-offset: {
-        width: 0;
-        height: 2;
-    },
-    shadow-opacity: 0.25px;
-    shadow-radius: 3.84px;
-    elevation: 5;
- `;
 const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
@@ -252,11 +196,11 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   container: {
-    elevation: 8,
-    borderRadius: 10,
-    paddingHorizontal: 40,
+    // elevation: 8,
+    // borderRadius: 10,
+    // paddingHorizontal: 40,
     paddingBottom: 30,
-    marginHorizontal: 30,
+    marginHorizontal: 15,
     marginTop: 25,
     paddingTop: 30,
     //   height: 50%,
@@ -264,6 +208,13 @@ const styles = StyleSheet.create({
     width: '90%',
     alignSelf: 'center',
     backgroundColor: 'white',
+  },
+  textInputStyle: {
+    fontSize: 15,
+    height: 45,
+    textAlignVertical: 'top',
+    marginTop: 10,
+    width: '100%',
   },
 });
 export default EditProfileScreen;

@@ -34,6 +34,8 @@ const initialState = {
   },
   allSections: [],
   manage_stock: false,
+  stock_display_format:'',
+  stock_left_quantity:0,
 };
 
 export default (state = initialState, action) => {
@@ -49,6 +51,9 @@ export default (state = initialState, action) => {
         currencyOptions: action.payload.store.currency_options,
         currencySymbol: action.payload.currencySymbol,
         manage_stock: action.payload.store.inventory.manage_stock,
+        stock_display_format:
+          action.payload.store.inventory.stock_display_format,
+        stock_left_quantity: action.payload.store.inventory.left_quantity,
         paymentSetting: action.payload.payment,
       };
     case GET_FEATURE_PRODUCT:

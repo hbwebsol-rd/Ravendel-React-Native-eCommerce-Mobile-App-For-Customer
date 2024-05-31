@@ -18,6 +18,7 @@ import Colors from '../../constants/Colors';
 import { getSubcategories } from '../../store/action/productAction';
 import { query } from '../../utils/service';
 import { GET_FILTEREDPRODUCTS_WITH_PAGINATION } from '../../queries/productQuery';
+import { APP_SECONDARY_COLOR } from '../../utils/config';
 
 const CategoriesScreen = ({ navigation }) => {
   const mainLoading = useSelector((state) => state.products.loading);
@@ -171,7 +172,10 @@ const CategoriesScreen = ({ navigation }) => {
         <Header navigation={navigation} title="Categories" />
         <ScrollView
           showsVerticalScrollIndicator={false}
-          style={styles.categoriesMainViewStyle}>
+          style={[
+            styles.categoriesMainViewStyle,
+            { backgroundColor: APP_SECONDARY_COLOR },
+          ]}>
           {!isEmpty(allCategoriesWithChildData) &&
           allCategoriesWithChildData.length > 0 ? (
             menuListing(allCategoriesWithChildData, 'mainCategory')
@@ -259,7 +263,6 @@ const styles = StyleSheet.create({
   categoriesMainViewStyle: {
     width: '10%',
     flexDirection: 'column',
-    backgroundColor: '#E7F5F4',
     elevation: 5,
     shadowColor: '#000',
     marginTop: 50,
