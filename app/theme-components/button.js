@@ -43,7 +43,7 @@ const ButtonStyle = ({ ...props }) => {
   fontprops.xtrasmall = props.xtrasmall;
   fontprops.minor = props.minor;
   return (
-    <AButton {...props}>
+    <AButton activeOpacity={props.activeopac ?? 0.7} {...props}>
       <View
         style={{
           flexDirection: 'row',

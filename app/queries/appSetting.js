@@ -5,13 +5,6 @@ const GET_APP_SETTING = gql`
     getSettings {
       seo {
         meta_title
-        meta_tag
-        meta_description
-      }
-      imageStorage {
-        status
-        s3_id
-        s3_key
       }
       store {
         currency_options {
@@ -22,14 +15,13 @@ const GET_APP_SETTING = gql`
           number_of_decimals
         }
         store_address {
+          addressLine1
+          addressLine2
           city
           country
           state
           zip
-        }
-        measurements {
-          weight_unit
-          dimensions_unit
+          hour
         }
         inventory {
           manage_stock
@@ -39,23 +31,20 @@ const GET_APP_SETTING = gql`
           }
           notification_recipients
           low_stock_threshold
-          out_of_stock_threshold
-          out_of_stock_visibility
+          left_quantity
           stock_display_format
         }
       }
-      paymnet {
+      payment {
         cash_on_delivery {
           enable
           title
           description
-          instructions
         }
         bank_transfer {
           enable
           title
           description
-          instructions
           account_details {
             account_name
             account_number
@@ -69,62 +58,43 @@ const GET_APP_SETTING = gql`
           enable
           title
           description
-          inline_credit_card_form
-          statement_descriptor
-          capture
           test_mode
-          publishable_key
-          secret_key
-          webhook_key
         }
         paypal {
           enable
           title
           description
-          paypal_email
-          ipn_email_notification
-          receiver_email
-          paypal_identity_token
-          invoice_prefix
           test_mode
-          api_username
-          api_password
-          api_signature
+          sandbox_secret_key
+          live_secret_key
+          sandbox_client_id
+          live_client_id
+        }
+        razorpay {
+          enable
+          title
+          description
+          test_mode
+          sandbox_secret_key
+          live_secret_key
+          sandbox_client_id
+          live_client_id
         }
       }
+      imageStorage {
+        status
+        s3_id
+        s3_key
+      }
       appearance {
-        home {
-          slider {
-            image
-            link
-            open_in_tab
-          }
-          add_section_in_home {
-            feature_product
-            recently_added_products
-            most_viewed_products
-            recently_bought_products
-            product_recommendation
-            products_on_sales
-            product_from_specific_categories
-          }
-          add_section_web {
-            label
-            name
-            visible
-            category
-          }
-        }
         theme {
           primary_color
+          playstore
+          appstore
           logo
         }
+
         mobile {
-          slider {
-            image
-            link
-            open_in_tab
-          }
           mobile_section {
             label
             section_img
@@ -132,10 +102,13 @@ const GET_APP_SETTING = gql`
             url
             category
           }
+          slider {
+            image
+            link
+            open_in_tab
+          }
         }
       }
-      createdAt
-      updatedAt
     }
   }
 `;

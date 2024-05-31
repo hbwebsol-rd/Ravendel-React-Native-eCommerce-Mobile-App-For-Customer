@@ -24,5 +24,14 @@ const Styles = StyleSheet.create({
     marginBottom: 5,
     borderRadius: 5,
   },
+  iosBox: {
+    borderColor: 'black',
+    borderWidth: 1,
+    width: 22,
+    height: 22,
+    backgroundColor: 'transparent',
+    position: 'absolute',
+    left: 7,
+  },
 });
 export default Styles;

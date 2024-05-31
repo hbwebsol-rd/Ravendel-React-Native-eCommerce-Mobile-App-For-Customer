@@ -47,7 +47,7 @@ export const query = async (query, variables) => {
       errors.graphQLErrors.length &&
       !isEmpty(errors.graphQLErrors[0].message)
     ) {
-      console.log('pErroringddd', errors.message);
+      console.log('Error', errors.message);
       return Promise.reject(errors.graphQLErrors[0].message);
     }
     if (

@@ -15,7 +15,7 @@ if (process.env.NODE_ENV === "production") {
   baseURL = "http://localhost:8000";
 }*/
 
-export const baseUrl = 'http://192.168.1.31:8000';
+export const baseUrl = 'http://192.168.1.6:8000';
 // export const baseUrl = 'http://localhost:8000';
 // export const baseUrl = 'https://ravendel-backend.hbwebsol.com';
 
@@ -160,3 +160,7 @@ export function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 }
+
+export const wait = (timeout) => {
+  return new Promise((resolve) => setTimeout(resolve, timeout));
+};
