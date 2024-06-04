@@ -108,6 +108,7 @@ const CategoriesScreen = ({ navigation }) => {
             activeOpacity={0.9}
             style={[
               styles.CategoriesListingWrapper,
+              disp !== 'mainCategory' ? { width: '40%' } : {},
               disp === 'mainCategory' && selectedCategory === category.id
                 ? { backgroundColor: '#fff', width: '100%' }
                 : {},
@@ -132,15 +133,10 @@ const CategoriesScreen = ({ navigation }) => {
                     }
                   : { height: 70, width: 75, resizeMode: 'contain' },
               ]}
-              onError={() => handleError(index, disp)}
               source={{
-                uri:
-                  (disp === 'subCategory' &&
-                    !isEmpty(errorIndicesCategory.subCategories) &&
-                    !errorIndicesCategory.subCategories.has(index)) ||
-                  (disp === 'mainCategory' && !errorIndicesCategory.categories)
-                    ? URL + category.image
-                    : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
+                uri: !isEmpty(category.image)
+                  ? URL + category.image
+                  : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
               }}
             />
 

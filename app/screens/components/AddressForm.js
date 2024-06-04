@@ -2,7 +2,7 @@ import React, { Fragment, useState } from 'react';
 import { AText, AButton, AHeader, BackHeader } from '../../theme-components';
 import { Formik, useFormik } from 'formik';
 import styled from 'styled-components/native';
-import { Appbar, Checkbox, TextInput } from 'react-native-paper';
+import { Appbar, Checkbox, RadioButton, TextInput } from 'react-native-paper';
 import {
   KeyboardAvoidingView,
   Modal,
@@ -50,6 +50,7 @@ const AdressForm = ({
       country: values.country,
       state: values.state,
       pincode: values.pincode,
+      addressType: values.addressType,
       defaultAddress: values.defaultAddress,
     };
     addForm(FormValue);
@@ -202,6 +203,50 @@ const AdressForm = ({
                   {formik.errors.pincode}
                 </AText>
               )}
+              <View style={styles.addressTypeContainerStyle}>
+                <TouchableOpacity
+                  activeOpacity={0.5}
+                  style={styles.radioBtnStyle}
+                  onPress={() =>
+                    formik.setFieldValue(
+                      'defaultAddress',
+                      !formik.values.defaultAddress,
+                    )
+                  }>
+                  <RadioButton
+                    value="Home"
+                    status={
+                      formik.values.addressType === 'Home'
+                        ? 'checked'
+                        : 'unchecked'
+                    }
+                    onPress={() => formik.setFieldValue('addressType', 'Home')}
+                  />
+                  <Text>Home</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  activeOpacity={0.5}
+                  style={styles.radioBtnStyle}
+                  onPress={() =>
+                    formik.setFieldValue(
+                      'defaultAddress',
+                      !formik.values.defaultAddress,
+                    )
+                  }>
+                  <RadioButton
+                    value="Office"
+                    status={
+                      formik.values.addressType === 'Office'
+                        ? 'checked'
+                        : 'unchecked'
+                    }
+                    onPress={() =>
+                      formik.setFieldValue('addressType', 'Office')
+                    }
+                  />
+                  <Text>Office</Text>
+                </TouchableOpacity>
+              </View>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 {console.log(formik.values.defaultAddress, ' def add')}
                 <Checkbox
@@ -274,6 +319,17 @@ const styles = StyleSheet.create({
     marginVertical: 7,
     borderWidth: 0,
     zIndex: 1,
+  },
+  addressTypeContainerStyle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '50%',
+    marginVertical: 15,
+    justifyContent: 'space-between',
+  },
+  radioBtnStyle: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });
 const CheckoutWrapper = styled.ScrollView`

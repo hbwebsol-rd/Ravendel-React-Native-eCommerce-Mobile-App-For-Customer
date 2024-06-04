@@ -22,6 +22,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -32,11 +33,13 @@ import {
   removeCartAction,
 } from '../../store/action/cartAction';
 import { ProductPriceText } from '../components';
-import { FontStyle } from '../../utils/config';
+import { APP_SECONDARY_COLOR, FontStyle } from '../../utils/config';
 import AIcon from 'react-native-vector-icons/AntDesign';
 import Colors from '../../constants/Colors';
 import Header from '../components/Header';
 import NavigationConstants from '../../navigation/NavigationConstants';
+import { catRecentProductAction } from '../../store/action/productAction';
+import ImageSliderNew from '../home/Components.js/CustomSliderNew';
 
 const CartScreen = ({ navigation }) => {
   // States and Variables
@@ -48,7 +51,9 @@ const CartScreen = ({ navigation }) => {
   const { cartId, couponDiscount, loading } = useSelector(
     (state) => state.cart,
   );
-  const { Loading, products } = useSelector((state) => state.products);
+  const { relatedProducts, Loading, products } = useSelector(
+    (state) => state.products,
+  );
   const { currencySymbol, currencyOptions } = useSelector(
     (state) => state.settings,
   );
@@ -70,6 +75,18 @@ const CartScreen = ({ navigation }) => {
 
   const ListProducts = () => {
     setCartProduct(cartItems);
+  };
+  useEffect(() => {
+    if (!isEmpty(cartProducts)) {
+      updateRelatedProducts();
+    }
+  }, [cartProducts]);
+
+  const updateRelatedProducts = () => {
+    const payload = {
+      productId: cartProducts[0].productId,
+    };
+    dispatch(catRecentProductAction(payload));
   };
 
   const removeCartItem = async (removedItem) => {
@@ -253,7 +270,8 @@ const CartScreen = ({ navigation }) => {
             <>
               <ScrollView
                 keyboardShouldPersistTaps={'always'}
-                style={{ width: '100%' }}
+                contentContainerStyle={{ flexGrow: 1 }}
+                style={{ width: '100%', flex: 1 }}
                 showsVerticalScrollIndicator={false}>
                 {cartProducts.map((product, index) => (
                   <TouchableOpacity
@@ -270,6 +288,7 @@ const CartScreen = ({ navigation }) => {
                       );
                     }}>
                     <ItemImage
+                      style={{ width: 90, height: 90 }}
                       source={{
                         uri: !isEmpty(product.productImage)
                           ? URL + product.productImage
@@ -277,80 +296,52 @@ const CartScreen = ({ navigation }) => {
                       }}
                     />
                     <ItemDescription>
-                      <View style={{ width: '100%' }}>
-                        <AText nol={1} fonts={FontStyle.semiBold} large heavy>
-                          {product.productTitle.length > 20
-                            ? product.productTitle.substring(0, 20) + '...'
-                            : product.productTitle}
+                      <View style={{ width: '97%', alignSelf: 'flex-start' }}>
+                        <AText nol={2} fonts={FontStyle.semiBold} medium heavy>
+                          {product.productTitle}
                         </AText>
-                        <AText
-                          fonts={FontStyle.semiBold}
-                          medium
-                          color={Colors.blackColor}>
-                          {formatCurrency(
-                            product.productPrice,
-                            currencyOptions,
-                            currencySymbol,
-                          )}
-                          <Text
-                            style={{
-                              marginLeft: 15,
-                              fontSize: 12,
-                              color: 'gray',
-                              textDecorationLine: 'line-through',
-                            }}>
-                            {' '}
-                            {formatCurrency(
-                              product.mrpAmount,
-                              currencyOptions,
-                              currencySymbol,
-                            )}
-                          </Text>
-                          <Text
-                            style={{
-                              marginLeft: 15,
-                              fontSize: 12,
-                              color: 'red',
-                            }}>
-                            {' ' + product.discountPercentage}
-                            {'%off'}
-                          </Text>
-                        </AText>
-                        <PriceQtyWrapper
-                          style={
-                            {
-                              // width: '35%',
-                              // flexWrap: 'wrap',
-                            }
-                          }>
-                          <QtyWrapper>
-                            <QtyButton
-                              onPress={() => {
-                                product.qty === 1
-                                  ? removeCartItem(product)
-                                  : decreaseItemQty(product);
-                              }}>
-                              <AText color="#fff">
-                                <AIcon
-                                  color={'#72787e'}
-                                  name="minussquare"
-                                  size={16}
-                                />
-                              </AText>
-                            </QtyButton>
-                            <AText center medium bold ml="10px" mr="10px">
-                              {product.qty}
+                        <View style={styles.contentCardStyle}>
+                          <ProductPriceText
+                            fontsizesmall={true}
+                            fontColor={Colors.blackColor}
+                            Pricing={{
+                              sellprice: product.productPrice,
+                              price: product.mrpAmount,
+                            }}
+                          />
+
+                          <View style={styles.qtyContainerStyle}>
+                            <AText ml={'5px'} center small bold>
+                              Qty: {product.qty}
                             </AText>
-                            <QtyButton onPress={() => increaseItemQty(product)}>
-                              <AText color="#fff">
+                            <View style={styles.arrowQtyBtnContainer}>
+                              <TouchableOpacity
+                                style={styles.upperArrowQtyBtnStyle}
+                                onPress={() => {
+                                  product.qty === 1
+                                    ? removeCartItem(product)
+                                    : decreaseItemQty(product);
+                                }}>
                                 <AIcon
                                   color={'#72787e'}
-                                  name="plussquare"
-                                  size={16}
+                                  name="caretup"
+                                  size={10}
                                 />
-                              </AText>
-                            </QtyButton>
-                          </QtyWrapper>
+                              </TouchableOpacity>
+
+                              <TouchableOpacity
+                                style={styles.downArrowQtyBtnStyle}
+                                onPress={() => increaseItemQty(product)}>
+                                <AText color="#fff">
+                                  <AIcon
+                                    color={'#72787e'}
+                                    name="caretdown"
+                                    size={10}
+                                  />
+                                </AText>
+                              </TouchableOpacity>
+                            </View>
+                          </View>
                           {product.productQuantity <= 5 ? (
                             <Text
                               style={{
@@ -361,18 +352,7 @@ const CartScreen = ({ navigation }) => {
                               {'Only ' + product.productQuantity + ' Left'}
                             </Text>
                           ) : null}
-
-                          {/* <ProductPriceText
-                            fontsizesmall={true}
-                            Pricing={{
-                              sellprice: product.productPrice,
-                              price: product.mrp,
-                            }}
-                            DontshowPercentage={true}
-                            showInMulipleLine={'column-reverse'}
-                            fontColor={'#DB3022'}
-                          /> */}
-                        </PriceQtyWrapper>
+                        </View>
                       </View>
                     </ItemDescription>
                     <RemoveItem
@@ -385,14 +365,7 @@ const CartScreen = ({ navigation }) => {
                   </TouchableOpacity>
                 ))}
                 {cartProducts && cartProducts.length > 0 ? (
-                  <View
-                    style={{
-                      marginTop: 10,
-                      marginBottom: 26,
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      marginHorizontal: 8,
-                    }}>
+                  <View style={styles.itemsInStyle}>
                     <AText color="gray" small fonts={FontStyle.semiBold}>
                       {cartProducts.length}{' '}
                       {cartProducts.length > 1 ? 'Items' : 'Item'} in your cart
@@ -408,9 +381,22 @@ const CartScreen = ({ navigation }) => {
                     </TouchableOpacity>
                   </View>
                 ) : null}
-                <View style={{ position: 'relative' }}>
-                  <AInputFeild
+
+                {!isEmpty(relatedProducts) && !isEmpty(relatedProducts[1])&&
+                !isEmpty(relatedProducts[1].products) ? (
+                  <ImageSliderNew
+                    title={'People who bought this also bought'}
+                    dataItems={relatedProducts[1].products}
+                    navigatetonext={(item) => {
+                      // setProductIds(item._id);
+                      // setProductUrls(item.url);
+                    }}
+                  />
+                ) : null}
+                {/* <View style={styles.couponConatinerStyle}>
+                  <TextInput
                     type="text"
+                    style={styles.coupanTextInputstyle}
                     value={couponCode}
                     onChangeText={(text) => setCouponCode(text)}
                     placeholder="Enter coupon code"
@@ -428,7 +414,7 @@ const CartScreen = ({ navigation }) => {
                     />
                   </View>
                 </View>
-                {couponApplied && <AText>Coupon Applied successfully</AText>}
+                {couponApplied && <AText>Coupon Applied successfully</AText>} */}
 
                 <View
                   style={{ width: '100%', marginBottom: 25, marginTop: 15 }}>
@@ -442,10 +428,6 @@ const CartScreen = ({ navigation }) => {
                       )}
                     </AText>
                   </View>
-                  {/* <View style={styles.summary}>
-                    <AText fonts={FontStyle.semiBold}>Items</AText>
-                    <AText color={Colors.grayColor}>${cartSummary?.cartTotal}</AText>
-                  </View> */}
                   <View style={styles.summary}>
                     <AText fonts={FontStyle.semiBold}>Discount On MRP</AText>
                     <AText color={Colors.green}>
@@ -508,7 +490,7 @@ const CartScreen = ({ navigation }) => {
                       marginTop: 5,
                       marginBottom: 25,
                     }}>
-                    <AText fonts={FontStyle.semiBold}>Grand Total</AText>
+                    <AText fonts={FontStyle.semiBold}>Total Amount</AText>
                     <AText color="gray">
                       {formatCurrency(
                         cartSummary?.grandTotal,
@@ -533,34 +515,38 @@ const CartScreen = ({ navigation }) => {
               />
             </EmptyWrapper>
           )}
-          {cartProducts && cartProducts.length ? (
-            <>
-              <CheckoutWrapper>
-                <AButton
-                  title="Proceed to Checkout"
-                  round
-                  mb="30px"
-                  onPress={() => {
-                    isLoggin
-                      ? navigation.navigate(
-                          NavigationConstants.SHIPPING_SCREEN,
-                          {
-                            screen: 'Shipping',
-                            cartAmount: cartSummary?.grandTotal,
-                            cartProducts: cartProducts,
-                            couponCode: couponCode,
-                          },
-                        )
-                      : navigation.navigate(
-                          NavigationConstants.LOGIN_SIGNUP_SCREEN,
-                        );
-                  }}
-                />
-              </CheckoutWrapper>
-            </>
-          ) : null}
         </>
       </View>
+
+      {cartProducts && cartProducts.length ? (
+        <View style={[styles.checkoutViewStyle]}>
+          <View style={{}}>
+            <AText fonts={FontStyle.semiBold}>Total Amount</AText>
+            <AText color="gray">
+              {formatCurrency(
+                cartSummary?.grandTotal,
+                currencyOptions,
+                currencySymbol,
+              )}
+            </AText>
+          </View>
+          <AButton
+            title="CHECKOUT"
+            round
+            width={'75px'}
+            onPress={() => {
+              isLoggin
+                ? navigation.navigate(NavigationConstants.SHIPPING_SCREEN, {
+                    screen: 'Shipping',
+                    cartAmount: cartSummary?.grandTotal,
+                    cartProducts: cartProducts,
+                    couponCode: couponCode,
+                  })
+                : navigation.navigate(NavigationConstants.LOGIN_SIGNUP_SCREEN);
+            }}
+          />
+        </View>
+      ) : null}
 
       {/*---------- Add coupon Modal---------- */}
       <Modal
@@ -591,13 +577,13 @@ const CartScreen = ({ navigation }) => {
             {/* </ModalClose> */}
           </ModalHeader>
           <ModalBody>
-            <AInputFeild
+            {/* <AInputFeild
               type="text"
               value={couponCode}
               onChangeText={(text) => setCouponCode(text)}
               placeholder="Please enter a valid coupon code"
             />
-            {couponApplied && <AText>Coupan Applied successfully</AText>}
+            {couponApplied && <AText>Coupan Applied successfully</AText>} */}
 
             <AButton onPress={() => ApplyCoupon()} round block title="Submit" />
           </ModalBody>
@@ -632,26 +618,6 @@ const ModalBody = styled.View`
   height: 100%;
   position: relative;
 `;
-const AInputFeild = styled.TextInput`
-  border-color: gray;
-  border-bottom-width: 1px;
-  width: 100%;
-  margin-bottom: 10px;
-  border-radius: 5px;
-  padding: 10px;
-`;
-
-const CheckoutWrapper = styled.View`
-  position: absolute;
-  bottom: 0;
-  left: 30;
-  right: 0;
-  background-color: transparent;
-  padding-top: 5px;
-  width: 100%;
-  justify-content: center;
-  align-items: center;
-`;
 const EmptyWrapper = styled.View`
   flex: 1;
   justify-content: center;
@@ -683,39 +649,14 @@ const ItemDescription = styled.View`
   justify-content: space-between;
 `;
 
-const PriceQtyWrapper = styled.View`
-  flex-direction: row;
-  // justify-content: flex-end;
-  margin-top: 5px;
-  align-items: center;
-`;
-const QtyWrapper = styled.View`
-  height: 30px;
-  overflown: hidden;
-  // width: 110px;
-  // margin: 10px 0px;
-  background: white;
-  flex-direction: row;
-  justify-content: flex-end;
-  align-items: center;
-  // border-width: 0.5px;
-  margin-right: 5px;
-`;
-const QtyButton = styled.TouchableOpacity`
-  background: white;
-  height: 100%;
-  // width: 25px;
-  border-radius: 5px;
-  justify-content: center;
-  align-items: center;
-`;
+
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 40,
     paddingBottom: 20,
-    paddingHorizontal: 30,
+    paddingHorizontal: 5,
     backgroundColor: Colors.whiteColor,
   },
   header: {
@@ -729,8 +670,46 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     zIndex: 10,
   },
+  arrowQtyBtnContainer: {
+    paddingHorizontal: 5,
+    alignSelf: 'center',
+    justifyContent: 'space-around',
+  },
+  upperArrowQtyBtnStyle: {
+    paddingHorizontal: 5,
+    flexWrap: 'wrap',
+    paddingTop: 5,
+  },
+  downArrowQtyBtnStyle: {
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    paddingBottom: 5,
+    paddingHorizontal: 5,
+  },
+  contentCardStyle: {
+    width: '85%',
+    marginTop: 7,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  qtyContainerStyle: {
+    overflow: 'hidden',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#E9E9E9',
+    borderRadius: 7,
+  },
+  itemsInStyle: {
+    marginTop: 10,
+    marginBottom: 26,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginHorizontal: 8,
+  },
   productitem: {
-    elevation: 5,
+    // elevation: 5,
     flexDirection: 'row',
     justifyContent: 'space-between',
     height: 105,
@@ -741,19 +720,44 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     position: 'relative',
     borderWidth: 1,
-    borderColor: '#f7f7f7',
+    borderColor: '#D4D4D4',
     marginHorizontal: 2,
+    paddingHorizontal: 7,
+    paddingVertical: 5,
   },
   summary: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 5,
   },
-  couponBtn: {
-    width: '30%',
-    alignSelf: 'flex-end',
+  couponConatinerStyle: {
+    width: '90%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderColor: 'gray',
+  },
+  coupanTextInputstyle: {
+    width: '100%',
+    marginBottom: 10,
+    borderRadius: 5,
+    width: '70%',
+    padding: 10,
+  },
+  checkoutViewStyle: {
     position: 'absolute',
-    bottom: 18,
+    flexDirection: 'row',
+    bottom: 0,
+    elevation: 5,
+    backgroundColor: 'rgba(255,255,255, 1)',
+    paddingVertical: 10,
+    width: ' 100%',
+    alignSelf: 'center',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 15,
   },
 });
 export default CartScreen;

@@ -5,6 +5,7 @@ import {
   ADD_ORDER,
   ADD_TOCART,
   CHECK_ZIPCODE,
+  SHIPPING_METHODS,
   UPDATE_PAYMENT_STATUS,
 } from '../../queries/orderQuery';
 import { getValue, isEmpty } from '../../utils/helper';
@@ -77,6 +78,26 @@ export const checkPincodeValid =
       dispatch({ type: CART_FAIL });
     }
   };
+export const getShippingMethods = () => async (dispatch) => {
+  dispatch({ type: CHECKOUT_LOADING });
+  try {
+    const response = await query(SHIPPING_METHODS);
+    if (
+      !isEmpty(response) &&
+      _.get(response, 'data.shipping.message.success')
+    ) {
+      dispatch({
+        type: 'SHIPPING_LIST',
+        payload: _.get(response, 'data.shipping.data.shippingClass', []),
+      });
+    } else {
+      dispatch({ type: CHECKOUT_LOADING_STOP });
+    }
+  } catch (error) {
+    console.log('error', error);
+    dispatch({ type: CART_FAIL });
+  }
+};
 
 export const paymentStatus =
   (paymentStatusData, navigation) => async (dispatch) => {

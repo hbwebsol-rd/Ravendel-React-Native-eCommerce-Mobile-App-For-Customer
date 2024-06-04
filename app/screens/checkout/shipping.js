@@ -18,10 +18,18 @@ import {
 } from '../../store/action';
 import { AdressForm } from '../components';
 import AIcon from 'react-native-vector-icons/AntDesign';
-import { APP_PRIMARY_COLOR, FontStyle, GREYTEXT } from '../../utils/config';
+import MIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {
+  APP_PRIMARY_COLOR,
+  APP_SECONDARY_COLOR,
+  FontStyle,
+  GREYTEXT,
+} from '../../utils/config';
 import Colors from '../../constants/Colors';
 import PropTypes from 'prop-types';
 import { checkPincodeValid } from '../../store/action/checkoutAction';
+import { Checkbox } from 'react-native-paper';
+
 
 const CheckoutScreen = ({ navigation, route }) => {
   const dispatch = useDispatch();
@@ -30,6 +38,7 @@ const CheckoutScreen = ({ navigation, route }) => {
   const { userDetails, loading } = useSelector((state) => state.customer);
   const [addressBook, setAddressBook] = useState();
   const [addressForm, setAddressForm] = useState(false);
+  const [shipingAdress, setShippingAdress] = useState(true);
   const { couponDiscount } = useSelector((state) => state.cart);
   const [addressDefault, setaddressDefault] = useState(0);
   const [initialFormValues, setInitialFormValues] = useState({
@@ -44,6 +53,7 @@ const CheckoutScreen = ({ navigation, route }) => {
     pincode: '',
     _id: '',
     defaultAddress: true,
+    addressType: '',
   });
   var cartAmount = route?.params?.cartAmount;
   var cartProducts = route?.params?.cartProducts;
@@ -109,6 +119,7 @@ const CheckoutScreen = ({ navigation, route }) => {
         state: values.state,
         pincode: values.pincode,
         defaultAddress: values.defaultAddress,
+        addressType: values.addressType,
       };
       setAddressForm(false);
       dispatch(addAddressAction(payload));
@@ -127,6 +138,7 @@ const CheckoutScreen = ({ navigation, route }) => {
         state: values.state,
         pincode: values.pincode,
         defaultAddress: values.defaultAddress,
+        addressType: values.addressType,
       };
       setInitialFormValues({
         firstname: '',
@@ -139,8 +151,8 @@ const CheckoutScreen = ({ navigation, route }) => {
         country: '',
         pincode: '',
         defaultAddress: true,
+        addressType: '',
       });
-      console.log(payload, 'payying');
       setAddressForm(false);
       dispatch(updateAddressAction(payload));
     }
@@ -159,6 +171,7 @@ const CheckoutScreen = ({ navigation, route }) => {
       pincode: values.pincode,
       _id: values._id,
       defaultAddress: values.defaultAddress ?? false,
+      addressType: values.addressType ?? '',
     });
     setAddressForm(true);
   };
@@ -197,97 +210,93 @@ const CheckoutScreen = ({ navigation, route }) => {
         <>
           <View style={styles.container}>
             <BackHeader navigation={navigation} name="Checkout" />
-            <View style={styles.container2}>
-              <View style={styles.step}>
-                <View style={styles.circle} />
-                <View style={styles.activeDot} />
-                <View style={styles.line} />
-                <View
-                  style={{
-                    ...styles.label,
-                    alignItems: 'flex-start',
-                    marginLeft: -15,
-                  }}>
-                  <AText fonts={FontStyle.semiBold} color="black">
-                    Address
-                  </AText>
-                </View>
-              </View>
-              <View style={styles.step}>
-                <View style={styles.line} />
-                <View style={styles.circle} />
-                <View style={styles.line} />
-                <View style={styles.label}>
-                  <AText fonts={FontStyle.semiBold} color="black">
-                    Shipping
-                  </AText>
-                </View>
-              </View>
-              <View style={styles.step}>
-                <View style={styles.line} />
 
-                <View style={styles.circle} />
-                <View
-                  style={{
-                    ...styles.label,
-                    alignItems: 'flex-end',
-                    marginLeft: 24,
-                  }}>
-                  <AText fonts={FontStyle.semiBold} color="black">
-                    Order Detail
-                  </AText>
-                </View>
-              </View>
-            </View>
             <ScrollView
-              style={{ marginHorizontal: 30, flex: 1 }}
+              style={{ marginHorizontal: 20, flex: 1 }}
               showsVerticalScrollIndicator={false}
               nestedScrollEnabled={true}
               scrollEnabled={scrollenable}>
+              <AText large fonts={FontStyle.semiBold} color="black">
+                Billing Address
+              </AText>
               <AddressWrapper>
                 {userDetails.addressBook.map((item, index) => (
-                  <View style={styles.addresscard}>
-                    <RadioButtonWrapper>
-                      <AText
-                        mr="8px"
-                        color={Colors.blackColor}
-                        fonts={FontStyle.semiBold}
-                        large>
-                        {item.firstName}
-                      </AText>
-                      {item.defaultAddress ? (
-                        <AIcon
-                          name="checkcircleo"
-                          size={18}
+                  <View
+                    style={[
+                      styles.addresscard,
+                      addressDefault === item._id
+                        ? {
+                            backgroundColor: APP_SECONDARY_COLOR,
+                          }
+                        : {},
+                    ]}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setaddressDefault(item._id);
+                      }}>
+                      <MIcon
+                        name={
+                          addressDefault === item._id
+                            ? 'radiobox-marked'
+                            : 'radiobox-blank'
+                        }
+                        size={18}
+                        color={APP_PRIMARY_COLOR}
+                      />
+                    </TouchableOpacity>
+                    <View style={{ marginStart: 15, width: '85%' }}>
+                      <View style={{ flexDirection: 'row' }}>
+                        <MIcon
+                          name={
+                            item.addressType == 'Home'
+                              ? 'home-outline'
+                              : 'briefcase-outline'
+                          }
+                          size={22}
                           color={APP_PRIMARY_COLOR}
                         />
-                      ) : null}
-                    </RadioButtonWrapper>
-                    <AText color={GREYTEXT} fonts={FontStyle.semiBold}>
-                      {item.phone}
-                    </AText>
-                    <AText color={GREYTEXT}>
-                      {item.addressLine1}, {item.addressLine2}, {item.city}
-                    </AText>
-                    <AText mb="10px" color={GREYTEXT}>
-                      {item.state}, {item.pincode}
-                    </AText>
+                        <AText
+                          ml="5px"
+                          color={Colors.blackColor}
+                          fonts={FontStyle.semiBold}
+                          medium>
+                          {item.addressType}
+                        </AText>
+                      </View>
 
-                    <AIcon
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          width: '80%',
+                          justifyContent: 'space-between',
+                        }}>
+                        <AText color={GREYTEXT} fonts={FontStyle.semiBold}>
+                          {item.firstName}
+                        </AText>
+                        <AText color={GREYTEXT} fonts={FontStyle.semiBold}>
+                          {item.phone}
+                        </AText>
+                      </View>
+                      <AText mt={'10px'} color={GREYTEXT}>
+                        {item.addressLine1}, {item.addressLine2}, {item.city}{' '}
+                        {item.state}, {item.pincode}
+                      </AText>
+                    </View>
+                    <TouchableOpacity
+                      style={styles.editBtnStyle}
                       onPress={() => {
                         editFormValues(item);
-                      }}
-                      style={{ alignSelf: 'flex-end' }}
-                      name="edit"
-                      size={15}
-                      color={'grey'}
-                    />
+                      }}>
+                      <MIcon
+                        name={'pencil-outline'}
+                        size={15}
+                        color={APP_PRIMARY_COLOR}
+                      />
+                    </TouchableOpacity>
                   </View>
                 ))}
               </AddressWrapper>
-              <AText large fonts={FontStyle.semiBold} color="black">
-                Select Delivery Address
-              </AText>
+
               <TouchableOpacity
                 activeOpacity={0.8}
                 onPress={() => {
@@ -308,6 +317,24 @@ const CheckoutScreen = ({ navigation, route }) => {
                 <AText ml="20px" color="black" fonts={FontStyle.semiBold}>
                   Add a new address
                 </AText>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.5}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginStart: 5,
+                }}
+                onPress={() => {
+                  setShippingAdress(!shipingAdress);
+                }}>
+                <Checkbox
+                  status={shipingAdress ? 'checked' : 'unchecked'}
+                  color={APP_PRIMARY_COLOR}
+                  onPress={() => setShippingAdress(!shipingAdress)}
+                />
+                <Text>Same as Billing address</Text>
               </TouchableOpacity>
               <AButton
                 ml="50px"
@@ -339,50 +366,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.whiteColor,
     // paddingHorizontal: 30,
   },
-  container2: {
-    marginHorizontal: 30,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingBottom: 30,
-    marginTop: 30,
-  },
-  step: {
-    position: 'relative',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    width: '33%',
-  },
 
-  circle: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: APP_PRIMARY_COLOR,
-  },
-  line: {
-    flex: 1,
-    height: 1,
-    backgroundColor: GREYTEXT,
-    marginHorizontal: 5,
-  },
-  label: {
-    fontFamily: FontStyle.semiBold,
-    width: '100%',
-    alignItems: 'center',
-  },
-  textinputstyle: {
-    marginTop: 5,
-    marginBottom: 5,
-  },
-  dropDownStyle: {
-    backgroundColor: '#E7E7E7',
-    marginVertical: 7,
-    borderWidth: 0,
-    zIndex: 1,
-  },
   addresscard: {
     paddingHorizontal: 20,
     paddingVertical: 9,
@@ -390,6 +374,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.whiteColor,
     borderRadius: 8,
     elevation: 3,
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
   },
   addaddresscard: {
     marginHorizontal: 2,
@@ -404,14 +390,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  activeDot: {
-    top: 5,
-    left: 5,
-    position: 'absolute',
-    width: 10,
-    height: 10,
-    borderRadius: 10,
-    backgroundColor: APP_PRIMARY_COLOR,
+  editBtnStyle: {
+    flexWrap: 'wrap',
+    width: 25,
+    height: 25,
   },
 });
 

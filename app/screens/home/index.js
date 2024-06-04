@@ -218,7 +218,12 @@ const HomeScreen = ({ navigation }) => {
     return (
       <View>
         <Image
-          style={{ width: itemWidth, height: 150, resizeMode: 'stretch' }}
+          style={{
+            width: itemWidth,
+            height: 150,
+            resizeMode: 'stretch',
+            borderRadius: 10,
+          }}
           source={{
             uri: !isEmpty(item.image)
               ? URL + item.image
@@ -268,11 +273,14 @@ const HomeScreen = ({ navigation }) => {
             ref={carouselRef}
             autoplayDelay={3000}
             // loop={true}
-            autoplay={true}
             data={homeslider}
             renderItem={renderItem}
             sliderWidth={windowWidth}
             itemWidth={itemWidth}
+            activeSlideAlignment={'start'}
+            inactiveSlideOpacity={1}
+            inactiveSlideScale={1}
+            slideStyle={{ marginHorizontal: 5, borderRadius: 10 }}
           />
         )}
         <Categories
@@ -389,5 +397,5 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
 });
-const itemWidth = windowWidth * 0.5;
+const itemWidth = windowWidth * 0.65;
 export default HomeScreen;

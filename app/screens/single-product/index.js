@@ -545,6 +545,7 @@ const SingleProductScreen = ({ navigation, route }) => {
                 </View>
                 {/* ==================simmilar product=================== */}
                 {!isEmpty(RelatedProducts) &&
+                !isEmpty(RelatedProducts[1]) &&
                 !isEmpty(RelatedProducts[1].products) ? (
                   <ImageSliderNew
                     title={'People who bought this also bought'}
@@ -556,6 +557,7 @@ const SingleProductScreen = ({ navigation, route }) => {
                   />
                 ) : null}
                 {!isEmpty(RelatedProducts) &&
+                !isEmpty(RelatedProducts[0]) &&
                 !isEmpty(RelatedProducts[0].products) ? (
                   <ImageSliderNew
                     title={'Similar Products'}

@@ -230,6 +230,23 @@ export const UPDATE_PAYMENT_STATUS = gql`
     }
   }
 `;
+export const SHIPPING_METHODS = gql`
+  query Shipping {
+    shipping {
+      data {
+        id
+        global
+        shippingClass
+        date
+        updated
+      }
+      message {
+        message
+        success
+      }
+    }
+  }
+`;
 export {
   ADD_TOCART,
   ADD_CART,
