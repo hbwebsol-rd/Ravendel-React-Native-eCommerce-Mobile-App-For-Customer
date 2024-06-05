@@ -18,6 +18,9 @@ import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import { LogBox } from 'react-native';
 import { Splash } from './app/screens';
 import AlertError from './app/theme-components/alert';
+import { updatePrimaryColor } from './app/utils/config';
+import { getValue } from './app/utils/helper';
+import Navigation from './app/navigation';
 
 // XMLHttpRequest = GLOBAL.originalXMLHttpRequest
 //   ? GLOBAL.originalXMLHttpRequest
@@ -40,13 +43,23 @@ const App = () => {
       setSplash(false);
     }, 2000);
   });
+
+  const updateColor = async () => {
+    const col = await getValue('PrimaryColor');
+    updatePrimaryColor(col);
+  };
+
+  useEffect(() => {
+    updateColor();
+  }, []);
+
   return (
     <>
       <Provider store={store}>
         <ApolloProvider client={APclient}>
           <PaperProvider theme={theme}>
             <NavigationContainer>
-              {splash ? <Splash /> : <DrawerNavigator />}
+              {splash ? <Splash /> : <Navigation />}
             </NavigationContainer>
             <AlertError />
           </PaperProvider>

@@ -24,7 +24,7 @@ import {
   ACol,
   AppLoader,
   AButton,
-  AHeader,
+  ProductCard,
 } from '../../theme-components';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -32,34 +32,35 @@ import AIcon from 'react-native-vector-icons/AntDesign';
 import GalleryImagesSlider from './galleryImages';
 import HTMLView from 'react-native-htmlview';
 import {
-  Animated,
-  Button,
-  Dimensions,
   Modal,
   StyleSheet,
   TouchableOpacity,
+  FlatList,
+  TextInput,
+  ScrollView,
 } from 'react-native';
 import StarRating from 'react-native-star-rating';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { isEmpty } from '../../utils/helper';
 import { useIsFocused } from '@react-navigation/native';
 import { ProductPriceText } from '../components';
-import { DataTable } from 'react-native-paper';
 import { View } from 'react-native-animatable';
 import moment from 'moment';
 import { reviewValidationSchema } from '../checkout/validationSchema';
 import { Formik } from 'formik';
-import { FontStyle } from '../../utils/config';
+import { APP_PRIMARY_COLOR, FontStyle } from '../../utils/config';
 import Colors from '../../constants/Colors';
-import { Image } from 'react-native';
-import { ImageBackground } from 'react-native';
-import FastImage from 'react-native-fast-image';
-import URL from '../../utils/baseurl';
+import ImageSliderNew from '../home/Components.js/CustomSliderNew';
+
 import {
   BottomSheetModal,
   BottomSheetModalProvider,
 } from '@gorhom/bottom-sheet';
-import { ScrollView, FlatList } from 'react-native-gesture-handler';
+import NavigationConstants from '../../navigation/NavigationConstants';
+import PropTypes from 'prop-types';
+import LevelWiseRating from './Components/levelWiseRating';
+import { checkPincodeValid } from '../../store/action/checkoutAction';
+
 var reviewObject = {
   title: '',
   email: '',
@@ -70,44 +71,12 @@ var reviewObject = {
   product_id: '',
 };
 
-const { height: windowHeight, width: windowWidth } = Dimensions.get('window');
-
 const SingleProductScreen = ({ navigation, route }) => {
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      headerTintColor: '#000',
-    });
-  }, [navigation]);
-  // ref
-  const bottomSheetModalRef = useRef(null);
-
-  // variables
-  const snapPoints = useMemo(() => ['26%', '42%', '100%'], []);
-
-  // callbacks
-  const handlePresentModalPress = useCallback(() => {
-    console.log('pressing', bottomSheetModalRef.current);
-    bottomSheetModalRef.current?.present();
-  }, []);
-  const handleSheetChanges = useCallback((index) => {
-    console.log('handleSheetChanges', index);
-  }, []);
-
-  useEffect(() => {
-    setTimeout(() => {
-      handlePresentModalPress();
-    }, 1000);
-  }, []);
-
-  const ProductId = route.params.productID;
-  const ProductUrl = route.params.productUrl;
-  const [ProductIds, setProductIds] = useState(ProductId);
-  const [ProductUrls, setProductUrls] = useState(ProductUrl);
-  const [review, setReview] = useState(reviewObject);
-  const SingleProduct = useSelector((state) => state.products.product);
-  const { user_token } = useSelector((state) => state.login);
+  // States and Variables
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
+  const SingleProduct = useSelector((state) => state.products.product);
+  const { user_token } = useSelector((state) => state.login);
   const { userDetails, isLoggin } = useSelector((state) => state.customer);
   const ReviewProduct = useSelector((state) => state.products.productReviews);
   const RelatedProducts = useSelector(
@@ -115,21 +84,124 @@ const SingleProductScreen = ({ navigation, route }) => {
   );
   const { manage_stock } = useSelector((state) => state.settings);
   const Loading = useSelector((state) => state.products.loading);
-  const [descriptionCollapse, setDescriptionCollapse] = useState(false);
+  const { currencyOptions, currencySymbol } = useSelector(
+    (state) => state.settings,
+  );
+  const ProductId = route.params.productID;
+  const ProductUrl = route.params.productUrl;
+  const [ProductIds, setProductIds] = useState(ProductId);
+  const [ProductUrls, setProductUrls] = useState(ProductUrl);
+  const [review, setReview] = useState(reviewObject);
   const [reviewcollapse, setReviewCollapse] = useState(false);
   const [writeReviewPop, setWriteReviewPop] = useState(false);
   const [sliderImages, setSliderImages] = useState([]);
   const cartItems = useSelector((state) => state.cart.products);
   const [itemInCart, setItemInCart] = useState(false);
-  const { cartId } = useSelector((state) => state.cart);
   const [singleProductLoading, setSingleProductLoading] = useState(true);
-  // const [scrollViewHeight, setScrollViewHeight] = useState('45%');
-  const [scrollY] = useState(new Animated.Value(0));
-  const [ScrollOffset, setScrollOffset] = useState(0);
-  // console.log(RelatedProducts, 'related Prod');
   const [cartQuantity, setCartQuantity] = useState(1);
+  const [pinCode, setPinCode] = useState('');
+  const [deliverable, setDeliverable] = useState('');
+  const snapPoints = ['40%', '62%', '100%'];
+
+  // ref
+  const bottomSheetModalRef = useRef(null);
+
+  // callbacks
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+
+  // Custom Function
+  const addReview = (val) => {
+    const reviews = {
+      title: val.title,
+      email: val.email,
+      review: val.review,
+      rating: val.rating,
+      status: val.status,
+      customerId: val.customer_id,
+      productId: val.product_id,
+    };
+    dispatch(productAddReviewAction(reviews));
+    setWriteReviewPop(!writeReviewPop);
+  };
+
+  const _storeData = async (product) => {
+    if (isLoggin) {
+      let variables = {
+        total:
+          parseFloat(SingleProduct.pricing.sellprice.toFixed(2)) * cartQuantity,
+        userId: userDetails._id,
+        productId: SingleProduct?._id,
+        qty: cartQuantity,
+        productTitle: SingleProduct?.url,
+        productImage: SingleProduct?.feature_image,
+        productPrice: parseFloat(
+          SingleProduct.pricing.sellprice.toFixed(2),
+        ).toString(),
+        variantId: '',
+        productQuantity: Number(SingleProduct.quantity),
+        attributes: SingleProduct.attribute,
+      };
+      dispatch(addToCartAction(variables));
+    } else {
+      try {
+        await AsyncStorage.setItem('cartproducts', JSON.stringify(product));
+        dispatch(checkStorageAction());
+      } catch (error) {
+        console.log('Something went Wrong!!!!');
+      }
+    }
+  };
+
+  const addToCart = async () => {
+    var hasCartProducts = [];
+    var products = [];
+    if (isLoggin) {
+      hasCartProducts = cartItems;
+    } else {
+      hasCartProducts = await AsyncStorage.getItem('cartproducts');
+      if (!isEmpty(hasCartProducts)) {
+        products = JSON.parse(hasCartProducts);
+      }
+    }
+
+    if (itemInCart) {
+      return true;
+    }
+    if (hasCartProducts !== null) {
+      setItemInCart(true);
+      products.push({
+        productId: SingleProduct._id,
+        qty: cartQuantity,
+        productTitle: SingleProduct.name,
+        productPrice: SingleProduct.pricing.sellprice,
+        attributes: SingleProduct.attribute,
+      });
+
+      _storeData(products);
+    } else {
+      setItemInCart(true);
+      _storeData([
+        {
+          productId: SingleProduct._id,
+          qty: cartQuantity,
+          productTitle: SingleProduct.name,
+          productPrice: SingleProduct.pricing.sellprice,
+          attributes: SingleProduct.attribute,
+        },
+      ]);
+    }
+  };
+
+  // Use Effect Call
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTintColor: '#000',
+    });
+  }, [navigation]);
+
   useEffect(() => {
-    // navigation.addListener('focus', () => {
     setReview({
       ...review,
       customer_id: userDetails._id,
@@ -137,12 +209,20 @@ const SingleProductScreen = ({ navigation, route }) => {
       email: userDetails.email,
     });
     setSingleProductLoading(true);
-    console.log(ProductUrl, 'pro id');
     dispatch(productAction(ProductUrls));
     dispatch(productReviewsAction(ProductIds));
+    const payload = {
+      productId: ProductIds,
+    };
+    dispatch(catRecentProductAction(payload));
     setSingleProductLoading(false);
-    // });
   }, [navigation, ProductIds]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      handlePresentModalPress();
+    }, 1000);
+  }, []);
 
   useEffect(() => {
     setSingleProductLoading(true);
@@ -171,12 +251,12 @@ const SingleProductScreen = ({ navigation, route }) => {
       setTimeout(() => {
         if (!isEmpty(cartItems) && cartItems.length > 0) {
           cartItems.map((item) => {
-            if (item.product_id === ProductIds) {
+            if (item.productId === ProductIds) {
               setItemInCart(true);
             }
           });
         }
-      }, 500);
+      }, 1000);
     } else {
       dispatch({
         type: PRODUCT_CLEAR,
@@ -186,218 +266,46 @@ const SingleProductScreen = ({ navigation, route }) => {
     setSingleProductLoading(false);
   }, [isFocused]);
 
-  const addReview = (val) => {
-    const reviews = {
-      title: val.title,
-      email: val.email,
-      review: val.review,
-      rating: val.rating,
-      status: val.status,
-      customer_id: val.customer_id,
-      product_id: val.product_id,
-    };
-    dispatch(productAddReviewAction(reviews));
-    setWriteReviewPop(!writeReviewPop);
-  };
-
-  const _storeData = async (product) => {
-    if (isLoggin) {
-      if (isEmpty(cartId)) {
-        const cartData = {
-          user_id: userDetails._id,
-          products: [
-            {
-              product_id: SingleProduct._id,
-              qty: cartQuantity,
-              product_title: SingleProduct.name,
-              product_price: parseFloat(
-                SingleProduct.pricing.sellprice.toFixed(2),
-              ),
-              product_image: SingleProduct.feature_image,
-              tax_class: SingleProduct.tax_class,
-              shipping_class: SingleProduct.shipping.shipping_class,
-            },
-          ],
-        };
-        console.log(cartId);
-        return;
-        dispatch(addCartAction(cartData));
-      } else {
-        const cartData = {
-          user_id: userDetails._id,
-          product_id: SingleProduct._id,
-          qty: cartQuantity,
-          product_title: SingleProduct.name,
-          product_price: parseFloat(SingleProduct.pricing.sellprice.toFixed(2)),
-          product_image: SingleProduct.feature_image,
-          tax_class: SingleProduct.tax_class,
-          shipping_class: SingleProduct.shipping.shipping_class,
-        };
-        dispatch(addToCartAction(cartData));
-      }
-    } else {
-      try {
-        await AsyncStorage.setItem('cartproducts', JSON.stringify(product));
-      } catch (error) {
-        console.log('Something went Wrong!!!!');
-      }
-    }
-    // navigation.reset({
-    //   index: 0,
-    //   routes: [{ name: 'Cart' }],
-    // });
-  };
-
-  const addToCart = async () => {
-    var hasCartProducts = [];
-    var products = [];
-    if (isLoggin) {
-      hasCartProducts = cartItems;
-    } else {
-      hasCartProducts = await AsyncStorage.getItem('cartproducts');
-      if (!isEmpty(hasCartProducts)) {
-        products = JSON.parse(hasCartProducts);
-      }
-    }
-
-    if (itemInCart) {
-      return true;
-    }
-    if (hasCartProducts !== null) {
-      setItemInCart(true);
-      products.push({
-        product_id: SingleProduct._id,
-        qty: cartQuantity,
-        product_title: SingleProduct.name,
-      });
-
-      _storeData(products);
-    } else {
-      setItemInCart(true);
-      _storeData([
-        {
-          product_id: SingleProduct._id,
-          qty: cartQuantity,
-          product_title: SingleProduct.name,
-        },
-      ]);
-    }
-  };
-
-  useEffect(() => {
-    if (SingleProduct?._id) {
-      const payload = {
-        category: SingleProduct?.categoryId.map((cat) => cat?.id),
-        productID: ProductIds,
-      };
-      dispatch(catRecentProductAction(payload));
-    }
-  }, [SingleProduct]);
-  // const handleScroll = (event) => {
-  //   const offsetY = event.nativeEvent.contentOffset.y;
-  //   // Adjust the height based on the scroll offset
-  //   const newHeight = offsetY > 0 ? '85%' : '45%';
-  //   setScrollViewHeight(newHeight);
-  // };
-
-  const handleScroll = Animated.event(
-    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-    { useNativeDriver: false }, // Set to true if using reanimated
-  );
-
-  const scrollViewHeight = scrollY.interpolate({
-    inputRange: [0, windowHeight * 0.5],
-    outputRange: [windowHeight * 0.5, windowHeight],
-    extrapolate: 'clamp',
-  });
-
-  const Checkpoints = ({ title, image }) => {
-    return (
-      <View style={{ alignItems: 'center' }}>
-        <Image source={image} style={{ width: 38, height: 38 }} />
-        <AText small>{title}</AText>
-      </View>
-    );
-  };
-  // console.log(scrollViewHeight, 'ssc');
   function renderItem({ item }) {
     return (
-      <TouchableOpacity
-        onPress={() => {
-          console.log('yes it ran', item._id);
+      <ProductCard
+        category={item}
+        displayImage={item.feature_image}
+        fontsizesmall={true}
+        navigateNextScreen={() => {
           setProductIds(item._id);
           setProductUrls(item.url);
-          // navigation.navigate('CateGories', {
-          //   screen: 'SingleProduct',
-          //   initial: false,
-          //   params: { productID: item._id, productUrl: item.url },
-          // });
         }}
-        style={styles.cardstyle}>
-        {/* <Icon
-          onPress={() => alert('Save it Wishlist')}
-          name="heart-o"
-          color={'red'}
-          size={15}
-          style={styles.heart}
-        /> */}
-        <ImageBackground
-          source={{
-            uri: !isEmpty(item.feature_image)
-              ? URL + item.feature_image
-              : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
-            priority: FastImage.priority.normal,
-          }}
-          style={styles.centeredItemImage}
-          imageStyle={{ borderRadius: 10, resizeMode: 'contain' }}>
-          <View style={styles.blurWrap}>
-            <ImageBackground
-              source={{
-                uri: !isEmpty(item.feature_image)
-                  ? URL + item.feature_image
-                  : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
-                priority: FastImage.priority.normal,
-              }}
-              blurRadius={Platform.OS === 'ios' ? 20 : 20}
-              style={styles.blurImageStyle}
-              imageStyle={{
-                borderRadius: 10,
-                resizeMode: 'cover',
-              }}></ImageBackground>
-          </View>
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => {
-              // navigatetonext(item);
-            }}
-            style={styles.overlay}></TouchableOpacity>
-          <View style={styles.textContainer}>
-            <AText mb="5px" small fonts={FontStyle.fontBold}>
-              {item.name.length > 14
-                ? item.name.substring(0, 14) + '...'
-                : item.name}
-            </AText>
-            <AText small fonts={FontStyle.fontBold} style={styles.text}>
-              $ {item.pricing.sellprice + '.00'}
-            </AText>
-          </View>
-          <View style={styles.textContainer2}>
-            <TouchableOpacity style={styles.iconcontainer}>
-              <Icon name="shopping-cart" color={'black'} size={14} />
-            </TouchableOpacity>
-            <StarRating
-              disabled={true}
-              maxStars={5}
-              rating={item.rating}
-              fullStarColor={'#FFDB20'}
-              emptyStarColor={'gray'}
-              starSize={10}
-            />
-          </View>
-        </ImageBackground>
-      </TouchableOpacity>
+      />
     );
   }
+
+  const cleanHTMLContent = (html) => {
+    // Remove extra spaces
+    let cleanedHtml = html.trim();
+    // Remove span tags but keep their content
+    // cleanedHtml = cleanedHtml.replace(/<\/?span[^>]*>/g, '');
+    return cleanedHtml;
+  };
+
+  const groupedSpecifications =
+    !isEmpty(SingleProduct.specifications) &&
+    SingleProduct.specifications.reduce((groups, spec) => {
+      const group = groups[spec.group] || [];
+      group.push(spec);
+      groups[spec.group] = group;
+      return groups;
+    }, {});
+  const groupedSpecificationData = groupedSpecifications;
+  const ratingPercentage = (ratingNo) =>
+    !isEmpty(SingleProduct.ratingCount) &&
+    Math.round((ratingNo / SingleProduct.ratingCount) * 100);
+
+  const checkZipcode = async () => {
+    var res = await dispatch(checkPincodeValid({ zipcode: pinCode }));
+    setDeliverable(res);
+  };
+
   return (
     <BottomSheetModalProvider>
       {singleProductLoading || Loading ? <AppLoader /> : null}
@@ -416,7 +324,6 @@ const SingleProductScreen = ({ navigation, route }) => {
                 name="arrowleft"
                 size={25}
               />
-              {/* <Icon name="heart-o" color={'red'} size={20} /> */}
             </View>
             {/* ===============Featured Images============= */}
             <GallerySliderWrapper>
@@ -426,317 +333,370 @@ const SingleProductScreen = ({ navigation, route }) => {
               onDismiss={() => handlePresentModalPress()}
               // enableDismissOnClose={false}
               ref={bottomSheetModalRef}
+              
               index={1}
-              snapPoints={snapPoints}
-              onChange={handleSheetChanges}
+              snapPoints={[200, '80%']}
               style={{ flex: 1 }}>
-              <ScrollView style={{ flex: 1 }}>
-                <ProductPriceText Pricing={SingleProduct.pricing} />
+              <ScrollView
+                keyboardShouldPersistTaps={'always'}
+                contentContainerStyle={{ flexGrow: 1, paddingBottom: 70 }}
+                style={{ flex: 1, flexGrow: 1, paddingBottom: 50 }}>
+                {/* <ProductPriceText Pricing={SingleProduct.pricing} /> */}
                 {/* ===============Product Name============= */}
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginHorizontal: 30,
-                  }}>
-                  <ProductName>
-                    <AText big color={'black'} fonts={FontStyle.semiBold}>
+                <View style={styles.headerContainerStyle}>
+                  <View style={styles.productNameHeaderView}>
+                    <AText big1 color={'black'} fonts={FontStyle.semiBold}>
                       {SingleProduct.name}
                     </AText>
-                    <View style={styles.starstyle}>
-                      <StarRating
-                        starStyle={{
-                          marginRight: 10,
-                        }}
-                        disabled={true}
-                        maxStars={5}
-                        rating={SingleProduct.rating}
-                        fullStarColor={'#FFDB20'}
-                        emptyStarColor={'gray'}
-                        starSize={14}
-                      />
-                      <AText
-                        color={'black'}
-                        fonts={
-                          FontStyle.semiBold
-                        }>{`(${SingleProduct.rating} rating)`}</AText>
-                    </View>
                     <AText
-                      mt="5px"
-                      big
-                      fonts={FontStyle.semiBold}
-                      color={'black'}>
-                      $ {SingleProduct.pricing.price + '.00'}
-                    </AText>
-                  </ProductName>
-                  <View style={{ width: '45%' }}>
-                    <AText
-                      right
                       small
-                      color={SingleProduct.quantity > 0 ? '#1FAD08' : 'red'}
-                      fonts={FontStyle.fontBold}>
-                      {SingleProduct.quantity > 0
-                        ? 'Available in stock'
-                        : 'Out of stock'}
+                      mt={'5px'}
+                      color={'#72787e'}
+                      fonts={FontStyle.semiBold}>
+                      {SingleProduct.short_description}
                     </AText>
-                    {((!isEmpty(SingleProduct.quantity) &&
-                      SingleProduct.quantity > 0) ||
-                      !manage_stock) && (
-                      <>
-                        {/* <AText fonts={FontStyle.semiBold} large>
-                        Quantity
-                      </AText> */}
-                        <QtyWrapper>
-                          <QtyButton
+                  </View>
+                  <View style={styles.ratingPriceAndStockViewStyle}>
+                    <View style={{ width: '70%' }}>
+                      {!isEmpty(SingleProduct.rating) &&
+                      SingleProduct.rating > 0 ? (
+                        <View style={styles.starstyle}>
+                          <AText
+                            small
+                            color={'#72787e'}
+                            fonts={FontStyle.semiBold}>
+                            {SingleProduct.rating}
+                          </AText>
+                          <StarRating
+                            disabled={true}
+                            maxStars={1}
+                            rating={1}
+                            fullStarColor={APP_PRIMARY_COLOR}
+                            starSize={16}
+                          />
+                        </View>
+                      ) : null}
+                      <ProductPriceText Pricing={SingleProduct.pricing} />
+                    </View>
+                    <View
+                      style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      <AText
+                        small
+                        color={SingleProduct.quantity > 0 ? '#1FAD08' : 'red'}
+                        fonts={FontStyle.fontBold}>
+                        {SingleProduct.quantity > 0
+                          ? 'Available in stock'
+                          : 'Out of stock'}
+                      </AText>
+                      {((!isEmpty(SingleProduct.quantity) &&
+                        SingleProduct.quantity > 0) ||
+                        !manage_stock) && (
+                        <View style={styles.quantityView}>
+                          <TouchableOpacity
+                            activeOpacity={0.9}
+                            style={styles.quantityBtnStyle}
                             onPress={() => {
                               cartQuantity > 1 &&
                                 setCartQuantity(cartQuantity - 1);
                             }}>
-                            <AText color="#72787e">
-                              <AIcon size={16} name="minussquare" />
+                            <AIcon color={'#000'} size={15} name="minus" />
+                          </TouchableOpacity>
+                          <View style={[styles.quantityBtnStyle]}>
+                            <AText medium bold>
+                              {cartQuantity}
                             </AText>
-                          </QtyButton>
-                          <AText medium bold ml="7px" mr="7px">
-                            {cartQuantity}
-                          </AText>
-                          <QtyButton
+                          </View>
+                          <TouchableOpacity
+                            activeOpacity={0.9}
+                            style={styles.quantityBtnStyle}
                             onPress={() => {
                               ((!isEmpty(SingleProduct.quantity) &&
                                 cartQuantity < SingleProduct.quantity) ||
                                 !manage_stock) &&
                                 setCartQuantity(cartQuantity + 1);
                             }}>
-                            <AText color="#72787e">
-                              <AIcon size={16} name="plussquare" />
-                            </AText>
-                          </QtyButton>
-                        </QtyWrapper>
-                      </>
-                    )}
+                            <AIcon color={'#000'} size={15} name="plus" />
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                    </View>
                   </View>
                 </View>
 
+                {!isEmpty(SingleProduct.attributes)
+                  ? SingleProduct.attributes.map((item) => (
+                      <View style={styles.containerViewStyle}>
+                        <AText large fonts={FontStyle.fontBold} mb="10px">
+                          {item.name}
+                        </AText>
+                        <View style={styles.attributeView}>
+                          {!isEmpty(item.values) &&
+                            item.values.map((key) => (
+                              <TouchableOpacity
+                                style={styles.attributeBoxStyle}>
+                                <AText
+                                  center
+                                  small
+                                  color={'black'}
+                                  fonts={FontStyle.fontRegular}>
+                                  {key.name.trim()}
+                                </AText>
+                              </TouchableOpacity>
+                            ))}
+                        </View>
+                      </View>
+                    ))
+                  : null}
+
                 {/* ================ Product short description================== */}
-                {!isEmpty(SingleProduct.short_description) && (
-                  <>
-                    <AText
-                      ml={'30px'}
-                      fonts={FontStyle.semiBold}
-                      mb="5px"
-                      large>
-                      About
+                {!isEmpty(SingleProduct.description) && (
+                  <View style={styles.containerViewStyle}>
+                    <AText large fonts={FontStyle.fontBold} mb="10px">
+                      Product Details
                     </AText>
                     <HTMLView
-                      style={{ marginHorizontal: 30 }}
-                      value={SingleProduct.short_description}
+                      // lineBreak={'\n'}
+                      // paragraphBreak={'\n'}
+                      stylesheet={htmlStyles}
+                      style={{ marginHorizontal: 5 }}
+                      value={cleanHTMLContent(SingleProduct.description)}
                     />
-                    <HTMLView
-                      style={{ marginHorizontal: 30 }}
-                      value={SingleProduct.description}
-                    />
-                  </>
+                    <View style={styles.boderLineView} />
+                  </View>
                 )}
-                <AText ml="30px" mt={'5px'} mb={'20px'} bold>
+                {/* <AText ml="30px" mt={'5px'} mb={'20px'} bold>
                   SKU:{SingleProduct.sku}
-                </AText>
+                </AText> */}
                 {/* ==================Product Quantity============================ */}
 
                 {/* ========================Custom Field================================ */}
-                {!isEmpty(SingleProduct.custom_field) &&
-                  SingleProduct.custom_field.length > 0 && (
-                    <CollapseWrapper>
-                      <CollapseTitle>
-                        <AText bold>Product specifications</AText>
-                      </CollapseTitle>
-                      <ACol col={2}>
-                        {SingleProduct.custom_field.map((item, index) => {
-                          return (
-                            <CustomWrapper>
-                              <ACol>
-                                <AText>{item.key}</AText>
-                              </ACol>
-                              <ACol>
-                                <AText>{item.value}</AText>
-                              </ACol>
-                            </CustomWrapper>
-                          );
-                        })}
-                      </ACol>
-                    </CollapseWrapper>
-                  )}
-
-                {/* ===============Product Reviews============= */}
-                <CollapseWrapper>
-                  <CollapseTitle
-                    onPress={() => setReviewCollapse(!reviewcollapse)}>
-                    <AText bold>Reviews</AText>
-                    <CollapseIcon>
-                      {reviewcollapse ? (
-                        <Icon name="chevron-up" color="#000" />
-                      ) : (
-                        <Icon name="chevron-down" color="#000" />
-                      )}
-                    </CollapseIcon>
-                  </CollapseTitle>
-                  <CollapseContainer
-                    // eslint-disable-next-line react-native/no-inline-styles
-                    style={{
-                      display: reviewcollapse ? 'flex' : 'none',
-                    }}>
-                    {true && (
-                      <>
-                        <View
-                          style={{
-                            width: '40%',
-                            alignSelf: 'flex-end',
-                            marginBottom: 10,
-                          }}>
-                          <AButton
-                            title={'Add a review'}
-                            round
-                            onPress={() =>
-                              isLoggin
-                                ? setWriteReviewPop(true)
-                                : navigation.navigate('AccountWrapper', {
-                                    screen: 'LoginSignUp',
-                                    initial: false,
-                                  })
-                            }
-                            small
-                            semi
-                          />
-                        </View>
-                      </>
-                    )}
-                    <>
-                      {ReviewProduct &&
-                      ReviewProduct.filter(
-                        (review) => review.status === 'approved',
-                      ).length > 0 ? (
-                        ReviewProduct.filter(
-                          (review) => review.status === 'approved',
-                        ).map((singleReview, index) => (
-                          <ReviewWrapper>
-                            <CollapseTitle>
-                              <ReveiwHeading>
-                                <Reviewrating
-                                  backgroundColor={
-                                    singleReview.rating < 2 ? 'red' : 'green'
-                                  }>
-                                  <AText center color="#fff">
-                                    {singleReview.rating}★
-                                  </AText>
-                                </Reviewrating>
-                                <AText bold center>
-                                  {singleReview.customerId.firstName}
-                                </AText>
-                              </ReveiwHeading>
-                              <AText small>
-                                {moment(singleReview.date).format('LL')}
-                              </AText>
-                            </CollapseTitle>
-                            <AText capitalize bold medium>
-                              {singleReview.title}
-                            </AText>
-                            <AText>{singleReview.review}</AText>
-                          </ReviewWrapper>
-                        ))
-                      ) : (
-                        <>
-                          <AText
-                            bbc={Colors.blackColor}
-                            bbw={'0.5px'}
-                            pb="8px"
-                            small
-                            center>
-                            There are no reviews yet. Be the first one to write
-                            one.
-                          </AText>
-                        </>
-                      )}
-                    </>
-                  </CollapseContainer>
-                </CollapseWrapper>
-                <AddToCartWrapper>
-                  {(!isEmpty(SingleProduct.quantity) &&
-                    SingleProduct.quantity > 0) ||
-                  !manage_stock ? (
-                    <AButton
-                      title={itemInCart ? 'Added' : 'Add to Cart'}
-                      round
-                      onPress={() => addToCart()}
-                    />
-                  ) : (
-                    <AButton
-                      title={'Out of Stock'}
-                      block
-                      round
-                      // onPress={() => addToCart()}
-                    />
-                  )}
-                </AddToCartWrapper>
-                <View style={styles.banner}>
-                  <Checkpoints
-                    title="Happy Customers"
-                    image={require('../../assets/images/feedback.png')}
-                  />
-                  <Checkpoints
-                    title="Genuine Product"
-                    image={require('../../assets/images/award.png')}
-                  />
-                  <Checkpoints
-                    title="Secure Checkout"
-                    image={require('../../assets/images/carttick.png')}
-                  />
-                </View>
-
-                <View style={{ marginHorizontal: 30, marginTop: 15 }}>
-                  <AText medium>Returns</AText>
-                  <AText small>
-                    This products is not returnable for full details on out
-                    return poliies please{' '}
-                    <AText color={Colors.blue} lineThrough small>
-                      click here
-                    </AText>
-                  </AText>
-                </View>
-                <FlatList
-                  numColumns={2}
-                  data={RelatedProducts}
-                  snapToAlignment="center"
-                  keyExtractor={(item) => item._id}
-                  ListHeaderComponent={() => (
-                    <AText
-                      color={Colors.blackColor}
-                      large
-                      fonts={FontStyle.semiBold}
-                      mb="10px">
-                      Similar Products
-                    </AText>
-                  )}
-                  renderItem={renderItem}
-                  columnWrapperStyle={{ justifyContent: 'space-between' }}
-                  contentContainerStyle={{
-                    marginTop: 10,
-                    flexDirection: 'column',
-                    margin: 'auto',
-                    marginHorizontal: 30,
-                  }}
-                  ListEmptyComponent={() => (
-                    <View>
-                      <AText
-                        style={{
-                          fontSize: 16,
-                          alignSelf: 'center',
-                          color: 'grey',
-                        }}>
-                        No Records Found
+                {!isEmpty(SingleProduct.specifications) &&
+                  SingleProduct.specifications.length > 0 && (
+                    <View style={styles.containerViewStyle}>
+                      <AText large fonts={FontStyle.fontBold} mb="10px">
+                        Specifications
                       </AText>
+
+                      {Object.keys(groupedSpecificationData).map(
+                        (item, index) => (
+                          <>
+                            <AText
+                              ml="10px"
+                              capitalize
+                              color={APP_PRIMARY_COLOR}
+                              fonts={FontStyle.semiBold}
+                              mb="5px"
+                              medium>
+                              {item}
+                            </AText>
+                            <View style={styles.specificationGroupStyle}>
+                              {groupedSpecificationData[item].map((spec) => (
+                                <View style={styles.specificationRowStyle}>
+                                  <AText
+                                    medium
+                                    capitalize
+                                    fonts={FontStyle.semiBold}>
+                                    {spec.key}
+                                  </AText>
+                                  <AText small capitalize>
+                                    {spec.value}
+                                  </AText>
+                                </View>
+                              ))}
+                              {index !==
+                              Object.keys(groupedSpecificationData).length -
+                                1 ? (
+                                <View
+                                  style={{
+                                    ...styles.boderLineView,
+                                    marginVertical: 10,
+                                  }}
+                                />
+                              ) : null}
+                            </View>
+                          </>
+                        ),
+                      )}
                     </View>
                   )}
-                />
+
+                {/* ==================ZipCode Verification=================== */}
+                <View style={styles.containerViewStyle}>
+                  <AText medium fonts={FontStyle.semiBold} mb="10px">
+                    Check delivery at your location
+                  </AText>
+                  <View style={styles.pinCodeViewStyle}>
+                    <TextInput
+                      placeholder="Enter Pincode"
+                      value={pinCode}
+                      style={{ fontSize: 12 }}
+                      maxLength={20}
+                      onChangeText={(text) => setPinCode(text)}
+                    />
+                    <TouchableOpacity
+                      onPress={() => checkZipcode()}
+                      style={[
+                        styles.pinCodeCheckBtnStyle,
+                        { backgroundColor: APP_PRIMARY_COLOR },
+                      ]}>
+                      <AText
+                        color={'#fff'}
+                        fonts={FontStyle.semiBold}
+                        mb="5px"
+                        small>
+                        CHECK
+                      </AText>
+                    </TouchableOpacity>
+                  </View>
+                  {!isEmpty(deliverable) && (
+                    <AText
+                      color={deliverable ? '#3E8959' : '#DD5B51'}
+                      small
+                      fonts={FontStyle.semiBold}
+                      mb="10px">
+                      {deliverable
+                        ? `Hooray, This product is deliverable at your zipcode`
+                        : `Sorry, This product is not deliverable at your zipcode. Try some other zipcode`}
+                    </AText>
+                  )}
+                </View>
+                {/* ==================simmilar product=================== */}
+                {!isEmpty(RelatedProducts) &&
+                !isEmpty(RelatedProducts[1]) &&
+                !isEmpty(RelatedProducts[1].products) ? (
+                  <ImageSliderNew
+                    title={'People who bought this also bought'}
+                    dataItems={RelatedProducts[1].products}
+                    navigatetonext={(item) => {
+                      setProductIds(item._id);
+                      setProductUrls(item.url);
+                    }}
+                  />
+                ) : null}
+                {!isEmpty(RelatedProducts) &&
+                !isEmpty(RelatedProducts[0]) &&
+                !isEmpty(RelatedProducts[0].products) ? (
+                  <ImageSliderNew
+                    title={'Similar Products'}
+                    dataItems={RelatedProducts[0].products}
+                    navigatetonext={(item) => {
+                      setProductIds(item._id);
+                      setProductUrls(item.url);
+                      setPinCode('');
+                      setDeliverable('');
+                    }}
+                  />
+                ) : null}
+                {/* ==================simmilar product=================== */}
+
+                {/* ===============Product Reviews============= */}
+                {!isEmpty(SingleProduct.levelWiseRating) &&
+                SingleProduct.ratingCount > 0 ? (
+                  <View style={styles.containerViewStyle}>
+                    <AText large fonts={FontStyle.fontBold} mb="10px">
+                      Rating and Reviews
+                    </AText>
+                    <LevelWiseRating
+                      levelWiseRating={SingleProduct.levelWiseRating}
+                      rating={SingleProduct.rating}
+                      ratingCount={SingleProduct.ratingCount}
+                    />
+
+                    {ReviewProduct &&
+                    ReviewProduct.filter(
+                      (review) => review.status === 'approved',
+                    ).length > 0 ? (
+                      <>
+                        <AText
+                          fonts={FontStyle.semiBold}
+                          mt="10px"
+                          mb="5px"
+                          medium>
+                          Customer Reviews
+                        </AText>
+                        {ReviewProduct.filter(
+                          (review) => review.status === 'approved',
+                        ).map((singleReview) => (
+                          <View style={styles.reviewContainerStyle}>
+                            <View
+                              style={[styles.starstyle, { borderWidth: 0 }]}>
+                              <AText
+                                medium
+                                color={'#72787e'}
+                                fonts={FontStyle.semiBold}>
+                                {singleReview.rating}
+                              </AText>
+                              <StarRating
+                                disabled={true}
+                                maxStars={1}
+                                rating={1}
+                                fullStarColor={'#DDAC17'}
+                                starSize={14}
+                              />
+                            </View>
+                            <View style={{ width: '85%' }}>
+                              <View style={styles.reviewStyle}>
+                                <AText capitalize bold small>
+                                  {singleReview.title}
+                                </AText>
+                                <AText semiminor color={'#8A8A8A'}>
+                                  {!isEmpty(singleReview.customerId.firstName)
+                                    ? singleReview.customerId.firstName + ` | `
+                                    : ''}
+                                  {moment(singleReview.date).format('ll')}
+                                </AText>
+                              </View>
+                              <AText xtrasmall>{singleReview.review} </AText>
+                            </View>
+                          </View>
+                        ))}
+                      </>
+                    ) : (
+                      <>
+                        <AText
+                          bbc={Colors.blackColor}
+                          bbw={'0.5px'}
+                          pb="8px"
+                          small
+                          center>
+                          There are no reviews yet. Be the first one to write
+                          one.
+                        </AText>
+                      </>
+                    )}
+                  </View>
+                ) : null}
               </ScrollView>
+              <View style={styles.addToCartWrapper}>
+                {(!isEmpty(SingleProduct.quantity) &&
+                  SingleProduct.quantity > 0) ||
+                !manage_stock ? (
+                  <TouchableOpacity
+                    style={{
+                      ...styles.addCartBtnStyle,
+                      backgroundColor: APP_PRIMARY_COLOR,
+                    }}
+                    onPress={() => addToCart()}>
+                    <AText color={'#fff'} font={FontStyle.fontBold} center>
+                      {itemInCart ? 'Added' : 'Add to Cart'}
+                    </AText>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    style={{
+                      ...styles.addCartBtnStyle,
+                      backgroundColor: APP_PRIMARY_COLOR,
+                    }}
+                    onPress={() => {}}>
+                    <AText color={'#fff'} font={FontStyle.fontBold} center>
+                      Out of Stock
+                    </AText>
+                  </TouchableOpacity>
+                )}
+              </View>
             </BottomSheetModal>
           </View>
 
@@ -847,31 +807,28 @@ const SingleProductScreen = ({ navigation, route }) => {
   );
 };
 
+SingleProductScreen.propTypes = {
+  navigation: PropTypes.object,
+  route: PropTypes.object,
+};
+
 //  ===============For Style=============
 
-const QtyWrapper = styled.View`
-  height: 30px;
-  overflown: hidden;
-  // width: 110px;
-  margin: 10px 0px;
-  background: white;
-  flex-direction: row;
-  justify-content: flex-end;
-  align-items: center;
-  // border-width: 0.5px;
-`;
-const QtyButton = styled.TouchableOpacity`
-  background: #fff;
-  height: 100%;
-  width: 28px;
-  justify-content: center;
-  align-items: center;
-  padding: 0px;
-`;
-const CustomWrapper = styled.View`
-  margin: 5px 0 0px 0;
-  flex-direction: row;
-`;
+const htmlStyles = StyleSheet.create({
+  // Add styles for any specific HTML tags if needed
+  p: {
+    margin: 0,
+    padding: 0,
+  },
+  li: {
+    margin: 0,
+  },
+  ul: {
+    marginTop: 0,
+  },
+  // Other styles as needed
+});
+
 const ModalWrapper = styled.ScrollView`
   background-color: rgba(0, 0, 0, 0.5);
   position: relative;
@@ -936,59 +893,7 @@ const GallerySliderWrapper = styled.View`
   height: 60%;
   background: white;
 `;
-const ProductName = styled.View`
-  padding: 10px 0;
-  width: 55%;
-`;
-const CollapseWrapper = styled.View`
-  flex: 1;
-  margin-horizontal: 30px;
-`;
-const CollapseContainer = styled.View`
-  background-color: ${Colors.whiteColor};
-  padding: 10px 10px 20px 10px;
-  border-radius: 15px;
-`;
-const CollapseTitle = styled.TouchableOpacity`
-  flex: 1;
-  justify-content: space-between;
-  align-items: center;
-  flex-direction: row;
-  padding: 5px 0;
-  border-bottom-color: #000;
-  border-bottom-width: 0.5px;
-  margin: 5px 0px;
-`;
-const CollapseIcon = styled.Text`
-  align-self: flex-end;
-`;
-const AddToCartWrapper = styled.View`
-  background: transparent;
-  padding-top: 5px;
-  width: 70%;
-  align-self: center;
-`;
-const ReviewWrapper = styled.View`
-  background: #fff;
-  padding-horizontal: 5px;
-  padding-vertical: 7px;
-  margin: 5px 0px;
-`;
-const Reviewrating = styled.View`
-  padding-horizontal: 5px;
-  padding-vertical: 3px;
-  border-radius: 7px;
-  justify-content: center;
-  align-items: center;
-  align-self: flex-start;
-  margin-end: 7px;
-`;
-const ReveiwHeading = styled.View`
-  justify-content: center;
-  align-items: center;
-  flex-direction: row;
-  align-self: flex-start;
-`;
+
 const NotFoundWrapper = styled.View`
   height: 200px;
   width: 100%;
@@ -1003,15 +908,26 @@ const NotFoundImage = styled.Image`
   height: null;
 `;
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 24,
-    justifyContent: 'center',
-    backgroundColor: 'grey',
+  productNameHeaderView: {
+    width: '100%',
   },
-  contentContainer: {
-    flex: 1,
+  quantityView: {
+    overflown: 'hidden',
+    // width: 110px;
+    margin: 10,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
     alignItems: 'center',
+    // border-width: 0.5px;
+  },
+  quantityBtnStyle: {
+    // background: '#fff',
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    margin: 2,
   },
   header: {
     flexDirection: 'row',
@@ -1024,6 +940,81 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     zIndex: 10,
   },
+  headerContainerStyle: {
+    justifyContent: 'space-between',
+    marginHorizontal: 15,
+  },
+  pinCodeViewStyle: {
+    width: '80%',
+    height: 40,
+    borderWidth: 1,
+    borderColor: '#D4D4D4',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 7,
+    marginHorizontal: 10,
+    paddingHorizontal: 5,
+  },
+  pinCodeCheckBtnStyle: {
+    width: '30%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 3,
+    padding: 5,
+  },
+  ratingPriceAndStockViewStyle: {
+    width: '100%',
+    marginTop: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  attributeView: {
+    flexDirection: 'row',
+    marginVertical: 7,
+  },
+  attributeBoxStyle: {
+    borderWidth: 1,
+    borderColor: '#636363',
+    marginHorizontal: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    paddingVertical: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  specificationGroupStyle: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    width: '97%',
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  specificationRowStyle: {
+    width: '40%',
+    marginStart: 7,
+    marginBottom: 20,
+  },
+  boderLineView: {
+    backgroundColor: '#E9E9E9',
+    height: 2,
+    width: '95%',
+    alignSelf: 'center',
+  },
+  reviewContainerStyle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginTop: 10,
+  },
+  reviewStyle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
   banner: {
     height: 120,
     backgroundColor: Colors.lightBlue,
@@ -1033,90 +1024,74 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 15,
   },
-  infostyle: {
-    zIndex: 10,
-    bottom: 0,
-    position: 'absolute',
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    backgroundColor: 'white',
-    paddingBottom: 30,
-    // paddingHorizontal: 30,
-    paddingTop: 20,
-    width: '100%',
+  containerViewStyle: {
     flex: 1,
-    elevation: 6,
+    marginVertical: 10,
+    marginHorizontal: 15,
   },
   starstyle: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#6D6D6D',
+    flexWrap: 'wrap',
+    width: 45,
+    paddingVertical: 5,
+    paddingHorizontal: 2,
+    justifyContent: 'space-evenly',
+    marginVertical: 7,
   },
-  cardstyle: {
-    width: '48%',
-    height: 236,
-    marginBottom: 30,
-    borderRadius: 10,
-    elevation: 5,
-  },
-
-  centeredItemImage: {
-    width: '100%',
-    height: '100%',
-    // resizeMode: 'contain',
-    borderRadius: 10,
-    // marginHorizontal: windowWidth * 0.05,
-  },
-  overlay: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    height: '25%',
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+  ratingContainerView: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
+    width: '100%',
+    justifyContent: 'space-evenly',
   },
-  textContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    marginHorizontal: 10,
-    marginBottom: 10,
-  },
-  textContainer2: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    textAlign: 'right',
-    marginHorizontal: 10,
-    alignItems: 'flex-end',
-    marginBottom: 10,
-  },
-  iconcontainer: {
-    marginBottom: 5,
-    width: 22,
-    height: 22,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+  ratingView: {
+    width: '30%',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  blurImageStyle: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-    bottom: 0,
-    justifyContent: 'flex-end',
-  },
-  blurWrap: {
-    height: '25%', //Here we need to specify the height of blurred part
+  levelWiseRatingContainerStyle: {
+    flexDirection: 'row',
+    alignItems: 'center',
     overflow: 'hidden',
+    marginVertical: 5,
+  },
+  levelWiseStarstyle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    width: 45,
+    paddingHorizontal: 2,
+    justifyContent: 'space-evenly',
+  },
+  progressbarContainerStyle: {
+    backgroundColor: '#D9D9D9',
+    marginVertical: 5,
+    width: '70%',
+    borderRadius: 10,
+    height: 4,
+  },
+  filledProgressbarStyle: {
+    backgroundColor: '#D9D9D9',
+    borderRadius: 10,
+    height: 4,
+  },
+  addToCartWrapper: {
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    paddingTop: 5,
     width: '100%',
+    alignSelf: 'center',
     position: 'absolute',
-    bottom: 0,
+    bottom: 1,
+  },
+  addCartBtnStyle: {
+    width: '70%',
+    borderRadius: 25,
+    paddingVertical: 15,
+    alignSelf: 'center',
   },
 });
 export default SingleProductScreen;

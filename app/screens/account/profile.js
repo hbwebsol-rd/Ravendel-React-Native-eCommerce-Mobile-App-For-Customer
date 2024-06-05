@@ -3,18 +3,19 @@ import { StatusBar, StyleSheet } from 'react-native';
 import { Appbar } from 'react-native-paper';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { AContainer, AHeader, AText, ZHeader } from '../../theme-components';
+import { AContainer, AHeader, AText, BackHeader } from '../../theme-components';
 import { isEmpty } from '../../utils/helper';
 import man from '../../assets/images/man.png';
 import woman from '../../assets/images/woman.png';
 import question from '../../assets/images/question.png';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import NavigationConstants from '../../navigation/NavigationConstants';
 
 const ProfileScreen = ({ navigation }) => {
   const userDetails = useSelector((state) => state.customer.userDetails);
   return (
     <>
-      <ZHeader
+      <BackHeader
         navigation={navigation}
         title="Profile"
         headerColor={'#312f2d'}
@@ -33,9 +34,12 @@ const ProfileScreen = ({ navigation }) => {
             }
           />
         </ImageWrapper>
-        <Header onPress={() => navigation.navigate('EditProfile')}>
+        <Header
+          onPress={() =>
+            navigation.navigate(NavigationConstants.EDIT_PROFILE_SCREEN)
+          }>
           <AText bold centeR uppercase medium>
-            {userDetails.first_name} {userDetails.last_name}
+            {userDetails.firstName} {userDetails.lastName}
           </AText>
           <Icon name="edit" size={18} style={styles.editIcon} />
         </Header>
