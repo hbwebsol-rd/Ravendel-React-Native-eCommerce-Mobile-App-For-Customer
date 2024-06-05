@@ -24,6 +24,8 @@ const initialState = {
   couponDiscount: 0,
   response: false,
   cartChecked: false,
+  billingAddress: {},
+  shippingAddress: {},
 };
 
 const setDataInStorage = async (product) => {
@@ -139,6 +141,13 @@ export default (state = initialState, action) => {
         loading: false,
         response: action.payload,
         cartChecked: false,
+      };
+    case 'ADD_ADDRESS':
+      return {
+        ...state,
+        loading: false,
+        billingAddress: action.payload.billingAddress,
+        shippingAddress: action.payload.shippingAddress,
       };
     case 'USER_LOGOUT':
       return { ...initialState };

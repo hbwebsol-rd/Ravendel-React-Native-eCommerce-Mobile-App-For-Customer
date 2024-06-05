@@ -59,6 +59,7 @@ import {
 import NavigationConstants from '../../navigation/NavigationConstants';
 import PropTypes from 'prop-types';
 import LevelWiseRating from './Components/levelWiseRating';
+import { checkPincodeValid } from '../../store/action/checkoutAction';
 
 var reviewObject = {
   title: '',
@@ -99,6 +100,7 @@ const SingleProductScreen = ({ navigation, route }) => {
   const [singleProductLoading, setSingleProductLoading] = useState(true);
   const [cartQuantity, setCartQuantity] = useState(1);
   const [pinCode, setPinCode] = useState('');
+  const [deliverable, setDeliverable] = useState('');
   const snapPoints = ['40%', '62%', '100%'];
 
   // ref
@@ -299,6 +301,11 @@ const SingleProductScreen = ({ navigation, route }) => {
     !isEmpty(SingleProduct.ratingCount) &&
     Math.round((ratingNo / SingleProduct.ratingCount) * 100);
 
+  const checkZipcode = async () => {
+    var res = await dispatch(checkPincodeValid({ zipcode: pinCode }));
+    setDeliverable(res);
+  };
+
   return (
     <BottomSheetModalProvider>
       {singleProductLoading || Loading ? <AppLoader /> : null}
@@ -326,6 +333,7 @@ const SingleProductScreen = ({ navigation, route }) => {
               onDismiss={() => handlePresentModalPress()}
               // enableDismissOnClose={false}
               ref={bottomSheetModalRef}
+              
               index={1}
               snapPoints={[200, '80%']}
               style={{ flex: 1 }}>
@@ -529,6 +537,7 @@ const SingleProductScreen = ({ navigation, route }) => {
                       onChangeText={(text) => setPinCode(text)}
                     />
                     <TouchableOpacity
+                      onPress={() => checkZipcode()}
                       style={[
                         styles.pinCodeCheckBtnStyle,
                         { backgroundColor: APP_PRIMARY_COLOR },
@@ -542,6 +551,17 @@ const SingleProductScreen = ({ navigation, route }) => {
                       </AText>
                     </TouchableOpacity>
                   </View>
+                  {!isEmpty(deliverable) && (
+                    <AText
+                      color={deliverable ? '#3E8959' : '#DD5B51'}
+                      small
+                      fonts={FontStyle.semiBold}
+                      mb="10px">
+                      {deliverable
+                        ? `Hooray, This product is deliverable at your zipcode`
+                        : `Sorry, This product is not deliverable at your zipcode. Try some other zipcode`}
+                    </AText>
+                  )}
                 </View>
                 {/* ==================simmilar product=================== */}
                 {!isEmpty(RelatedProducts) &&
@@ -565,6 +585,8 @@ const SingleProductScreen = ({ navigation, route }) => {
                     navigatetonext={(item) => {
                       setProductIds(item._id);
                       setProductUrls(item.url);
+                      setPinCode('');
+                      setDeliverable('');
                     }}
                   />
                 ) : null}

@@ -16,7 +16,7 @@ import NavigationConstants from '../../navigation/NavigationConstants';
 import _ from 'lodash';
 
 export const checkoutDetailsAction =
-  (checkoutDetailsData, cartId, navigation) => async (dispatch) => {
+  (checkoutDetailsData, cartId, navigation, navParams) => async (dispatch) => {
     dispatch({ type: CHECKOUT_LOADING });
 
     try {
@@ -33,11 +33,14 @@ export const checkoutDetailsAction =
 
         const cartData = { id: cartId, products: [] };
         dispatch(updateCartAction(cartData, checkoutDetailsData.customer_id));
-        checkoutDetailsData.billing.paymentMethod === 'Cash On Delivery'
-          ? navigation.navigate(NavigationConstants.THANK_YOU_SCREEN)
-          : navigation.navigate(NavigationConstants.STRIPE_PAYMENT, {
+        checkoutDetailsData.billing.paymentMethod === 'stripe'
+          ? navigation.navigate(NavigationConstants.STRIPE_PAYMENT, {
               url: response.data.addOrder.redirectUrl,
-            });
+            })
+          : navigation.navigate(
+              NavigationConstants.THANK_YOU_SCREEN,
+              navParams,
+            );
       } else {
         dispatch({ type: CHECKOUT_LOADING_STOP });
         dispatch({
@@ -62,7 +65,18 @@ export const checkPincodeValid =
       const response = await query(CHECK_ZIPCODE, payload);
 
       if (!isEmpty(response) && _.get(response, 'data.checkZipcode.success')) {
-        navigation.navigate('ShippingMethod', navParams);
+        if (!isEmpty(navParams)) {
+          dispatch({
+            type: 'ADD_ADDRESS',
+            payload: {
+              shippingAddress: navParams.shippingAddress,
+              billingAddress: navParams.billingAddress,
+            },
+          });
+          navigation.navigate('ShippingMethod');
+        } else {
+          return true;
+        }
       } else {
         dispatch({
           type: ALERT_ERROR,
@@ -72,6 +86,7 @@ export const checkPincodeValid =
             'Invalid zipcode.',
           ),
         });
+        return false;
       }
     } catch (error) {
       console.log('error', error);

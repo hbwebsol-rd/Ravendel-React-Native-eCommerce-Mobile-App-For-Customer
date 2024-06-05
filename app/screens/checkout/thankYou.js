@@ -19,17 +19,17 @@ import { formatCurrency, isEmpty } from '../../utils/helper';
 import { ProductPriceText } from '../components';
 
 const MyComponent = ({ navigation, route }) => {
-  var cartAmount = route.params.cartAmount;
-  const cartItems = useSelector((state) => state.cart.products);
-  var defaultaddress = route.params.shippingValue[0];
   var paymentMethod = route?.params?.paymentMethod;
   var shippingMethod = route?.params?.shippingMethod;
   var cartProducts = route.params.cartProducts;
-  const { cartSummary, couponDiscount } = useSelector((state) => state.cart);
-
+  
+  const { cartSummary, shippingAddress, billingAddress } = useSelector(
+    (state) => state.cart,
+  );
   const { currencySymbol, currencyOptions } = useSelector(
     (state) => state.settings,
   );
+
   return (
     <ScrollView
       contentContainerStyle={{ flexGrow: 1, paddingTop: 35, paddingBottom: 5 }}
@@ -72,7 +72,7 @@ const MyComponent = ({ navigation, route }) => {
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <MIcon
                 name={
-                  defaultaddress.addressType == 'Home'
+                  billingAddress.addressType == 'Home'
                     ? 'home-outline'
                     : 'briefcase-outline'
                 }
@@ -83,16 +83,16 @@ const MyComponent = ({ navigation, route }) => {
                 ml="5px"
                 color={APP_PRIMARY_COLOR}
                 fonts={FontStyle.semiBold}>
-                {defaultaddress.addressType}
+                {billingAddress.addressType}
               </AText>
             </View>
             <AText color={GREYTEXT} fonts={FontStyle.semiBold}>
-              {defaultaddress.firstName} {defaultaddress.lastName}
+              {billingAddress.firstName} {billingAddress.lastName}
             </AText>
             <AText mt={'10px'} color={GREYTEXT}>
-              {defaultaddress.addressLine1}, {defaultaddress.addressLine2},{' '}
-              {defaultaddress.city} {defaultaddress.state},{' '}
-              {defaultaddress.pincode}
+              {billingAddress.addressLine1}, {billingAddress.addressLine2},{' '}
+              {billingAddress.city} {billingAddress.state},{' '}
+              {billingAddress.pincode}
             </AText>
           </View>
         </View>
@@ -102,12 +102,12 @@ const MyComponent = ({ navigation, route }) => {
           </AText>
           <View>
             <AText color={GREYTEXT} fonts={FontStyle.semiBold}>
-              {defaultaddress.firstName} {defaultaddress.lastName}
+              {shippingAddress.firstName} {shippingAddress.lastName}
             </AText>
             <AText mt={'10px'} color={GREYTEXT}>
-              {defaultaddress.addressLine1}, {defaultaddress.addressLine2},{' '}
-              {defaultaddress.city} {defaultaddress.state},{' '}
-              {defaultaddress.pincode}
+              {shippingAddress.addressLine1}, {shippingAddress.addressLine2},{' '}
+              {shippingAddress.city} {shippingAddress.state},{' '}
+              {shippingAddress.pincode}
             </AText>
           </View>
         </View>

@@ -30,16 +30,13 @@ import PropTypes from 'prop-types';
 import { checkPincodeValid } from '../../store/action/checkoutAction';
 import { Checkbox } from 'react-native-paper';
 
-
-const CheckoutScreen = ({ navigation, route }) => {
+const CheckoutScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const [scrollenable, setScrollEnable] = useState(true);
   const { userDetails, loading } = useSelector((state) => state.customer);
-  const [addressBook, setAddressBook] = useState();
   const [addressForm, setAddressForm] = useState(false);
   const [shipingAdress, setShippingAdress] = useState(true);
-  const { couponDiscount } = useSelector((state) => state.cart);
   const [addressDefault, setaddressDefault] = useState(0);
   const [initialFormValues, setInitialFormValues] = useState({
     firstname: userDetails.firstName,
@@ -55,33 +52,10 @@ const CheckoutScreen = ({ navigation, route }) => {
     defaultAddress: true,
     addressType: '',
   });
-  var cartAmount = route?.params?.cartAmount;
-  var cartProducts = route?.params?.cartProducts;
-  var couponCode = route?.params?.couponCode;
-  const { currencyOptions, currencySymbol } = useSelector(
-    (state) => state.settings,
-  );
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      title: 'Shipping',
-      headerTransparent: false,
-      headerTintColor: '#000',
-      headerRight: () => (
-        <AText bold pr="10px">
-          {formatCurrency(
-            cartAmount - couponDiscount,
-            currencyOptions,
-            currencySymbol,
-          )}
-        </AText>
-      ),
-    });
-  }, [navigation]);
 
   useEffect(() => {
     if (!isEmpty(userDetails.addressBook)) {
       let address = userDetails.addressBook;
-      setAddressBook(address);
       setAddressForm(false);
       var found = address.find((item) => {
         return item.default_address == true;
@@ -156,7 +130,6 @@ const CheckoutScreen = ({ navigation, route }) => {
       setAddressForm(false);
       dispatch(updateAddressAction(payload));
     }
-    // navigation.navigate('PaymentMethod', { shippingValue: values, cartAmount: cartAmount, cartProducts: cartProducts });
   };
   const editFormValues = (values) => {
     setInitialFormValues({
@@ -177,13 +150,14 @@ const CheckoutScreen = ({ navigation, route }) => {
   };
 
   const handleShipping = () => {
+    const shipAdress =
+      userDetails.addressBook &&
+      userDetails.addressBook.find((item) => item._id == addressDefault);
     const payload = { zipcode: defaddress[0].pincode };
     const navigationParams = {
       screen: 'ShippingMethod',
-      shippingValue: defaddress,
-      cartAmount: cartAmount,
-      cartProducts: cartProducts,
-      couponCode: couponCode,
+      shippingAddress: shipAdress,
+      billingAddress: shipAdress,
     };
     dispatch(checkPincodeValid(payload, navigation, navigationParams));
   };
