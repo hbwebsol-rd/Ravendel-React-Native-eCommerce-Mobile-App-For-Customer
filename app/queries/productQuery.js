@@ -192,11 +192,64 @@ const GET_FILTEREDPRODUCTS_WITH_PAGINATION = gql`
 const GET_SEARCH_PRODUCTS = gql`
   query SearchProducts($searchTerm: String!, $page: Int!, $limit: Int!) {
     searchProducts(searchTerm: $searchTerm, page: $page, limit: $limit) {
-      name
-      url
-      pricing
-      feature_image
-      rating
+      count
+      products {
+        _id
+        name
+        categoryId {
+          id
+          name
+          parentId
+          attributeIds
+          url
+          description
+          image
+          thumbnail_image
+          meta
+          date
+          updated
+        }
+        categoryTree
+        brand {
+          id
+          name
+          url
+          brand_logo
+          meta
+          date
+          updated
+        }
+        url
+        sku
+        short_description
+        description
+        quantity
+        pricing
+        feature_image
+        gallery_image
+        meta
+        shipping
+        taxClass
+        status
+        featured_product
+        product_type
+        custom_field
+        specifications {
+          key
+          attributeId
+          value
+          attributeValueId
+          group
+        }
+        attributes
+        variations
+        date
+        rating
+        ratingCount
+        levelWiseRating
+        breadcrumb
+        updated
+      }
     }
   }
 `;

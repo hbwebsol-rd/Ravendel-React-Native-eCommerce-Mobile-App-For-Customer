@@ -7,6 +7,7 @@ import {
   ImageBackground,
   FlatList,
   TextInput,
+  ScrollView,
 } from 'react-native';
 import {
   CLEAR_SEARCH_PRODUCT,
@@ -27,6 +28,7 @@ import { FontStyle } from '../../utils/config';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import FastImage from 'react-native-fast-image';
 import NavigationConstants from '../../navigation/NavigationConstants';
+import CardContainer from './Components.js/RandomCard';
 
 const SearchProduct = ({ navigation, route }) => {
   const dispatch = useDispatch();
@@ -35,11 +37,9 @@ const SearchProduct = ({ navigation, route }) => {
   const { currencyOptions, currencySymbol } = useSelector(
     (state) => state.settings,
   );
-  const {
-    filterData,
-    singleCategoryDetails: singleCateogry,
-    totalCount,
-  } = useSelector((state) => state.products);
+  const { singleCategoryDetails: singleCateogry } = useSelector(
+    (state) => state.products,
+  );
   const [categorydata, setCategorydata] = useState(null);
   const [searchTerm, setsearchTerm] = useState(searchWord);
   console.log(searchWord, singleCateogry, ' srt');
@@ -140,60 +140,34 @@ const SearchProduct = ({ navigation, route }) => {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
+    <ScrollView
+      contentContainerStyle={{ flexGrow: 1 }}
+      style={{
+        backgroundColor: Colors.whiteColor,
+      }}>
       <View style={styles.header}>
         <AIcon
           onPress={() => navigation.navigate(NavigationConstants.HOME_SCREEN)}
           name="arrowleft"
           size={22}
         />
-        <AText fonts={FontStyle.semiBold} ml="20px">
+        <AText fonts={FontStyle.fontBold} large ml="20px">
           {searchTerm
             ? capitalizeFirstLetter(searchTerm).replace(/-/g, ' ')
             : ''}
         </AText>
       </View>
-      <FlatList
-        numColumns={2}
-        data={categorydata}
-        snapToAlignment="center"
-        keyExtractor={(item) => item._id}
-        renderItem={renderItem}
-        columnWrapperStyle={{ justifyContent: 'space-between' }}
-        contentContainerStyle={{
-          marginTop: 10,
-          flexDirection: 'column',
-          margin: 'auto',
-          marginHorizontal: 30,
-          paddingBottom: 20,
+      <CardContainer
+        title={''}
+        dataItems={categorydata ? categorydata : []}
+        navigatetonext={(item) => {
+          navigation.navigate(NavigationConstants.SINGLE_PRODUCT_SCREEN, {
+            productID: item._id,
+            productUrl: item.url,
+          });
         }}
-        ListEmptyComponent={() => (
-          <View>
-            <AText style={{ fontSize: 16, alignSelf: 'center', color: 'grey' }}>
-              No Records Found
-            </AText>
-          </View>
-        )}
-        // ListFooterComponent={() =>
-        //   // Render Load More button as a footer
-        //   currentPage < totalPage && (
-        //     <TouchableOpacity
-        //       onPress={() => handleLoadMore()}
-        //       style={{
-        //         width: '100%',
-        //         alignItems: 'center',
-        //         paddingVertical: 2,
-        //       }}>
-        //       {loader ? (
-        //         <ActivityIndicator />
-        //       ) : (
-        //         <AText color={Colors.blue}>Load More</AText>
-        //       )}
-        //     </TouchableOpacity>
-        //   )
-        // }
       />
-    </View>
+    </ScrollView>
   );
 };
 

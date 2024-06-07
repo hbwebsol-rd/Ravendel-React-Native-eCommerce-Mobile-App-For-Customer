@@ -106,8 +106,7 @@ export const catProductAction =
     if (!loading) {
       dispatch({ type: PRODUCT_LOADING });
     }
-    console.log(JSON.stringify(filters), ' fill terrr you');
-
+    
     try {
       let response;
 
@@ -158,7 +157,7 @@ export const catProductSearchAction =
       dispatch({
         type: CAT_PRODUCTS,
         payload: {
-          products: _.get(response, 'data.searchProducts', []),
+          products: _.get(response, 'data.searchProducts.products', []),
           counts: _.get(
             response,
             'data.getCategoryPageData.productData.count',

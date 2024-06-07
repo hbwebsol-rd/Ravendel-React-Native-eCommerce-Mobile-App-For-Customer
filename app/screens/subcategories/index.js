@@ -112,7 +112,7 @@ const SubCategoriesScreen = ({ navigation, route }) => {
   const handleinpiut = (e) => {
     setInpvalue(e);
   };
-  console.log(filterList[filterSelect], 'filterSelect');
+
   useEffect(() => {
     setFilterList(filterData);
   }, [filterData]);
@@ -223,33 +223,7 @@ const SubCategoriesScreen = ({ navigation, route }) => {
         categoryUrl: selectedCatId,
       },
       sort: sortBy,
-      filters: [
-        {
-          field: 'brand',
-          type: 'array',
-          category: 'static',
-          valueType: 'ObjectId',
-          select: ActiveBrand,
-        },
-        {
-          field: 'pricing.sellprice',
-          type: 'range',
-          category: 'static',
-          select: {
-            minValue: amountRange[0],
-            maxValue: amountRange[1],
-          },
-        },
-        {
-          field: 'rating',
-          type: 'choice',
-          category: 'static',
-          valueType: 'Integer',
-          select: {
-            minValue: starCount,
-          },
-        },
-      ],
+      filters: filterList.filter((item) => !isEmpty(item.select)),
       pageNo: 1,
       limit: 10,
     };
@@ -320,6 +294,92 @@ const SubCategoriesScreen = ({ navigation, route }) => {
   if (loading) {
     return <AppLoader />;
   }
+  const rangeFilterRenderCompomnent = (type) => {
+    var priceSegments = [];
+    if (type === 'range') {
+      const minPrice = filterList[filterSelect].data.minPrice;
+      const maxPrice = filterList[filterSelect].data.maxPrice;
+      const segments = 6;
+      const step = (maxPrice - minPrice) / segments;
+      priceSegments = Array(segments)
+        .fill()
+        .map((_, i) => {
+          const startPrice = (minPrice + i * step).toFixed(0);
+          const endPrice = (minPrice + (i + 1) * step).toFixed(0);
+          return (
+            <Pressable
+              activeOpacity={0.9}
+              style={styles.filterListDatastyle}
+              onPress={() => {
+                const newFilterList = JSON.parse(JSON.stringify(filterList));
+                newFilterList[filterSelect].select = {
+                  minPrice: '',
+                  maxPrice: '',
+                };
+                newFilterList[filterSelect].select.minPrice = startPrice;
+                newFilterList[filterSelect].select.maxPrice = endPrice;
+                setFilterList(newFilterList);
+              }}>
+              <IonIcon
+                color={APP_PRIMARY_COLOR}
+                name={
+                  !isEmpty(filterList[filterSelect].select) &&
+                  filterList[filterSelect].select.minPrice == startPrice &&
+                  filterList[filterSelect].select.maxPrice == endPrice
+                    ? 'radio-button-on'
+                    : 'radio-button-off'
+                }
+                style={{ marginHorizontal: 5 }}
+                size={20}
+              />
+
+              <AText key={i} xtrasmall color="#000" center>
+                {`${startPrice} - ${endPrice}`}
+              </AText>
+            </Pressable>
+          );
+        });
+    } else {
+      const segments = 5;
+
+      priceSegments = Array(segments)
+        .fill()
+        .map((_, i) => {
+          return (
+            <Pressable
+              activeOpacity={0.9}
+              style={styles.filterListDatastyle}
+              onPress={() => {
+                const newFilterList = JSON.parse(JSON.stringify(filterList));
+                newFilterList[filterSelect].select = {
+                  minValue: '',
+                };
+                newFilterList[filterSelect].select.minValue = i;
+                setFilterList(newFilterList);
+              }}>
+              <IonIcon
+                color={APP_PRIMARY_COLOR}
+                name={
+                  !isEmpty(filterList[filterSelect].select) &&
+                  !isEmpty(filterList[filterSelect].select.minValue) &&
+                  filterList[filterSelect].select.minValue == i
+                    ? 'radio-button-on'
+                    : 'radio-button-off'
+                }
+                style={{ marginHorizontal: 5 }}
+                size={20}
+              />
+
+              <AText mr={'5px'} key={i} xtrasmall color="#000" center>
+                {i}
+              </AText>
+              <IonIcon name={'star'} color={'#DDAC17'} size={15} />
+            </Pressable>
+          );
+        });
+    }
+    return priceSegments;
+  };
 
   return (
     <>
@@ -485,16 +545,30 @@ const SubCategoriesScreen = ({ navigation, route }) => {
           }}
           style={{ flex: 1, flexDirection: 'row' }}>
           <View style={styles.filterModalHeader}>
+            <View style={{ flexDirection: 'row' }}>
+              <TouchableOpacity
+                style={{ marginEnd: 10 }}
+                onPress={() => handleReset()}>
+                <AIcon
+                  onPress={() => setFilterModal(false)}
+                  name="arrowleft"
+                  size={20}
+                />
+              </TouchableOpacity>
+              <AText fonts={FontStyle.semiBold}>Filter</AText>
+            </View>
             <TouchableOpacity
-              style={{ marginEnd: 10 }}
-              onPress={() => handleReset()}>
-              <AIcon
-                onPress={() => setFilterModal(false)}
-                name="arrowleft"
-                size={20}
-              />
+              onPress={() => handleFilter()}
+              style={{
+                backgroundColor: APP_PRIMARY_COLOR,
+                paddingHorizontal: 15,
+                paddingVertical: 10,
+                borderRadius: 15,
+              }}>
+              <AText color={'#fff'} fonts={FontStyle.semiBold}>
+                Apply
+              </AText>
             </TouchableOpacity>
-            <AText fonts={FontStyle.semiBold}>Filter</AText>
           </View>
           <View style={styles.filterBodyStyle}>
             <ScrollView
@@ -530,9 +604,14 @@ const SubCategoriesScreen = ({ navigation, route }) => {
                 marginTop: 12,
               }}
               showsVerticalScrollIndicator={false}>
-              {filterSelect && !isEmpty(filterList[filterSelect])
-                ? filterList[filterSelect].type == 'array' ||
-                  filterList[filterSelect].type == 'choice'
+              {!isEmpty(filterSelect) &&
+              !isEmpty(filterList[filterSelect]) &&
+              !isEmpty(filterList[filterSelect].type)
+                ? filterList[filterSelect].type == 'choice' &&
+                  filterList[filterSelect].field == 'rating'
+                  ? rangeFilterRenderCompomnent('rating')
+                  : filterList[filterSelect].type == 'array' ||
+                    filterList[filterSelect].type == 'choice'
                   ? filterList[filterSelect].data &&
                     filterList[filterSelect].data.map((item, index) => (
                       <Pressable
@@ -542,7 +621,23 @@ const SubCategoriesScreen = ({ navigation, route }) => {
                           const newFilterList = JSON.parse(
                             JSON.stringify(filterList),
                           );
+                          newFilterList[filterSelect].select = !isEmpty(
+                            newFilterList[filterSelect].select,
+                          )
+                            ? newFilterList[filterSelect].select
+                            : [];
                           if (filterList[filterSelect].type == 'array') {
+                            if (
+                              !newFilterList[filterSelect].data[index].select
+                            ) {
+                              newFilterList[filterSelect].select.push(
+                                item.value,
+                              );
+                            } else {
+                              newFilterList[filterSelect].select.filter(
+                                (id) => item.value !== id,
+                              );
+                            }
                             newFilterList[filterSelect].data[index].select =
                               !newFilterList[filterSelect].data[index].select;
                           } else {
@@ -580,6 +675,8 @@ const SubCategoriesScreen = ({ navigation, route }) => {
                         </AText>
                       </Pressable>
                     ))
+                  : filterList[filterSelect].type == 'range'
+                  ? rangeFilterRenderCompomnent('range')
                   : null
                 : null}
 
@@ -699,6 +796,7 @@ const styles = StyleSheet.create({
   filterModalHeader: {
     flexDirection: 'row',
     shadowColor: '#000',
+    justifyContent: 'space-between',
     alignItems: 'center',
     shadowOffset: {
       width: 0,
