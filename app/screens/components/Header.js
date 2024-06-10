@@ -7,7 +7,7 @@ import { Image } from 'react-native';
 import NavigationConstants from '../../navigation/NavigationConstants';
 import PropTypes from 'prop-types';
 
-const Header = ({ navigation, title, showProfileIcon }) => {
+const Header = ({ navigation, title, showProfileIcon, titleColor }) => {
   function handlePress() {
     // navigation.openDrawer();
   }
@@ -21,7 +21,7 @@ const Header = ({ navigation, title, showProfileIcon }) => {
         <View style={Styles.bar1}></View>
         <View style={Styles.bar2}></View>
       </TouchableOpacity> */}
-      <AText fonts={FontStyle.semiBold} ml="20px">
+      <AText color={titleColor ?? '#000'} fonts={FontStyle.fontBold}>
         {title}
       </AText>
       {showProfileIcon ? (
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     marginTop: 10,
-    paddingHorizontal: 30,
+    paddingHorizontal: 17,
     zIndex: 10,
     // backgroundColor: Colors.whiteColor,
   },

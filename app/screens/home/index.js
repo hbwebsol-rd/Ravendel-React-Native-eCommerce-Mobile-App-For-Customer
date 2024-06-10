@@ -237,30 +237,31 @@ const HomeScreen = ({ navigation }) => {
     <View style={Styles.mainContainer}>
       {settingLoading ? <AppLoader /> : null}
       <StatusBar backgroundColor={APP_PRIMARY_COLOR} />
-      {/* <Header showProfileIcon navigation={navigation} title={''} /> */}
+      <Header
+        titleColor={APP_PRIMARY_COLOR}
+        showProfileIcon
+        navigation={navigation}
+        title={'Ravendal'}
+      />
       <View style={styles.searchstyle}>
-        <ARow mt={'10px'} row alignItems="center" position="relative">
-          <Icon
-            style={styles.iconstyle}
-            name={'search'}
-            size={15}
-            color={'black'}
-          />
-          <TextInput
-            height={30}
-            bc={'#E0E0E0'}
-            onSubmit={() => handleSearchProduct()}
-            value={searchTerm}
-            onchange={handleinpiut}
-            padding={0}
-            pl={35}
-            inputBgColor={Colors.whiteColor}
-            fs={12}
-            placeholder={'Search'}
-            placeholdercolor={'black'}
-            br={30}
-          />
-        </ARow>
+        <Icon
+          style={styles.iconstyle}
+          name={'search'}
+          size={15}
+          color={'black'}
+        />
+        <TextInput
+          height={50}
+          onSubmit={() => handleSearchProduct()}
+          value={searchTerm}
+          onchange={handleinpiut}
+          padding={0}
+          pl={35}
+          inputBgColor={'#EFF0F0'}
+          fs={12}
+          placeholder={'Search'}
+          placeholdercolor={'black'}
+        />
       </View>
       <View style={{ padding: 10, backgroundColor: Colors.whiteColor }}></View>
       <AContainer
@@ -382,12 +383,17 @@ const styles = StyleSheet.create({
   searchstyle: {
     flexWrap: 'wrap',
     flexDirection: 'row',
-    backgroundColor: Colors.whiteColor,
-    height: 60,
+    backgroundColor: '#EFF0F0',
+    height: 50,
     marginTop: 30,
-    paddingHorizontal: 30,
-    paddingTop: 20,
-    alignItems: 'flex-start',
+    borderRadius: 30,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+    marginTop: 60,
+    marginHorizontal: 10,
+    justifyContent: 'center',
+    borderColor: '#E0E0E0',
+    borderWidth: 0.9,
   },
 
   iconstyle: {
