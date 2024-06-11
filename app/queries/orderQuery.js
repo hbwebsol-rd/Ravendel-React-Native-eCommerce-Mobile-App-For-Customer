@@ -218,6 +218,7 @@ const ADD_ORDER = gql`
       redirectUrl
       paypalOrderId
       razorpayOrderId
+      id
     }
   }
 `;

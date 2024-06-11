@@ -382,7 +382,8 @@ const CartScreen = ({ navigation }) => {
                   </View>
                 ) : null}
 
-                {!isEmpty(relatedProducts) && !isEmpty(relatedProducts[1])&&
+                {!isEmpty(relatedProducts) &&
+                !isEmpty(relatedProducts[1]) &&
                 !isEmpty(relatedProducts[1].products) ? (
                   <ImageSliderNew
                     title={'People who bought this also bought'}
@@ -510,7 +511,7 @@ const CartScreen = ({ navigation }) => {
               <AButton
                 title="Shop Now"
                 onPress={() =>
-                  navigation.navigate(NavigationConstants.SHOP_SCREEN)
+                  navigation.navigate(NavigationConstants.CATEGORIES_SCREEN)
                 }
               />
             </EmptyWrapper>
@@ -648,8 +649,6 @@ const ItemDescription = styled.View`
   flex-direction: row;
   justify-content: space-between;
 `;
-
-
 
 const styles = StyleSheet.create({
   container: {

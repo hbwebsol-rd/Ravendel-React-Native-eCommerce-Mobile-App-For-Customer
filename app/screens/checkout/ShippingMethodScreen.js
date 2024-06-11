@@ -7,7 +7,7 @@ import {
   ScrollView,
   Image,
 } from 'react-native';
-import { AText, AButton, BackHeader } from '../../theme-components';
+import { AText, AButton, BackHeader, AppLoader } from '../../theme-components';
 import styled from 'styled-components/native';
 import { formatCurrency, isEmpty } from '../../utils/helper';
 import { useDispatch, useSelector } from 'react-redux';
@@ -44,9 +44,10 @@ const ShippingMethodScreen = ({ navigation }) => {
 
   const { userDetails, isLoggin } = useSelector((state) => state.customer);
   const cartItems = useSelector((state) => state.cart.products);
-  const { shippingMethodList } = useSelector((state) => state.checkoutDetail);
+  const { shippingMethodList, loading } = useSelector(
+    (state) => state.checkoutDetail,
+  );
   const { paymentSetting } = useSelector((state) => state.settings);
-
   const [paymentMethod, setPaymentMethod] = useState('Cash On Delivery');
   const [couponCode, setCouponCode] = useState('');
   const [coupontotal, setCouponTotal] = useState(0);
@@ -152,7 +153,16 @@ const ShippingMethodScreen = ({ navigation }) => {
     console.log(JSON.stringify(payload), 'payyyyl check');
     // return;
     if (paymentMethod.toLowerCase() !== 'paypal') {
-      dispatch(checkoutDetailsAction(payload, cartId, navigation, navParams));
+      dispatch(
+        checkoutDetailsAction(
+          payload,
+          cartId,
+          navigation,
+          navParams,
+          paymentSetting,
+          cartSummary?.grandTotal,
+        ),
+      );
     } else {
       navigation.navigate('PaypalPayment', { orderData: payload });
     }
@@ -161,6 +171,9 @@ const ShippingMethodScreen = ({ navigation }) => {
     // }
   };
 
+  if (loading) {
+    return <AppLoader />;
+  }
   return (
     <View style={styles.container}>
       <BackHeader navigation={navigation} name="Checkout" />

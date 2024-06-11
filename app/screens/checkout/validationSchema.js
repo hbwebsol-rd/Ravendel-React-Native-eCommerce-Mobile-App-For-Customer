@@ -56,7 +56,7 @@ export const signupValidationSchema = yup.object().shape({
     }),
   mobile: yup
     .string()
-    .matches(phoneReg, 'Phone number is not valid')
+    // .matches(phoneReg, 'Phone number is not valid')
     .label('Mobile No.')
     .required(),
   policy: yup

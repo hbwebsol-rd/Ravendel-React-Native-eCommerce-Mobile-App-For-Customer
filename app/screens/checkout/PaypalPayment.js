@@ -1,22 +1,51 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableHighlight } from 'react-native';
 import WebView from 'react-native-webview';
+import RazorpayCheckout from 'react-native-razorpay';
+import URL from '../../utils/baseurl';
+import { useDispatch, useSelector } from 'react-redux';
+import { paymentStatus } from '../../store/action/checkoutAction';
 
 const Paypalpayment = ({ navigation, route }) => {
+  const dispatch = useDispatch();
   const orderData = route.params.orderData;
-  console.log(orderData, 'ood');
+  const token = useSelector((state) => state.login.user_token);
+  orderData.token = token;
+  console.log(JSON.stringify(orderData), 'ood', token);
+
+  const onNavigationStateChange = (path) => {
+    const urls = path.nativeEvent.url;
+    // console.log(url, '---');
+    if (urls.includes('http://localhost')) {
+      const regex = /[?&]([^=#]+)=([^&#]*)/g;
+      let match;
+      const params = {};
+
+      // Loop through matches and extract key-value pairs
+      while ((match = regex.exec(urls))) {
+        params[match[1]] = decodeURIComponent(match[2]);
+      }
+
+      console.log(params);
+      const payload = {
+        id: params.orderId,
+        paymentStatus: 'success',
+      };
+      dispatch(paymentStatus(payload, navigation));
+    }
+  };
   return (
     <View style={styles.container}>
       <WebView
         source={{
-          uri: `https://30e6-116-75-243-3.ngrok-free.app/checkout?orderData=${JSON.stringify(
+          uri: `https://a666-116-75-243-3.ngrok-free.app/reactNativePaypal?orderData=${JSON.stringify(
             orderData,
           )}`,
         }}
         startInLoadingState={true}
-        // onLoadProgress={(path) => {
-        //   onNavigationStateChange(path);
-        // }}
+        onLoadProgress={(path) => {
+          onNavigationStateChange(path);
+        }}
       />
     </View>
   );

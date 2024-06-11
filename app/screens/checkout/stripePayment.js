@@ -7,11 +7,12 @@ import { paymentStatus } from '../../store/action/checkoutAction';
 const StripePayment = ({ navigation, route }) => {
   const dispatch = useDispatch();
   const url = route.params.url;
-
+  const navParams = route.params.navParams;
+  console.log(url, ' url stipe');
   const onNavigationStateChange = (path) => {
     const urls = path.nativeEvent.url;
-    console.log(url, '---');
-    if (urls.includes('http://localhost')) {
+    console.log(urls, '---');
+    if (urls.includes('https://demo1-ravendel.hbwebsol.com')) {
       const regex = /[?&]([^=#]+)=([^&#]*)/g;
       let match;
       const params = {};
@@ -26,7 +27,7 @@ const StripePayment = ({ navigation, route }) => {
         id: params.orderId,
         paymentStatus: 'success',
       };
-      dispatch(paymentStatus(payload, navigation));
+      dispatch(paymentStatus(payload, navigation, navParams));
     }
   };
   return (
