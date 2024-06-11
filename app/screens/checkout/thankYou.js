@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  BackHandler,
 } from 'react-native';
 import { AButton, AText } from '../../theme-components';
 import Colors from '../../constants/Colors';
@@ -21,8 +22,14 @@ import { ProductPriceText } from '../components';
 const MyComponent = ({ navigation, route }) => {
   var paymentMethod = route?.params?.paymentMethod;
   var shippingMethod = route?.params?.shippingMethod;
-  var cartProducts = route.params.cartProducts;
-  
+  var cartProducts = route?.params?.cartProducts;
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => true,
+    );
+    return () => backHandler.remove();
+  }, []);
   const { cartSummary, shippingAddress, billingAddress } = useSelector(
     (state) => state.cart,
   );

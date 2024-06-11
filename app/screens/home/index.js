@@ -52,6 +52,7 @@ import {
   APP_PRIMARY_COLOR,
   APP_SECONDARY_COLOR,
   FontStyle,
+  changeWindowHeightWidth,
   windowWidth,
 } from '../../utils/config';
 import Icon from 'react-native-vector-icons/Feather';
@@ -66,6 +67,9 @@ import Styles from '../../Theme';
 import NavigationConstants from '../../navigation/NavigationConstants';
 import URL from '../../utils/baseurl';
 import Carousel from 'react-native-snap-carousel';
+import NoConnection from '../../theme-components/nointernet';
+import NetInfo from '@react-native-community/netinfo';
+import { NET_OFF, NET_ON } from '../../store/reducers/alert';
 
 const HomeScreen = ({ navigation }) => {
   // States and Variables
@@ -84,8 +88,11 @@ const HomeScreen = ({ navigation }) => {
   );
 
   const settingLoading = useSelector((state) => state.settings.loading);
+  const { netConnection } = useSelector((state) => state.alert);
+  console.log(netConnection, ' netinfo');
   const [allCategories, setAllCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [size, setSize] = useState(0);
   const carouselRef = useRef(null);
 
   //Custom Functions
@@ -183,7 +190,25 @@ const HomeScreen = ({ navigation }) => {
     dispatch(AppSettingAction());
     wait(2000).then(() => setRefreshing(false));
   }, []);
+
   // Use Effect Call
+  useEffect(() => {
+    NetInfo.addEventListener((networkState) => {
+      dispatch({ type: networkState.isConnected ? NET_ON : NET_OFF });
+    });
+  }, [NetInfo]);
+
+  // useEffect(() => {
+  //   const updateWindowHeight = () => {
+  //     const newWindowHeight = Dimensions.get('window').height;
+  //     const newWindowWidth = Dimensions.get('window').width;
+  //     changeWindowHeightWidth(newWindowHeight, newWindowWidth);
+  //     setSize(newWindowWidth);
+  //   };
+
+  //   Dimensions.addEventListener('change', updateWindowHeight);
+
+  // }, []);
 
   useEffect(() => {
     dispatch(AppSettingAction());
@@ -233,6 +258,9 @@ const HomeScreen = ({ navigation }) => {
       </View>
     );
   };
+  if (netConnection) {
+    return <NoConnection />;
+  }
   return (
     <View style={Styles.mainContainer}>
       {settingLoading ? <AppLoader /> : null}
