@@ -14,6 +14,7 @@ import { CART_FAIL, updateCartAction } from './cartAction';
 import NavigationConstants from '../../navigation/NavigationConstants';
 import _ from 'lodash';
 import RazorpayCheckout from 'react-native-razorpay';
+import { APP_PRIMARY_COLOR } from '../../utils/config';
 
 export const checkoutDetailsAction =
   (
@@ -50,7 +51,10 @@ export const checkoutDetailsAction =
             })
           : checkoutDetailsData.billing.paymentMethod === 'cashondelivery' ||
             checkoutDetailsData.billing.paymentMethod === 'banktransfer'
-          ? navigation.navigate(NavigationConstants.THANK_YOU_SCREEN, navParams)
+          ? navigation.navigate(NavigationConstants.THANK_YOU_SCREEN, {
+              ...navParams,
+              orderId: response.data.addOrder.id,
+            })
           : '';
         if (checkoutDetailsData.billing.paymentMethod === 'razorpay') {
           console.log('opening rzor');
@@ -66,7 +70,7 @@ export const checkoutDetailsAction =
               contact: '9191919191',
               name: 'Razorpay Software',
             },
-            theme: { color: '#F37254' },
+            theme: { color: APP_PRIMARY_COLOR },
           };
           RazorpayCheckout.open(options)
             .then((data) => {

@@ -18,11 +18,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components/native';
 import { formatCurrency, isEmpty } from '../../utils/helper';
 import { ProductPriceText } from '../components';
+import moment from 'moment';
 
 const MyComponent = ({ navigation, route }) => {
   var paymentMethod = route?.params?.paymentMethod;
   var shippingMethod = route?.params?.shippingMethod;
   var cartProducts = route?.params?.cartProducts;
+  var orderId = route?.params?.orderId;
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
@@ -58,7 +60,7 @@ const MyComponent = ({ navigation, route }) => {
               Order Number
             </AText>
             <AText color="black" mb={'5px'} fonts={FontStyle.fv} small>
-              1234
+              {orderId}
             </AText>
           </View>
           <View
@@ -67,7 +69,7 @@ const MyComponent = ({ navigation, route }) => {
               Date
             </AText>
             <AText color="black" mb={'5px'} fonts={FontStyle.fontRegular} small>
-              4-April-2023
+              {moment(new Date()).format('ll')}
             </AText>
           </View>
         </View>
@@ -291,7 +293,7 @@ const MyComponent = ({ navigation, route }) => {
         mr="50px"
         onPress={() => navigation.navigate(NavigationConstants.HOME_SCREEN)}
         round
-        title="Next"
+        title="Home"
       />
     </ScrollView>
   );

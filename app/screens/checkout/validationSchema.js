@@ -16,7 +16,7 @@ export const validationSchema = yup.object().shape({
   lastname: yup.string().label('Last Name').min(2).required(),
   phone: yup
     .string()
-    .matches(phoneReg, 'Phone number is not valid')
+    // .matches(phoneReg, 'Phone number is not valid')
     .label('Phone number')
     .required(),
   // landmark: yup
@@ -70,7 +70,7 @@ export const editProfileValidationSchema = yup.object().shape({
   email: yup.string().label('Email').email().required(),
   phone: yup
     .string()
-    .matches(phoneReg, 'Phone number is not valid')
+    // .matches(phoneReg, 'Phone number is not valid')
     .label('Phone No.')
     .required(),
 });

@@ -42,7 +42,7 @@ import {
 import StarRating from 'react-native-star-rating';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { isEmpty } from '../../utils/helper';
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused, useScrollToTop } from '@react-navigation/native';
 import { ProductPriceText } from '../components';
 import { View } from 'react-native-animatable';
 import moment from 'moment';
@@ -107,6 +107,7 @@ const SingleProductScreen = ({ navigation, route }) => {
   const [pinCode, setPinCode] = useState('');
   const [deliverable, setDeliverable] = useState('');
   const snapPoints = ['40%', '62%', '100%'];
+  const scrollViewRef = useRef(null);
 
   // ref
   const bottomSheetModalRef = useRef(null);
@@ -115,6 +116,15 @@ const SingleProductScreen = ({ navigation, route }) => {
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current?.present();
   }, []);
+
+  useEffect(() => {
+    scrollViewRef.current?.scrollTo({
+      y: 0,
+      animated: true,
+    });
+  }, [ProductUrls]);
+
+  useScrollToTop(scrollViewRef);
 
   // Custom Function
   const addReview = (val) => {
@@ -319,9 +329,10 @@ const SingleProductScreen = ({ navigation, route }) => {
       {!isEmpty(SingleProduct) ? (
         <>
           <ScrollView
+            ref={scrollViewRef}
             keyboardShouldPersistTaps={'always'}
             contentContainerStyle={{ flexGrow: 1, paddingBottom: 70 }}
-            style={{ flexGrow: 1, paddingBottom: 50 }}>
+            style={{ flexGrow: 1, paddingBottom: 50, backgroundColor: '#fff' }}>
             {/* <ProductPriceText Pricing={SingleProduct.pricing} /> */}
             {/* ===============Product Name============= */}
             <View style={{ width: '100%', height: 450 }}>
@@ -629,19 +640,31 @@ const SingleProductScreen = ({ navigation, route }) => {
             ) : null}
           </ScrollView>
           <View style={styles.addToCartWrapper}>
-            {(!isEmpty(SingleProduct.quantity) && SingleProduct.quantity > 0) ||
-            !manage_stock ? (
-              <TouchableOpacity
-                style={{
-                  ...styles.addCartBtnStyle,
-                  backgroundColor: APP_PRIMARY_COLOR,
-                }}
-                onPress={() => addToCart()}>
-                <AText color={'#fff'} font={FontStyle.fontBold} center>
-                  {itemInCart ? 'Added' : 'Add to Cart'}
-                </AText>
-              </TouchableOpacity>
-            ) : (
+            {/* {(!isEmpty(SingleProduct.quantity) && SingleProduct.quantity > 0) ||
+            !manage_stock ? ( */}
+            <TouchableOpacity
+              style={{
+                ...styles.addCartBtnStyle,
+                backgroundColor:
+                  (!isEmpty(SingleProduct.quantity) &&
+                    SingleProduct.quantity > 0) ||
+                  !manage_stock
+                    ? APP_PRIMARY_COLOR
+                    : '#c7c7c7',
+              }}
+              disabled={
+                (!isEmpty(SingleProduct.quantity) &&
+                  SingleProduct.quantity > 0) ||
+                !manage_stock
+                  ? false
+                  : true
+              }
+              onPress={() => addToCart()}>
+              <AText color={'#fff'} font={FontStyle.fontBold} center>
+                {itemInCart ? 'Added' : 'Add to Cart'}
+              </AText>
+            </TouchableOpacity>
+            {/* ) : (
               <TouchableOpacity
                 style={{
                   ...styles.addCartBtnStyle,
@@ -656,7 +679,7 @@ const SingleProductScreen = ({ navigation, route }) => {
                   Out of Stock
                 </AText>
               </TouchableOpacity>
-            )}
+            )} */}
           </View>
           {/* </BottomSheetModal> */}
 
@@ -1037,7 +1060,8 @@ const styles = StyleSheet.create({
     height: 4,
   },
   addToCartWrapper: {
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    backgroundColor: 'rgba(168, 164, 164,0.35)',
+    // backgroundColor:'red',
     paddingTop: 5,
     width: '100%',
     alignSelf: 'center',
@@ -1045,9 +1069,10 @@ const styles = StyleSheet.create({
     bottom: 1,
   },
   addCartBtnStyle: {
-    width: '70%',
+    width: '60%',
     borderRadius: 25,
-    paddingVertical: 15,
+    paddingVertical: 10,
+    marginBottom: 3,
     alignSelf: 'center',
   },
 });

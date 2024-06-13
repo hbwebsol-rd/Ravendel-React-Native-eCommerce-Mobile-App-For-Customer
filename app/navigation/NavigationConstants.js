@@ -30,4 +30,5 @@ export default {
   WISHLIST: 'WishList',
   NOTIFICATION: 'Notification',
   PAYPAL_PAYMENT: 'PaypalPayment',
+  ContactUs: 'ContactUs',
 };

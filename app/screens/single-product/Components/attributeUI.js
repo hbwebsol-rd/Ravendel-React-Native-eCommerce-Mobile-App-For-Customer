@@ -1,7 +1,11 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import React from 'react';
 import { AText } from '../../../theme-components';
-import { APP_SECONDARY_COLOR, FontStyle } from '../../../utils/config';
+import {
+  APP_PRIMARY_COLOR,
+  APP_SECONDARY_COLOR,
+  FontStyle,
+} from '../../../utils/config';
 import { isEmpty } from '../../../utils/helper';
 
 const AttributeListing = ({
@@ -12,18 +16,16 @@ const AttributeListing = ({
   productUrl,
   onPress,
 }) => {
-
-    const selectAttribute = (keyName) => {
-    const keyNameTrimmedLower = keyName.trim().toLowerCase();
-    return (hasMatchingVariation = variations.some(
+  const selectAttribute = (keyID) => {
+    let hasMatchingVariation = variations.some(
       (vari) =>
         vari.productUrl === productUrl &&
         vari.combinations.some(
           (comb) =>
-            comb.attributeName.toLowerCase() === attributeName.toLowerCase() &&
-            comb.attributeValueName.toLowerCase() === keyNameTrimmedLower,
+            comb.attributeId === attributeID && comb.attributeValueId === keyID,
         ),
-    ));
+    );
+    return hasMatchingVariation;
   };
   const changeAttribute = (attributeValueId) => {
     let selectedVariation = variations.find(
@@ -47,10 +49,18 @@ const AttributeListing = ({
           ),
         );
       });
+      console.log('adsdasdasdad', result && !isEmpty(result.productUrl));
+
       if (result && !isEmpty(result.productUrl)) {
         let payLoad = { _id: result.productId, url: result.productUrl };
         onPress(payLoad);
+      } else {
+        console.log('adsdasdasdad');
+        alert('Product not found');
       }
+    } else {
+      console.log('adsdasdasdad');
+      alert('Product not found');
     }
   };
   return (
@@ -66,12 +76,12 @@ const AttributeListing = ({
               style={[
                 styles.attributeBoxStyle,
                 {
-                  backgroundColor: selectAttribute(key.name)
+                  backgroundColor: selectAttribute(key._id)
                     ? APP_SECONDARY_COLOR
                     : '#fff',
-                  borderColor: selectAttribute(key.name)
-                    ? APP_SECONDARY_COLOR
-                    : '#fff',
+                  borderColor: selectAttribute(key._id)
+                    ? APP_PRIMARY_COLOR
+                    : '#000',
                 },
               ]}>
               <AText center small color={'black'} fonts={FontStyle.fontRegular}>
@@ -98,6 +108,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingVertical: 6,
     alignItems: 'center',
+    borderWidth: 1,
     justifyContent: 'center',
   },
   containerViewStyle: {

@@ -48,27 +48,41 @@ const ShippingMethodScreen = ({ navigation }) => {
     (state) => state.checkoutDetail,
   );
   const { paymentSetting } = useSelector((state) => state.settings);
-  const [paymentMethod, setPaymentMethod] = useState('Cash On Delivery');
+  const [paymentMethod, setPaymentMethod] = useState('CASH_ON_DELIVERY');
   const [couponCode, setCouponCode] = useState('');
   const [coupontotal, setCouponTotal] = useState(0);
 
   const [couponApplied, setCouponApplied] = useState(false);
   const [shippingMethod, setShippingMethod] = useState('');
-  const { cartSummary, couponDiscount, cartId, shippingAddress } = useSelector(
-    (state) => state.cart,
-  );
+  const {
+    cartSummary,
+    couponDiscount,
+    cartId,
+    shippingAddress,
+    billingAddress,
+  } = useSelector((state) => state.cart);
 
   const {
-    pincode,
-    state,
-    city,
-    addressLine1,
-    phone,
-    lastName,
-    firstName,
-    country,
+    pincode: shipping_pincode,
+    state: shipping_state,
+    city: shipping_city,
+    addressLine1: shipping_addressLine1,
+    phone: shipping_phone,
+    lastName: shipping_lastName,
+    firstName: shipping_firstName,
+    country: shipping_country,
   } = shippingAddress;
-
+  const {
+    pincode: biller_pincode,
+    state: biller_state,
+    city: biller_city,
+    addressLine1: biller_addressLine1,
+    phone: biller_phone,
+    lastName: biller_lastName,
+    firstName: biller_firstName,
+    country: biller_country,
+  } = billingAddress;
+console.log(shippingAddress,'shippingAddress')
   const { currencySymbol, currencyOptions } = useSelector(
     (state) => state.settings,
   );
@@ -115,33 +129,37 @@ const ShippingMethodScreen = ({ navigation }) => {
   };
 
   const checkoutDetails = () => {
+    if (isEmpty(shippingMethod)) {
+      alert('Please select shipping Method');
+      return;
+    }
     // if (checked === 'cod') {
     const payload = {
       userId: _id,
       billing: {
-        lastname: lastName,
-        firstname: firstName,
-        address: addressLine1,
-        city: city,
-        zip: pincode,
-        country: country,
-        state: state,
+        lastname: biller_lastName,
+        firstname: biller_firstName,
+        address: biller_addressLine1,
+        city: biller_city,
+        zip: biller_pincode,
+        country: biller_country,
+        state: biller_state,
         email: userEmail,
-        phone: phone || '1234',
+        phone: biller_phone || '1234',
         paymentMethod: paymentMethod
           .replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '')
           .toLowerCase(),
       },
       shipping: {
-        firstname: userFirstName,
-        lastname: userLastName,
-        address: addressLine1,
-        city: city,
-        zip: pincode,
-        country: country,
-        state: state,
+        firstname: shipping_firstName,
+        lastname: shipping_lastName,
+        address: shipping_addressLine1,
+        city: shipping_city,
+        zip: shipping_pincode,
+        country: shipping_country,
+        state: shipping_state,
         email: userEmail,
-        phone: userPhone || '1234',
+        phone: shipping_phone || '1234',
         notes: '',
       },
     };

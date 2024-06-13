@@ -33,6 +33,7 @@ import {
   WishList,
   PaypalPayment,
   SearchProduct,
+  ContactUs,
 } from '../screens';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
@@ -260,6 +261,11 @@ const Navigation = () => {
           name={NVC.THANK_YOU_SCREEN}
           options={{ headerShown: false, tabBarButton: () => null }}
           component={ThankYou}
+        />
+        <Stack.Screen
+          name={NVC.ContactUs}
+          options={{ headerShown: false, tabBarButton: () => null }}
+          component={ContactUs}
         />
         {/* Cart End */}
 

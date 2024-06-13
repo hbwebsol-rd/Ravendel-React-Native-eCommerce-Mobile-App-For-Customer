@@ -76,7 +76,7 @@ const AccountScreen = ({ navigation }) => {
     {
       id: 3,
       name: 'Contact US',
-      navigationScreen: '',
+      navigationScreen: NavigationConstants.ContactUs,
     },
   ];
   const Logout = () => {
@@ -141,12 +141,14 @@ const AccountScreen = ({ navigation }) => {
               </AText>
               {impInfoFieldArray.map((item) => (
                 <TouchableOpacity
-                  style={{
-                    width: '95%',
-                    paddingVertical: 5,
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                  }}>
+                  onPress={() => {
+                    item.navigationScreen
+                      ? navigation.navigate(item.navigationScreen, {
+                          initial: false,
+                        })
+                      : '';
+                  }}
+                  style={styles.infoBtnStyle}>
                   <AText
                     color={'#8A8A8A'}
                     mediu
@@ -311,6 +313,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 10,
     borderColor: 'grey',
+  },
+  infoBtnStyle: {
+    width: '95%',
+    paddingVertical: 5,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 });
 export default AccountScreen;

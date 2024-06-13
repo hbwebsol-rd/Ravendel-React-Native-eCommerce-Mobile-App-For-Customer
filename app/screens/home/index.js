@@ -395,7 +395,7 @@ const SectionView = styled.View`
   border-color: #ddd;
 `;
 const PopularPicksWrapper = styled.TouchableOpacity`
-  height: 168px;
+  height: 170px;
   width: 100%;
   margin-top: 30px;
 `;
@@ -403,7 +403,7 @@ const PopularPicksWrapper = styled.TouchableOpacity`
 const PopularPicksImage = styled.Image`
   width: 100%;
   height: 100%;
-  resize-mode: cover;
+  resize-mode: stretch;
 `;
 
 const styles = StyleSheet.create({

@@ -36,8 +36,10 @@ const CheckoutScreen = ({ navigation }) => {
   const [scrollenable, setScrollEnable] = useState(true);
   const { userDetails, loading } = useSelector((state) => state.customer);
   const [addressForm, setAddressForm] = useState(false);
-  const [shipingAdress, setShippingAdress] = useState(true);
+  const [sameShipingAdress, setSameShippingAdress] = useState(true);
+  const [formSubmit, setFormSubmit] = useState(false);
   const [addressDefault, setaddressDefault] = useState(0);
+  const [shippingAddress, setShippingAddress] = useState({});
   const [initialFormValues, setInitialFormValues] = useState({
     firstname: userDetails.firstName,
     lastname: userDetails.lastName,
@@ -95,8 +97,14 @@ const CheckoutScreen = ({ navigation }) => {
         defaultAddress: values.defaultAddress,
         addressType: values.addressType,
       };
-      setAddressForm(false);
-      dispatch(addAddressAction(payload));
+      console.log(payload, '!sameShipingAdress && !addressForm');
+      if (!sameShipingAdress && !addressForm) {
+        setShippingAddress(payload);
+        handleShipping(payload);
+      } else {
+        setAddressForm(false);
+        dispatch(addAddressAction(payload));
+      }
     } else {
       const payload = {
         id: userDetails._id,
@@ -149,16 +157,29 @@ const CheckoutScreen = ({ navigation }) => {
     setAddressForm(true);
   };
 
-  const handleShipping = () => {
-    const shipAdress =
+  const handleShipping = (shipAddresspayload) => {
+    const billAddress =
       userDetails.addressBook &&
       userDetails.addressBook.find((item) => item._id == addressDefault);
-    const payload = { zipcode: defaddress[0].pincode };
+    const payload = {
+      zipcode:
+        !sameShipingAdress && shipAddresspayload
+          ? shipAddresspayload.pincode
+          : !sameShipingAdress && shippingAddress
+          ? shippingAddress.pincode
+          : billAddress.pincode,
+    };
     const navigationParams = {
       screen: 'ShippingMethod',
-      shippingAddress: shipAdress,
-      billingAddress: shipAdress,
+      shippingAddress:
+        !sameShipingAdress && shipAddresspayload
+          ? shipAddresspayload
+          : !sameShipingAdress && shippingAddress
+          ? shippingAddress
+          : billAddress,
+      billingAddress: billAddress,
     };
+    console.log(navigationParams, 'navigationParams');
     dispatch(checkPincodeValid(payload, navigation, navigationParams));
   };
 
@@ -167,30 +188,30 @@ const CheckoutScreen = ({ navigation }) => {
       {loading ? <AppLoader /> : null}
       {(isEmpty(userDetails) && isEmpty(userDetails.addressBook)) ||
       addressForm ? (
-        <>
-          <AdressForm
-            navigation={navigation}
-            addForm={onSubmit}
-            onStopScroll={() => {
-              setScrollEnable(!scrollenable);
-            }}
-            cancelAddForm={() => {
-              setAddressForm(false);
-            }}
-            initialFormValues={initialFormValues}
-          />
-        </>
+        <AdressForm
+          navigation={navigation}
+          addForm={onSubmit}
+          onStopScroll={() => {
+            setScrollEnable(!scrollenable);
+          }}
+          showBottomPanel={true}
+          showHeader={true}
+          cancelAddForm={() => {
+            setAddressForm(false);
+          }}
+          initialFormValues={initialFormValues}
+        />
       ) : (
         <>
           <View style={styles.container}>
             <BackHeader navigation={navigation} name="Checkout" />
 
             <ScrollView
-              style={{ marginHorizontal: 20, flex: 1 }}
+              style={{ marginHorizontal: 20, marginTop: 10, flex: 1 }}
               showsVerticalScrollIndicator={false}
               nestedScrollEnabled={true}
               scrollEnabled={scrollenable}>
-              <AText large fonts={FontStyle.semiBold} color="black">
+              <AText medium fonts={FontStyle.semiBold} color="black">
                 Billing Address
               </AText>
               <AddressWrapper>
@@ -198,11 +219,17 @@ const CheckoutScreen = ({ navigation }) => {
                   <View
                     style={[
                       styles.addresscard,
-                      addressDefault === item._id
-                        ? {
-                            backgroundColor: APP_SECONDARY_COLOR,
-                          }
-                        : {},
+                      addressDefault === item._id,
+                      {
+                        backgroundColor:
+                          addressDefault === item._id
+                            ? APP_SECONDARY_COLOR
+                            : '#fff',
+                        borderColor:
+                          addressDefault === item._id
+                            ? APP_PRIMARY_COLOR
+                            : '#c8c8c8',
+                      },
                     ]}>
                     <TouchableOpacity
                       onPress={() => {
@@ -301,20 +328,40 @@ const CheckoutScreen = ({ navigation }) => {
                   marginStart: 5,
                 }}
                 onPress={() => {
-                  setShippingAdress(!shipingAdress);
+                  setSameShippingAdress(!sameShipingAdress);
                 }}>
                 <Checkbox
-                  status={shipingAdress ? 'checked' : 'unchecked'}
+                  status={sameShipingAdress ? 'checked' : 'unchecked'}
                   color={APP_PRIMARY_COLOR}
-                  onPress={() => setShippingAdress(!shipingAdress)}
+                  onPress={() => setSameShippingAdress(!sameShipingAdress)}
                 />
                 <Text>Same as Billing address</Text>
               </TouchableOpacity>
+
+              <AddressWrapper>
+                {!sameShipingAdress && (
+                  <AdressForm
+                    navigation={navigation}
+                    handleSubmit={formSubmit}
+                    addForm={onSubmit}
+                    onStopScroll={() => {
+                      setScrollEnable(!scrollenable);
+                    }}
+                    cancelAddForm={() => {
+                      setAddressForm(false);
+                    }}
+                    initialFormValues={initialFormValues}
+                  />
+                )}
+              </AddressWrapper>
               <AButton
                 ml="50px"
                 mr="50px"
                 onPress={() => {
-                  handleShipping();
+                  sameShipingAdress ? handleShipping() : setFormSubmit(true);
+                  setTimeout(() => {
+                    setFormSubmit(false);
+                  }, 700);
                 }}
                 round
                 title="Next"
@@ -350,6 +397,7 @@ const styles = StyleSheet.create({
     elevation: 3,
     flexDirection: 'row',
     justifyContent: 'space-evenly',
+    borderWidth: 1,
   },
   addaddresscard: {
     marginHorizontal: 2,

@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   },
   ratingOverlay: {
     position: 'absolute',
-    bottom: 67,
+    bottom: 72,
     left: 10,
     // width: 20,
     borderRadius:5,
