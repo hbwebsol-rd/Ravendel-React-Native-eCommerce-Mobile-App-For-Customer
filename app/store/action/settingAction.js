@@ -11,6 +11,7 @@ import { isEmpty, storeData } from '../../utils/helper';
 import { query } from '../../utils/service';
 import _ from 'lodash';
 import { CATS_SUCCESS } from './productAction';
+import { LogOut } from '../reducers/loginReducer';
 
 export const AppSettingAction = () => async (dispatch) => {
   const response = await query(GET_APP_SETTING);
@@ -71,6 +72,7 @@ export const AppSettingAction = () => async (dispatch) => {
     }
   } catch (error) {
     dispatch({ type: SETTING_FAIL });
+    console.log(error, 'error in homesetting');
   }
 };
 

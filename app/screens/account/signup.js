@@ -54,7 +54,7 @@ const SignupScreen = ({ navigation, handleActiveTab }) => {
       email: values.email,
       password: values.password,
       phone: values.mobile,
-      company: values.company,
+      // company: values.company,
     };
     dispatch(registerAction(registerValue, navigation, handleActiveTab));
   };
@@ -120,7 +120,11 @@ const SignupScreen = ({ navigation, handleActiveTab }) => {
       <View style={{ flexDirection: 'row' }}>
         <CountryPicker
           show={show}
-          style={{ height: 500 }}
+          style={{
+            modal: {
+              height: 500,
+            },
+          }}
           // when picker button press you will get the country object with dial code
           pickerButtonOnPress={(item) => {
             setCountryCode(item.dial_code);
@@ -133,7 +137,7 @@ const SignupScreen = ({ navigation, handleActiveTab }) => {
               }, 100);
             }
           }}
-          showOnly={['UA', 'EN', 'IN', 'US', 'UA']}
+          // showOnly={['UA', 'EN', 'IN', 'US', 'UA']}
         />
 
         <TextInput
@@ -160,7 +164,7 @@ const SignupScreen = ({ navigation, handleActiveTab }) => {
           {formik.errors.mobile}
         </AText>
       )}
-      <TextInput
+      {/* <TextInput
         color={'#000'}
         mt={10}
         padding={0}
@@ -177,7 +181,7 @@ const SignupScreen = ({ navigation, handleActiveTab }) => {
         <AText color="red" xtrasmall>
           {formik.errors.company}
         </AText>
-      )}
+      )} */}
 
       <TextInput
         secureTextEntry={true}

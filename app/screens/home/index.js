@@ -89,7 +89,6 @@ const HomeScreen = ({ navigation }) => {
 
   const settingLoading = useSelector((state) => state.settings.loading);
   const { netConnection } = useSelector((state) => state.alert);
-  console.log(netConnection, ' netinfo');
   const [allCategories, setAllCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [size, setSize] = useState(0);
@@ -100,7 +99,7 @@ const HomeScreen = ({ navigation }) => {
     try {
       const token = await getToken();
       const userdata = await getValue('userDetails');
-
+      console.log(token, 'tokentokentokentoken');
       if (token !== null) {
         var loginDetails = {
           user_token: token,
@@ -191,13 +190,6 @@ const HomeScreen = ({ navigation }) => {
     wait(2000).then(() => setRefreshing(false));
   }, []);
 
-  // Use Effect Call
-  useEffect(() => {
-    NetInfo.addEventListener((networkState) => {
-      dispatch({ type: networkState.isConnected ? NET_ON : NET_OFF });
-    });
-  }, [NetInfo]);
-
   // useEffect(() => {
   //   const updateWindowHeight = () => {
   //     const newWindowHeight = Dimensions.get('window').height;
@@ -212,6 +204,7 @@ const HomeScreen = ({ navigation }) => {
 
   useEffect(() => {
     dispatch(AppSettingAction());
+    setSearchTerm('');
   }, [isFocused]);
   useEffect(() => {
     // Filter data as per categories
@@ -258,9 +251,7 @@ const HomeScreen = ({ navigation }) => {
       </View>
     );
   };
-  if (netConnection) {
-    return <NoConnection />;
-  }
+
   return (
     <View style={Styles.mainContainer}>
       {settingLoading ? <AppLoader /> : null}
@@ -286,6 +277,7 @@ const HomeScreen = ({ navigation }) => {
           padding={0}
           pl={35}
           inputBgColor={'#EFF0F0'}
+          bc={'#EFF0F0'}
           fs={12}
           placeholder={'Search'}
           placeholdercolor={'black'}

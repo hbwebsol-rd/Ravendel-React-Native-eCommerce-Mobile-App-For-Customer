@@ -29,9 +29,11 @@ const CardContainer = ({ dataItems, navigatetonext, title }) => {
   );
   return (
     <View style={styles.container}>
-      <AText mb={'10px'} large fonts={FontStyle.fontBold}>
-        {title}
-      </AText>
+      {title && (
+        <AText mb={'10px'} large fonts={FontStyle.fontBold}>
+          {title}
+        </AText>
+      )}
       <View
         style={{
           flexDirection: 'row',

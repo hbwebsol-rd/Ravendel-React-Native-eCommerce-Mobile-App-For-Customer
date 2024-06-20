@@ -52,6 +52,8 @@ const SavedAddressScreen = ({ navigation, route }) => {
     country: '',
     pincode: '',
     _id: '',
+    defaultAddress: true,
+    addressType: '',
   });
 
   useEffect(() => {
@@ -82,16 +84,17 @@ const SavedAddressScreen = ({ navigation, route }) => {
     if (isEmpty(initialFormValues._id)) {
       const payload = {
         id: userDetails._id,
-        first_name: values.firstname,
-        last_name: values.lastname,
+        firstName: values.firstname,
+        lastName: values.lastname,
         phone: values.phone,
-        address_line1: values.address,
-        address_line2: values.landmark,
+        addressLine1: values.address,
+        addressLine2: values.landmark,
         city: values.city,
         country: values.country,
         state: values.state,
         pincode: values.pincode,
-        default_address: true,
+        defaultAddress: values.defaultAddress,
+        addressType: values.addressType,
       };
       setAddressForm(false);
       dispatch(addAddressAction(payload));
@@ -99,16 +102,17 @@ const SavedAddressScreen = ({ navigation, route }) => {
       const payload = {
         id: userDetails._id,
         _id: initialFormValues._id,
-        first_name: values.firstname,
-        last_name: values.lastname,
+        firstName: values.firstname,
+        lastName: values.lastname,
         phone: values.phone,
-        address_line1: values.address,
-        address_line2: values.landmark,
+        addressLine1: values.address,
+        addressLine2: values.landmark,
         city: values.city,
         country: values.country,
         state: values.state,
         pincode: values.pincode,
-        default_address: true,
+        defaultAddress: values.defaultAddress,
+        addressType: values.addressType,
       };
       setInitialFormValues({
         firstname: '',
@@ -179,8 +183,8 @@ const SavedAddressScreen = ({ navigation, route }) => {
           cancelAddForm={() => {
             setAddressForm(false);
           }}
-            showBottomPanel={true}
-            showHeader={true}
+          showBottomPanel={true}
+          showHeader={true}
           initialFormValues={initialFormValues}
         />
       ) : (
@@ -198,7 +202,7 @@ const SavedAddressScreen = ({ navigation, route }) => {
                   <View style={styles.AddressContentWrapper}>
                     <RadioButtonWrapper
                       onPress={() => {
-                        updatedefaultaddress(item);
+                        editFormValues(item);
                       }}>
                       <View
                         style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -292,6 +296,7 @@ const styles = StyleSheet.create({
     borderColor: '#D4D4D4',
     padding: 10,
     paddingHorizontal: 16,
+    marginVertical: 7,
     justifyContent: 'space-evenly',
   },
   addAddressBtnStyle: {

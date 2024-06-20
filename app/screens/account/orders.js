@@ -62,7 +62,7 @@ const OrderScreen = ({ navigation }) => {
                           Order Number:{' '}
                         </AText>
                         <AText color={Colors.gray}>
-                          {'000026 '}
+                          {prod.orderNumber}
                           {prod.order_number}{' '}
                         </AText>
                       </ProfileDetailWrapper>

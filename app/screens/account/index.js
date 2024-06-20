@@ -17,7 +17,7 @@ import {
 } from '../../utils/config';
 import AIcon from 'react-native-vector-icons/AntDesign';
 import FIcon from 'react-native-vector-icons/Feather';
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { GREYTEXT } from '../../utils/config';
 import Colors from '../../constants/Colors';
 import Header from '../components/Header';
@@ -80,7 +80,13 @@ const AccountScreen = ({ navigation }) => {
     },
   ];
   const Logout = () => {
-    dispatch(LogOut(navigation));
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      { text: 'OK', onPress: () => dispatch(LogOut(navigation)) },
+    ]);
   };
   return (
     <>

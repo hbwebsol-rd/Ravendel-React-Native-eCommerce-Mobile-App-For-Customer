@@ -46,7 +46,9 @@ import { APP_PRIMARY_COLOR } from '../utils/config';
 import Colors from '../constants/Colors';
 import NVC from '../navigation/NavigationConstants';
 import ShippingMethodScreen from '../screens/checkout/ShippingMethodScreen';
-
+import NoConnection from '../theme-components/nointernet';
+import NetInfo from '@react-native-community/netinfo';
+import { NET_OFF, NET_ON } from '../store/reducers/alert';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 const setting = { themes: [{ primaryColor: '#3a3a3a', productsCount: '3' }] };
@@ -57,6 +59,7 @@ const Navigation = () => {
   const isFocused = useIsFocused();
   const cartItems = useSelector((state) => state.cart.products) || 0;
   const { isLoggin } = useSelector((state) => state.customer);
+  const { netConnection } = useSelector((state) => state.alert);
 
   // Custom Function
   const getCart = async () => {
@@ -69,6 +72,11 @@ const Navigation = () => {
     }
   };
 
+  useEffect(() => {
+    NetInfo.addEventListener((networkState) => {
+      dispatch({ type: networkState.isConnected ? NET_ON : NET_OFF });
+    });
+  }, [NetInfo]);
   // Use Effect Call
   useEffect(() => {
     dispatch(sessionCheck());
@@ -105,7 +113,9 @@ const Navigation = () => {
   const HomeIconWithBadge = (props) => {
     return <IconWithBadge {...props} badgeCount={cartItems.length} />;
   };
-
+  if (netConnection) {
+    return <NoConnection />;
+  }
   return (
     <>
       <Tab.Navigator

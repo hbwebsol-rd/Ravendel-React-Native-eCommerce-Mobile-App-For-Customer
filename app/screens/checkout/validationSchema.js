@@ -34,9 +34,17 @@ export const validationSchema = yup.object().shape({
   state: yup.string().label('State').required(),
 });
 export const signupValidationSchema = yup.object().shape({
-  firstName: yup.string().label('First Name').min(4).required(),
-  lastName: yup.string().label('Last Name').min(2).required(),
-  email: yup.string().label('Email').email().required(),
+  firstName: yup
+    .string()
+    .label('First Name')
+    .min(4)
+    .required('First Name is required'),
+  lastName: yup
+    .string()
+    .label('Last Name')
+    .min(2)
+    .required('Last Name is required'),
+  email: yup.string().label('Email').email().required('Email is required'),
   password: yup
     .string('')
     .required('Please enter password')
@@ -49,7 +57,7 @@ export const signupValidationSchema = yup.object().shape({
     .matches(regularExpression, 'Password too weak'),
   confirmPassword: yup
     .string()
-    .required()
+    .required('Confirm password is required')
     .label('Confirm password')
     .test('passwords-match', 'Passwords must match', function (value) {
       return this.parent.password === value;
@@ -57,8 +65,9 @@ export const signupValidationSchema = yup.object().shape({
   mobile: yup
     .string()
     // .matches(phoneReg, 'Phone number is not valid')
+    .min(8, 'Invalid mobile No.')
     .label('Mobile No.')
-    .required(),
+    .required('Mobile No. is required'),
   policy: yup
     .boolean()
     .oneOf([true], 'Please accept terms and policy')

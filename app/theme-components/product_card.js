@@ -51,7 +51,9 @@ function ProductCard({
         //  && category.quantity < 5
         <View style={[styles.overlay]}>
           <AText color={'#fff'} xtrasmall fonts={FontStyle.fontBold}>
-            {category.quantity} left
+            {category.quantity > 0
+              ? `${category.quantity} left`
+              : `Out of stock`}
           </AText>
         </View>
       ) : null}
@@ -123,7 +125,7 @@ const styles = StyleSheet.create({
     bottom: 72,
     left: 10,
     // width: 20,
-    borderRadius:5,
+    borderRadius: 5,
     overflow: 'hidden',
     paddingHorizontal: 5,
     paddingVertical: 4,

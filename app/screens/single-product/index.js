@@ -300,6 +300,7 @@ const SingleProductScreen = ({ navigation, route }) => {
     let cleanedHtml = html.trim();
     // Remove span tags but keep their content
     // cleanedHtml = cleanedHtml.replace(/<\/?span[^>]*>/g, '');
+    console.log(cleanedHtml, 'cleanedHtml');
     return cleanedHtml;
   };
 
@@ -321,7 +322,7 @@ const SingleProductScreen = ({ navigation, route }) => {
     var res = await dispatch(checkPincodeValid({ zipcode: pinCode }));
     setDeliverable(res);
   };
-
+  console.log(SingleProduct.description, 'SingleProduct.description');
   return (
     <BottomSheetModalProvider>
       {singleProductLoading || Loading ? <AppLoader /> : null}
@@ -506,6 +507,7 @@ const SingleProductScreen = ({ navigation, route }) => {
               </AText>
               <View style={styles.pinCodeViewStyle}>
                 <TextInput
+                  keyboardType="numeric"
                   placeholder="Enter Pincode"
                   value={pinCode}
                   style={{ fontSize: 12 }}
@@ -805,9 +807,12 @@ const htmlStyles = StyleSheet.create({
   },
   li: {
     margin: 0,
+    padding: 0,
+    paddingTop: 0,
   },
   ul: {
-    marginTop: 0,
+    margin: 0,
+    padding: 0,
   },
   // Other styles as needed
 });

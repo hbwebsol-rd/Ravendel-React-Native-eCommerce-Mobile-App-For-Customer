@@ -18,7 +18,7 @@ import Colors from '../../constants/Colors';
 import { getSubcategories } from '../../store/action/productAction';
 import { query } from '../../utils/service';
 import { GET_FILTEREDPRODUCTS_WITH_PAGINATION } from '../../queries/productQuery';
-import { APP_SECONDARY_COLOR } from '../../utils/config';
+import { APP_PRIMARY_COLOR, APP_SECONDARY_COLOR } from '../../utils/config';
 
 const CategoriesScreen = ({ navigation }) => {
   const mainLoading = useSelector((state) => state.products.loading);
@@ -56,6 +56,7 @@ const CategoriesScreen = ({ navigation }) => {
   useEffect(() => {
     if (allCategoriesWithChild) {
       setAllCategoriesWithChildData(allCategoriesWithChild);
+      getSubcategory(allCategoriesWithChild[0]);
     }
   }, [allCategoriesWithChild]);
 
@@ -141,7 +142,7 @@ const CategoriesScreen = ({ navigation }) => {
             />
 
             {disp === 'mainCategory' ? (
-              <AText uppercase xtrasmall color="#000" center>
+              <AText uppercase xtrasmall pt={'5px'} color={'#000'} center>
                 {category.name}
               </AText>
             ) : (
@@ -170,7 +171,7 @@ const CategoriesScreen = ({ navigation }) => {
           showsVerticalScrollIndicator={false}
           style={[
             styles.categoriesMainViewStyle,
-            { backgroundColor: APP_SECONDARY_COLOR },
+            { backgroundColor: '#f1f1f1' },
           ]}>
           {!isEmpty(allCategoriesWithChildData) &&
           allCategoriesWithChildData.length > 0 ? (

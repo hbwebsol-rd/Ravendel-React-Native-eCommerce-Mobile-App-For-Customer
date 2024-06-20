@@ -57,6 +57,7 @@ import PropTypes from 'prop-types';
 import BrandFilter from '../components/BrandFilter';
 import RangeFilter from '../components/RangeFilter';
 import RatingFilter from '../components/RatingFilter';
+import FilterModal from './filter';
 
 const SubCategoriesScreen = ({ navigation, route }) => {
   const dispatch = useDispatch();
@@ -112,9 +113,42 @@ const SubCategoriesScreen = ({ navigation, route }) => {
   const handleinpiut = (e) => {
     setInpvalue(e);
   };
+  const sortData = {
+    heading: 'Sort',
+    type: 'choice',
+    field: 'sort',
+    category: 'static',
+    valueType: 'ObjectId',
+    data: [
+      {
+        label: 'Lowest to highest',
+        value: {
+          field: 'pricing.sellprice',
+          type: 'asc',
+        },
+        select: false,
+      },
+      {
+        label: 'highest to Lowest',
+        value: {
+          field: 'pricing.sellprice',
+          type: 'desc',
+        },
+        select: false,
+      },
+      {
+        label: 'Newest',
+        value: {
+          field: 'date',
+          type: 'desc',
+        },
+        select: false,
+      },
+    ],
+  };
 
   useEffect(() => {
-    setFilterList(filterData);
+    setFilterList([sortData, ...filterData]);
   }, [filterData]);
   const handleLoadMore = () => {
     setLoader(true);
@@ -153,19 +187,13 @@ const SubCategoriesScreen = ({ navigation, route }) => {
       let reg = new RegExp(inpvalue.toLowerCase());
       array = singleCateogry.filter((item) => {
         let name = item.name;
-        if (
-          !isEmpty(name) &&
-          name.toLowerCase().match(reg) &&
-          selectedCat === item.url
-        ) {
+        if (!isEmpty(name) && name.toLowerCase().match(reg)) {
           return item;
         }
       });
     } else if (selectedCat !== 'All' && isEmpty(inpvalue)) {
       array = singleCateogry.filter((item) => {
-        if (selectedCat === item.url) {
-          return item;
-        }
+        return item;
       });
     } else if (!isEmpty(inpvalue) && selectedCat === 'All') {
       let reg = new RegExp(inpvalue.toLowerCase());
@@ -223,7 +251,9 @@ const SubCategoriesScreen = ({ navigation, route }) => {
         categoryUrl: selectedCatId,
       },
       sort: sortBy,
-      filters: filterList.filter((item) => !isEmpty(item.select)),
+      filters: filterList.filter(
+        (item) => item.field !== 'sort' && !isEmpty(item.select),
+      ),
       pageNo: 1,
       limit: 10,
     };
@@ -267,119 +297,9 @@ const SubCategoriesScreen = ({ navigation, route }) => {
     );
   }
 
-  const sortData = [
-    {
-      name: 'Lowest to highest',
-      sortData: {
-        field: 'pricing.sellprice',
-        type: 'asc',
-      },
-    },
-    {
-      name: 'highest to Lowest',
-      sortData: {
-        field: 'pricing.sellprice',
-        type: 'desc',
-      },
-    },
-    {
-      name: 'Newest',
-      sortData: {
-        field: 'date',
-        type: 'desc',
-      },
-    },
-  ];
-
   if (loading) {
     return <AppLoader />;
   }
-  const rangeFilterRenderCompomnent = (type) => {
-    var priceSegments = [];
-    if (type === 'range') {
-      const minPrice = filterList[filterSelect].data.minPrice;
-      const maxPrice = filterList[filterSelect].data.maxPrice;
-      const segments = 6;
-      const step = (maxPrice - minPrice) / segments;
-      priceSegments = Array(segments)
-        .fill()
-        .map((_, i) => {
-          const startPrice = (minPrice + i * step).toFixed(0);
-          const endPrice = (minPrice + (i + 1) * step).toFixed(0);
-          return (
-            <Pressable
-              activeOpacity={0.9}
-              style={styles.filterListDatastyle}
-              onPress={() => {
-                const newFilterList = JSON.parse(JSON.stringify(filterList));
-                newFilterList[filterSelect].select = {
-                  minPrice: '',
-                  maxPrice: '',
-                };
-                newFilterList[filterSelect].select.minPrice = startPrice;
-                newFilterList[filterSelect].select.maxPrice = endPrice;
-                setFilterList(newFilterList);
-              }}>
-              <IonIcon
-                color={APP_PRIMARY_COLOR}
-                name={
-                  !isEmpty(filterList[filterSelect].select) &&
-                  filterList[filterSelect].select.minPrice == startPrice &&
-                  filterList[filterSelect].select.maxPrice == endPrice
-                    ? 'radio-button-on'
-                    : 'radio-button-off'
-                }
-                style={{ marginHorizontal: 5 }}
-                size={20}
-              />
-
-              <AText key={i} xtrasmall color="#000" center>
-                {`${startPrice} - ${endPrice}`}
-              </AText>
-            </Pressable>
-          );
-        });
-    } else {
-      const segments = 5;
-
-      priceSegments = Array(segments)
-        .fill()
-        .map((_, i) => {
-          return (
-            <Pressable
-              activeOpacity={0.9}
-              style={styles.filterListDatastyle}
-              onPress={() => {
-                const newFilterList = JSON.parse(JSON.stringify(filterList));
-                newFilterList[filterSelect].select = {
-                  minValue: '',
-                };
-                newFilterList[filterSelect].select.minValue = i;
-                setFilterList(newFilterList);
-              }}>
-              <IonIcon
-                color={APP_PRIMARY_COLOR}
-                name={
-                  !isEmpty(filterList[filterSelect].select) &&
-                  !isEmpty(filterList[filterSelect].select.minValue) &&
-                  filterList[filterSelect].select.minValue == i
-                    ? 'radio-button-on'
-                    : 'radio-button-off'
-                }
-                style={{ marginHorizontal: 5 }}
-                size={20}
-              />
-
-              <AText mr={'5px'} key={i} xtrasmall color="#000" center>
-                {i}
-              </AText>
-              <IonIcon name={'star'} color={'#DDAC17'} size={15} />
-            </Pressable>
-          );
-        });
-    }
-    return priceSegments;
-  };
 
   return (
     <>
@@ -387,9 +307,7 @@ const SubCategoriesScreen = ({ navigation, route }) => {
         <View style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
           <View style={styles.header}>
             <AIcon
-              onPress={() =>
-                navigation.navigate(NavigationConstants.HOME_SCREEN)
-              }
+              onPress={() => navigation.goBack()}
               name="arrowleft"
               size={22}
             />
@@ -534,189 +452,15 @@ const SubCategoriesScreen = ({ navigation, route }) => {
             }
           />
         </View>
-
-        <Modal
-          // enableDismissOnClose={false}
-          visible={filterModal}
-          snapPoints={snapPoints}
-          onChange={handleSheetChanges}
-          contentContainerStyle={{
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          }}
-          style={{ flex: 1, flexDirection: 'row' }}>
-          <View style={styles.filterModalHeader}>
-            <View style={{ flexDirection: 'row' }}>
-              <TouchableOpacity
-                style={{ marginEnd: 10 }}
-                onPress={() => handleReset()}>
-                <AIcon
-                  onPress={() => setFilterModal(false)}
-                  name="arrowleft"
-                  size={20}
-                />
-              </TouchableOpacity>
-              <AText fonts={FontStyle.semiBold}>Filter</AText>
-            </View>
-            <TouchableOpacity
-              onPress={() => handleFilter()}
-              style={{
-                backgroundColor: APP_PRIMARY_COLOR,
-                paddingHorizontal: 15,
-                paddingVertical: 10,
-                borderRadius: 15,
-              }}>
-              <AText color={'#fff'} fonts={FontStyle.semiBold}>
-                Apply
-              </AText>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.filterBodyStyle}>
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              style={styles.filterListView}>
-              {!isEmpty(filterList) && filterList.length > 0
-                ? filterList.map((category, index) => {
-                    return (
-                      <Pressable
-                        activeOpacity={0.9}
-                        style={[
-                          styles.filterListingWrapper,
-                          filterSelect == index
-                            ? { backgroundColor: '#fff', width: '100%' }
-                            : {},
-                        ]}
-                        onPress={() => {
-                          setFilterSelect(index);
-                        }}>
-                        <AText uppercase xtrasmall color="#000" center>
-                          {category.heading}
-                        </AText>
-                      </Pressable>
-                    );
-                  })
-                : null}
-            </ScrollView>
-            <ScrollView
-              style={{
-                width: '60%',
-                flexDirection: 'column',
-                backgroundColor: Colors.whiteColor,
-                marginTop: 12,
-              }}
-              showsVerticalScrollIndicator={false}>
-              {!isEmpty(filterSelect) &&
-              !isEmpty(filterList[filterSelect]) &&
-              !isEmpty(filterList[filterSelect].type)
-                ? filterList[filterSelect].type == 'choice' &&
-                  filterList[filterSelect].field == 'rating'
-                  ? rangeFilterRenderCompomnent('rating')
-                  : filterList[filterSelect].type == 'array' ||
-                    filterList[filterSelect].type == 'choice'
-                  ? filterList[filterSelect].data &&
-                    filterList[filterSelect].data.map((item, index) => (
-                      <Pressable
-                        activeOpacity={0.9}
-                        style={styles.filterListDatastyle}
-                        onPress={() => {
-                          const newFilterList = JSON.parse(
-                            JSON.stringify(filterList),
-                          );
-                          newFilterList[filterSelect].select = !isEmpty(
-                            newFilterList[filterSelect].select,
-                          )
-                            ? newFilterList[filterSelect].select
-                            : [];
-                          if (filterList[filterSelect].type == 'array') {
-                            if (
-                              !newFilterList[filterSelect].data[index].select
-                            ) {
-                              newFilterList[filterSelect].select.push(
-                                item.value,
-                              );
-                            } else {
-                              newFilterList[filterSelect].select.filter(
-                                (id) => item.value !== id,
-                              );
-                            }
-                            newFilterList[filterSelect].data[index].select =
-                              !newFilterList[filterSelect].data[index].select;
-                          } else {
-                            newFilterList[filterSelect].data.map((key, i) => {
-                              key.select = i == index;
-                            });
-                          }
-                          setFilterList(newFilterList);
-                        }}>
-                        {item.select ? (
-                          <IonIcon
-                            color={APP_PRIMARY_COLOR}
-                            name={
-                              filterList[filterSelect].type == 'choice'
-                                ? 'radio-button-on'
-                                : 'checkbox-outline'
-                            }
-                            style={{ marginHorizontal: 5 }}
-                            size={20}
-                          />
-                        ) : (
-                          <IonIcon
-                            color={APP_PRIMARY_COLOR}
-                            style={{ marginHorizontal: 5 }}
-                            name={
-                              filterList[filterSelect].type == 'choice'
-                                ? 'radio-button-off'
-                                : 'square-outline'
-                            }
-                            size={20}
-                          />
-                        )}
-                        <AText xtrasmall color="#000" center>
-                          {item.label}
-                        </AText>
-                      </Pressable>
-                    ))
-                  : filterList[filterSelect].type == 'range'
-                  ? rangeFilterRenderCompomnent('range')
-                  : null
-                : null}
-
-              {/* <AText
-                color={Colors.blackColor}
-                mt={'10px'}
-                fonts={FontStyle.semiBold}>
-                Sort By
-              </AText>
-              <View style={{ width: '35%' }}>
-                {sortData.map((item) => (
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <TouchableOpacity
-                      onPress={() => setSortBy(item.sortData)}
-                      style={{
-                        marginRight: 5,
-                        height: 15,
-                        width: 15,
-                        borderWidth: 1,
-                        borderColor: Colors.blackColor,
-                        borderRadius: 8,
-                        backgroundColor:
-                          sortBy.field == item.sortData.field &&
-                          sortBy.type == item.sortData.type
-                            ? APP_PRIMARY_COLOR
-                            : Colors.transparentColor,
-                      }}></TouchableOpacity>
-                    <AText>{item.name}</AText>
-                  </View>
-                ))}
-              </View>
-              <AButton
-                mt={'20px'}
-                title={'Apply Filter'}
-                round
-                onPress={() => handleFilter()}
-              /> */}
-            </ScrollView>
-          </View>
-        </Modal>
+        <FilterModal
+          filterModal={filterModal}
+          setFilterModal={(val) => setFilterModal(val)}
+          filterList={filterList}
+          setFilterList={(val) => setFilterList(val)}
+          handleReset={() => handleReset()}
+          handleFilter={() => handleFilter()}
+          setSortBy={(val) => setSortBy(val)}
+        />
       </BottomSheetModalProvider>
     </>
   );
@@ -781,7 +525,7 @@ const styles = StyleSheet.create({
   },
   filterListView: {
     width: '10%',
-    backgroundColor: APP_SECONDARY_COLOR,
+    backgroundColor: '#F1F1F1',
     marginTop: 4,
   },
   filterListingWrapper: {

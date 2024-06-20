@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Text,
 } from 'react-native';
 import { AText, AButton, BackHeader, AppLoader } from '../../theme-components';
 import styled from 'styled-components/native';
@@ -82,7 +83,7 @@ const ShippingMethodScreen = ({ navigation }) => {
     firstName: biller_firstName,
     country: biller_country,
   } = billingAddress;
-console.log(shippingAddress,'shippingAddress')
+  console.log(shippingAddress, 'shippingAddress');
   const { currencySymbol, currencyOptions } = useSelector(
     (state) => state.settings,
   );
@@ -383,16 +384,15 @@ console.log(shippingAddress,'shippingAddress')
                       fontColor={Colors.blackColor}
                       Pricing={{
                         sellprice: product.productPrice,
-                        price: product.mrpAmount,
+                        price: product.mrp,
                       }}
                     />
-
                     <View style={styles.qtyContainerStyle}>
                       <AText ml={'5px'} center small bold>
                         Qty: {product.qty}
                       </AText>
                     </View>
-                    {product.productQuantity <= 5 ? (
+                    {/* {product.productQuantity <= 5 ? (
                       <Text
                         style={{
                           color: '#ff0000',
@@ -401,7 +401,7 @@ console.log(shippingAddress,'shippingAddress')
                         }}>
                         {'Only ' + product.productQuantity + ' Left'}
                       </Text>
-                    ) : null}
+                    ) : null} */}
                   </View>
                 </View>
               </ItemDescription>
@@ -422,6 +422,7 @@ console.log(shippingAddress,'shippingAddress')
           <View style={styles.summary}>
             <AText fonts={FontStyle.semiBold}>Discount On MRP</AText>
             <AText color={Colors.green}>
+              -{' '}
               {formatCurrency(
                 cartSummary?.discountTotal,
                 currencyOptions,

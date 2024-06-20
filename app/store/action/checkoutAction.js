@@ -4,6 +4,7 @@ import {
   ADD_ORDER,
   ADD_TOCART,
   CHECK_ZIPCODE,
+  GET_ORDER,
   SHIPPING_METHODS,
   UPDATE_PAYMENT_STATUS,
 } from '../../queries/orderQuery';
@@ -128,14 +129,16 @@ export const checkPincodeValid =
           return true;
         }
       } else {
-        dispatch({
-          type: ALERT_ERROR,
-          payload: _.get(
-            response,
-            'data.checkZipcode.message',
-            'Invalid zipcode.',
-          ),
-        });
+        if (!isEmpty(navParams)) {
+          dispatch({
+            type: ALERT_ERROR,
+            payload: _.get(
+              response,
+              'data.checkZipcode.message',
+              'Invalid zipcode.',
+            ),
+          });
+        }
         return false;
       }
     } catch (error) {
@@ -143,6 +146,21 @@ export const checkPincodeValid =
       dispatch({ type: CART_FAIL });
     }
   };
+export const getOrder = (payload) => async (dispatch) => {
+  dispatch({ type: CHECKOUT_LOADING });
+
+  try {
+    const response = await query(GET_ORDER, payload);
+    if (!isEmpty(response) && _.get(response, 'data.order.message.success')) {
+      return response.data.order.data;
+    } else {
+      return [];
+    }
+  } catch (error) {
+    console.log('error', error);
+    dispatch({ type: CART_FAIL });
+  }
+};
 export const getShippingMethods = () => async (dispatch) => {
   dispatch({ type: CHECKOUT_LOADING });
   try {

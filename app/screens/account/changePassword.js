@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { AButton, AHeader, BackHeader } from '../../theme-components';
+import {
+  AButton,
+  AHeader,
+  BackHeader,
+  TextInput,
+} from '../../theme-components';
 import { isEmpty } from '../../utils/helper';
 import { changePasswordAction } from '../../store/action';
 import { ALERT_ERROR } from '../../store/reducers/alert';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Colors from '../../constants/Colors';
 
 const ChangePasswordScreen = ({ navigation }) => {
@@ -58,51 +63,89 @@ const ChangePasswordScreen = ({ navigation }) => {
   return (
     <View style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
       <BackHeader navigation={navigation} name="Change Password" back />
-      <ItemWrapper>
-        <ItemDescription>
-          <TextInputArea
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+        }}>
+        <View style={styles.container}>
+          <TextInput
             placeholder="Old Password"
             value={userDetails.old_password}
             secureTextEntry={true}
-            onChangeText={(text) =>
+            onchange={(text) =>
               setuserDetails({
                 ...userDetails,
                 old_password: text,
               })
             }
+            hookuse
+            iconColor={'#9F9F9F'}
+            icon={'eye-off'}
+            color={'#000'}
+            mt={10}
+            padding={0}
+            bw={0}
+            pb={10}
+            onerror={false}
+            placeholdercolor={'#ABA7A7'}
+            inputBgColor="transparent"
           />
-          <TextInputArea
+          <TextInput
             placeholder="New Password"
             maxLength={10}
             value={userDetails.new_password}
             secureTextEntry={true}
-            onChangeText={(text) =>
+            onchange={(text) =>
               setuserDetails({
                 ...userDetails,
                 new_password: text,
               })
             }
+            hookuse
+            iconColor={'#9F9F9F'}
+            icon={'eye-off'}
+            color={'#000'}
+            mt={10}
+            padding={0}
+            bw={0}
+            pb={10}
+            onerror={false}
+            placeholdercolor={'#ABA7A7'}
+            inputBgColor="transparent"
           />
-          <TextInputArea
+          <TextInput
             placeholder="Confirm Password"
             value={userDetails.confirm_password}
             secureTextEntry={true}
             maxLength={10}
-            onChangeText={(text) =>
+            onchange={(text) =>
               setuserDetails({
                 ...userDetails,
                 confirm_password: text,
               })
             }
+            hookuse
+            iconColor={'#9F9F9F'}
+            icon={'eye-off'}
+            color={'#000'}
+            mt={10}
+            padding={0}
+            bw={0}
+            pb={10}
+            onerror={false}
+            placeholdercolor={'#ABA7A7'}
+            inputBgColor="transparent"
           />
           <AButton
             onPress={() => {
               profileUpdate();
             }}
+            mt={'20px'}
             title="Submit"
           />
-        </ItemDescription>
-      </ItemWrapper>
+        </View>
+      </View>
     </View>
   );
 };
@@ -136,5 +179,20 @@ const ItemDescription = styled.View`
   padding: 10px;
   background: #fff;
 `;
-
+const styles = StyleSheet.create({
+  container: {
+    elevation: 8,
+    borderRadius: 10,
+    paddingHorizontal: 40,
+    paddingBottom: 30,
+    marginHorizontal: 30,
+    marginTop: 25,
+    paddingTop: 30,
+    //   height: 50%,
+    justifyContent: 'center',
+    width: '90%',
+    alignSelf: 'center',
+    backgroundColor: 'white',
+  },
+});
 export default ChangePasswordScreen;

@@ -9,7 +9,7 @@ import { windowWidth } from '../../../utils/config';
 const itemWidth = windowWidth * 0.45;
 const itemHeight = itemWidth * 1.5; // visible item height
 
-const MyCarousel = ({ dataItems, navigatetonext, title }) => {
+const MyCarousel = ({ dataItems, navigatetonext, title, productWidth }) => {
   const carouselRef = useRef(null);
   const _renderItem = ({ item, index }) => {
     return (
@@ -17,6 +17,7 @@ const MyCarousel = ({ dataItems, navigatetonext, title }) => {
         <ProductCard
           category={item}
           displayImage={item.feature_image}
+          productWidth={productWidth}
           navigateNextScreen={() => navigatetonext(item)}
         />
       </View>

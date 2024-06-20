@@ -248,6 +248,31 @@ export const SHIPPING_METHODS = gql`
     }
   }
 `;
+
+const GET_ORDER = gql`
+  query ($id: ID!) {
+    order(id: $id) {
+      data {
+        id
+        orderNumber
+        userId
+        paymentStatus
+        shippingStatus
+        shipping
+        billing
+        products
+        totalSummary
+        couponCard
+        date
+        updated
+      }
+      message {
+        message
+        success
+      }
+    }
+  }
+`;
 export {
   ADD_TOCART,
   ADD_CART,
@@ -263,4 +288,5 @@ export {
   CALCULATE_CART_WITHOUT_LOGIN,
   CHANGE_QTY,
   CHECK_ZIPCODE,
+  GET_ORDER,
 };

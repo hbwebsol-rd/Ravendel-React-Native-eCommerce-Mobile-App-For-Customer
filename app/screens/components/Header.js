@@ -21,7 +21,7 @@ const Header = ({ navigation, title, showProfileIcon, titleColor }) => {
         <View style={Styles.bar1}></View>
         <View style={Styles.bar2}></View>
       </TouchableOpacity> */}
-      <AText color={titleColor ?? '#000'} fonts={FontStyle.fontBold}>
+      <AText large color={titleColor ?? '#000'} fonts={FontStyle.fontBold}>
         {title}
       </AText>
       {showProfileIcon ? (

@@ -47,7 +47,7 @@ const CartScreen = ({ navigation }) => {
   const isFocused = useIsFocused();
   const { userDetails, isLoggin } = useSelector((state) => state.customer);
   const cartItems = useSelector((state) => state.cart.products);
-  const cartSummary = useSelector((state) => state.cart.cartSummary);
+  const cartSummaryPrice = useSelector((state) => state.cart.cartSummary);
   const { cartId, couponDiscount, loading } = useSelector(
     (state) => state.cart,
   );
@@ -57,6 +57,7 @@ const CartScreen = ({ navigation }) => {
   const { currencySymbol, currencyOptions } = useSelector(
     (state) => state.settings,
   );
+  const [cartSummary, setCartSummary] = useState({});
   const [cartProducts, setCartProduct] = useState([]);
   const [coupontotal, setCouponTotal] = useState(0);
   const [couponModal, setCouponModal] = useState(false);
@@ -81,6 +82,12 @@ const CartScreen = ({ navigation }) => {
       updateRelatedProducts();
     }
   }, [cartProducts]);
+  
+  useEffect(() => {
+    if (!isEmpty(cartSummaryPrice)) {
+      setCartSummary(cartSummaryPrice);
+    }
+  }, [cartSummaryPrice]);
 
   const updateRelatedProducts = () => {
     const payload = {
@@ -132,11 +139,6 @@ const CartScreen = ({ navigation }) => {
     var outOfStock = false;
     cartItems.map((cart) => {
       if (cart.productId === item.productId) {
-        console.log(
-          cart.qty,
-          cart.productQuantity,
-          cart.qty == cart.productQuantity,
-        );
         if (cart.qty == cart.productQuantity) {
           outOfStock = true;
         } else {
@@ -260,6 +262,7 @@ const CartScreen = ({ navigation }) => {
   useEffect(() => {
     ListProducts();
   }, [products, cartItems]);
+
   return (
     <>
       {loading ? <AppLoader /> : null}
@@ -306,11 +309,38 @@ const CartScreen = ({ navigation }) => {
                             fontColor={Colors.blackColor}
                             Pricing={{
                               sellprice: product.productPrice,
-                              price: product.mrpAmount,
+                              price: product.mrp,
                             }}
                           />
-
-                          <View style={styles.qtyContainerStyle}>
+                          <QtyWrapper>
+                            <QtyButton
+                              onPress={() => {
+                                product.qty === 1
+                                  ? removeCartItem(product)
+                                  : decreaseItemQty(product);
+                              }}>
+                              <AText color="#fff">
+                                <AIcon
+                                  color={'#72787e'}
+                                  name="minussquare"
+                                  size={16}
+                                />
+                              </AText>
+                            </QtyButton>
+                            <AText center medium bold ml="10px" mr="10px">
+                              {product.qty}
+                            </AText>
+                            <QtyButton onPress={() => increaseItemQty(product)}>
+                              <AText color="#fff">
+                                <AIcon
+                                  color={'#72787e'}
+                                  name="plussquare"
+                                  size={16}
+                                />
+                              </AText>
+                            </QtyButton>
+                          </QtyWrapper>
+                          {/* <View style={styles.qtyContainerStyle}>
                             <AText ml={'5px'} center small bold>
                               Qty: {product.qty}
                             </AText>
@@ -341,8 +371,8 @@ const CartScreen = ({ navigation }) => {
                                 </AText>
                               </TouchableOpacity>
                             </View>
-                          </View>
-                          {product.productQuantity <= 5 ? (
+                          </View> */}
+                          {/* {product.productQuantity <= 5 ? (
                             <Text
                               style={{
                                 color: '#ff0000',
@@ -351,7 +381,7 @@ const CartScreen = ({ navigation }) => {
                               }}>
                               {'Only ' + product.productQuantity + ' Left'}
                             </Text>
-                          ) : null}
+                          ) : null} */}
                         </View>
                       </View>
                     </ItemDescription>
@@ -388,9 +418,15 @@ const CartScreen = ({ navigation }) => {
                   <ImageSliderNew
                     title={'People who bought this also bought'}
                     dataItems={relatedProducts[1].products}
+                    productWidth={150}
                     navigatetonext={(item) => {
-                      // setProductIds(item._id);
-                      // setProductUrls(item.url);
+                      navigation.navigate(
+                        NavigationConstants.SINGLE_PRODUCT_SCREEN,
+                        {
+                          productID: item._id,
+                          productUrl: item.url,
+                        },
+                      );
                     }}
                   />
                 ) : null}
@@ -432,6 +468,7 @@ const CartScreen = ({ navigation }) => {
                   <View style={styles.summary}>
                     <AText fonts={FontStyle.semiBold}>Discount On MRP</AText>
                     <AText color={Colors.green}>
+                      -{' '}
                       {formatCurrency(
                         cartSummary?.discountTotal,
                         currencyOptions,
@@ -648,6 +685,26 @@ const ItemDescription = styled.View`
   padding: 10px;
   flex-direction: row;
   justify-content: space-between;
+`;
+const QtyWrapper = styled.View`
+  height: 30px;
+  overflown: hidden;
+  // width: 110px;
+  // margin: 10px 0px;
+  background: white;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  // border-width: 0.5px;
+  margin-right: 5px;
+`;
+const QtyButton = styled.TouchableOpacity`
+  background: white;
+  height: 100%;
+  // width: 25px;
+  border-radius: 5px;
+  justify-content: center;
+  align-items: center;
 `;
 
 const styles = StyleSheet.create({
