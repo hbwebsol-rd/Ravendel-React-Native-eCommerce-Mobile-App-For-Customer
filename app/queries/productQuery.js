@@ -54,6 +54,16 @@ const GET_PRODUCT = gql`
     productbyurl(url: $url) {
       data {
         _id
+        breadcrumb
+        attributes
+        variations
+        specifications {
+          key
+          value
+          group
+          attributeValueId
+          attributeId
+        }
         rating
         name
         url
@@ -76,33 +86,15 @@ const GET_PRODUCT = gql`
         custom_field
         date
         updated
-        attribute
-        attribute_master {
-          id
-          name
-          attribute_values
-          createdAt
-          updatedAt
-        }
         categoryId {
           id
           name
           __typename
         }
-        variation_master {
-          id
-          productId
-          combination
-          quantity
-          sku
-          image
-          pricing
-          createdAt
-          updatedAt
-        }
         short_description
-        variant
         __typename
+        ratingCount
+        levelWiseRating
       }
       message {
         message
@@ -122,31 +114,9 @@ const GET_CATEGORIES = gql`
         name
         parentId
         date
-        updated
         url
         image
       }
-    }
-  }
-`;
-
-const GET_ALL_CATEGORIES = gql`
-  query ($fillter: customObject) {
-    productCategoriesByFilter(filter: $fillter) {
-      id
-      name
-      parentId
-      url
-      description
-      image
-      child_cat {
-        id
-        name
-        parentId
-      }
-      meta
-      date
-      updated
     }
   }
 `;
@@ -193,44 +163,92 @@ export const GET_FILTEREDPRODUCTS = gql`
   }
 `;
 
-const GET_CAT_PRODUCTS = gql`
-  query ($url: String!) {
-    productsbycaturl(cat_url: $url) {
-      data {
-        id
+const GET_FILTEREDPRODUCTS_WITH_PAGINATION = gql`
+  query GetCategoryPageData(
+    $mainFilter: customObject
+    $filters: customArray
+    $sort: customObject
+    $pageNo: Int
+    $limit: Int
+  ) {
+    getCategoryPageData(
+      mainFilter: $mainFilter
+      filters: $filters
+      pageNo: $pageNo
+      limit: $limit
+      sort: $sort
+    ) {
+      isMostParentCategory
+      mostParentCategoryData
+      categoryTree
+      filterData
+      productData
+      message
+      success
+    }
+  }
+`;
+
+const GET_SEARCH_PRODUCTS = gql`
+  query SearchProducts($searchTerm: String!, $page: Int!, $limit: Int!) {
+    searchProducts(searchTerm: $searchTerm, page: $page, limit: $limit) {
+      count
+      products {
+        _id
         name
-        parentId
-        url
-        description
-        image
-        meta
-        date
-        updated
-        products {
-          _id
+        categoryId {
+          id
           name
+          parentId
+          attributeIds
           url
-          sku
           description
-          quantity
-          pricing
-          feature_image
-          gallery_image
+          image
+          thumbnail_image
           meta
-          shipping
-          tax_class
-          status
-          featured_product
-          product_type
-          custom_field
           date
           updated
-          rating
-          categoryId {
-            id
-            name
-          }
         }
+        categoryTree
+        brand {
+          id
+          name
+          url
+          brand_logo
+          meta
+          date
+          updated
+        }
+        url
+        sku
+        short_description
+        description
+        quantity
+        pricing
+        feature_image
+        gallery_image
+        meta
+        shipping
+        taxClass
+        status
+        featured_product
+        product_type
+        custom_field
+        specifications {
+          key
+          attributeId
+          value
+          attributeValueId
+          group
+        }
+        attributes
+        variations
+        date
+        rating
+        ratingCount
+        levelWiseRating
+        breadcrumb
+        updated
       }
     }
   }
@@ -239,27 +257,17 @@ const GET_CAT_PRODUCTS = gql`
 const GET_PRODUCT_REVIEWS = gql`
   query ($id: ID!) {
     productwisereview(productId: $id) {
-      data {
-        id
-        title
-        customerId {
-          id
-          firstName
-        }
-        productId {
-          _id
-          name
-        }
-        email
+      count
+      reviews {
         review
+        date
         rating
         status
-        date
-        updated
-      }
-      message {
-        message
-        success
+        title
+        customerId {
+          firstName
+          lastName
+        }
       }
     }
   }
@@ -277,8 +285,8 @@ const ADD_REVIEW = gql`
   ) {
     addReview(
       title: $title
-      customer_id: $customer_id
-      product_id: $product_id
+      customerId: $customer_id
+      productId: $product_id
       email: $email
       review: $review
       rating: $rating
@@ -346,9 +354,40 @@ export const GET_RELATED_PRODUCTS_QUERY = gql`
       quantity
       featured_product
       status
-      variant
       shipping
       taxClass
+    }
+  }
+`;
+export const GET_ADDITIONAL_PRODUCTS_QUERY = gql`
+  query ($productId: ID!) {
+    additionalDetails(productId: $productId)
+  }
+`;
+
+const GET_ALL_FIELDS = gql`
+  query GetHomePage($deviceType: ID!) {
+    getHomePage(deviceType: $deviceType) {
+      parentCategories {
+        id
+        name
+        url
+        image
+      }
+      sections {
+        name
+        section_img
+        display_type
+        products {
+          _id
+          name
+          quantity
+          rating
+          pricing
+          feature_image
+          url
+        }
+      }
     }
   }
 `;
@@ -366,12 +405,6 @@ const GET_BRANDS_QUERY = gql`
           description
           keywords
         }
-        date
-        updated
-      }
-      message {
-        message
-        success
       }
     }
   }
@@ -444,13 +477,14 @@ export {
   GET_PRODUCTS,
   GET_CATEGORIES,
   GET_PRODUCT,
-  GET_CAT_PRODUCTS,
   GET_PRODUCT_REVIEWS,
   ADD_REVIEW,
-  GET_ALL_CATEGORIES,
   SALE_PRODUCT,
   RECENT_PRODUCT,
   PRODUCT_BY_A_CATEGORY,
   FEATURE_CATEGORY,
   GET_BRANDS_QUERY,
+  GET_ALL_FIELDS,
+  GET_FILTEREDPRODUCTS_WITH_PAGINATION,
+  GET_SEARCH_PRODUCTS,
 };

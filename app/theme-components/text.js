@@ -15,7 +15,11 @@ const AText = styled.Text`
   border-bottom-width: ${(props) => props.bbw ?? '0px'};
   border-bottom-color: ${(props) => props.bbc ?? APP_PRIMARY_COLOR};
   text-decoration-line: ${(props) =>
-    props.lineThrough ? 'underline' : 'none'};
+    props.underLine
+      ? 'underline'
+      : props.lineThrough
+      ? 'line-through'
+      : 'none'};
   font-family: ${(props) => props.fonts ?? 'SegoeUI'};
   z-index: ${(props) => props.zindex ?? '1'};
   ${({
@@ -28,6 +32,7 @@ const AText = styled.Text`
     minor,
     semiminor,
     big,
+    big1,
   }) => {
     switch (true) {
       case jumbo:
@@ -42,6 +47,8 @@ const AText = styled.Text`
         return `font-size: 27px`;
       case big:
         return `font-size: 24px`;
+      case big1:
+        return `font-size: 22px`;
       case large:
         return `font-size: 18px`;
       case medium:
@@ -68,10 +75,12 @@ const AText = styled.Text`
         `text-align: left`;
     }
   }}
-    ${({ uppercase }) => {
+    ${({ uppercase,capitalize }) => {
     switch (true) {
       case uppercase:
         return `text-transform: uppercase`;
+      case capitalize:
+        return `text-transform: capitalize`;
       default:
         `text-transform: inherit`;
     }
@@ -79,7 +88,11 @@ const AText = styled.Text`
 `;
 
 const TextStyle = ({ ...props }) => {
-  return <AText {...props}>{props.children}</AText>;
+  return (
+    <AText numberOfLines={props.nol ?? null} {...props}>
+      {props.children}
+    </AText>
+  );
 };
 
 export default TextStyle;
