@@ -4,7 +4,8 @@ import {
   AContainer,
   AHeader,
   AButton,
-  ZHeader,
+  BackHeader,
+  MainLayout,
 } from '../../theme-components';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -17,202 +18,184 @@ import {
 } from '../../utils/config';
 import AIcon from 'react-native-vector-icons/AntDesign';
 import FIcon from 'react-native-vector-icons/Feather';
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { GREYTEXT } from '../../utils/config';
 import Colors from '../../constants/Colors';
 import Header from '../components/Header';
 import Styles from '../../Theme';
+import NavigationConstants from '../../navigation/NavigationConstants';
+import editIcon from '../../assets/images/editIcon.png';
+import changePasswordIcon from '../../assets/images/changePasswordIcon.png';
+import locationIcon from '../../assets/images/locationIcon.png';
+import orderIcon from '../../assets/images/orderIcon.png';
 
 const AccountScreen = ({ navigation }) => {
-  const isLoggin = useSelector((state) => state.customer.isLoggin);
+  const { isLoggin, userDetails } = useSelector((state) => state.customer);
   const dispatch = useDispatch();
-
+  const headerFieldArray = [
+    {
+      id: 1,
+      name: 'Edit Information',
+      iconName: editIcon,
+      navigationScreen: NavigationConstants.EDIT_PROFILE_SCREEN,
+    },
+    {
+      id: 2,
+      name: 'My Addresses',
+      iconName: locationIcon,
+      navigationScreen: NavigationConstants.SAVED_ADDRESS_SCREEN,
+    },
+    {
+      id: 3,
+      name: 'My Orders',
+      iconName: orderIcon,
+      navigationScreen: NavigationConstants.ORDERS_SCREEN,
+    },
+    {
+      id: 3,
+      name: 'Change Password',
+      iconName: changePasswordIcon,
+      navigationScreen: NavigationConstants.CHANGE_PASSWORD_SCREEN,
+    },
+  ];
+  const impInfoFieldArray = [
+    {
+      id: 1,
+      name: 'Return and Refund Policy',
+      navigationScreen: '',
+    },
+    {
+      id: 2,
+      name: 'Terms and Condition',
+      navigationScreen: '',
+    },
+    {
+      id: 3,
+      name: 'Privacy Policy',
+      navigationScreen: '',
+    },
+    {
+      id: 3,
+      name: 'Contact US',
+      navigationScreen: NavigationConstants.ContactUs,
+    },
+  ];
   const Logout = () => {
-    dispatch(LogOut(navigation));
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      { text: 'OK', onPress: () => dispatch(LogOut(navigation)) },
+    ]);
   };
   return (
-    <>
-      <View style={Styles.mainContainer}>
-        <Header navigation={navigation} title={'My Account'} />
-        {isLoggin ? (
+    <MainLayout style={Styles.mainContainer}>
+      <Header navigation={navigation} title={'My Account'} />
+      {isLoggin ? (
+        <>
+          <View
+            style={{ alignItems: 'center', marginTop: 60, marginBottom: 10 }}>
+            <Image source={require('../../assets/images/man.png')} />
+            <AText mb="5px" big center fonts={FontStyle.semiBold} color="black">
+              {userDetails.firstName} {userDetails.lastName}
+            </AText>
+            <AText
+              mb="5px"
+              center
+              fonts={FontStyle.semiBold}
+              color={APP_PRIMARY_COLOR}>
+              {userDetails.email}
+            </AText>
+            <AText center fonts={FontStyle.semiBold} color={APP_PRIMARY_COLOR}>
+              {userDetails.phone}
+            </AText>
+          </View>
+          <View style={styles.headerContainer}>
+            {headerFieldArray.map((item) => (
+              <TouchableOpacity
+                style={styles.boxContainerBtnStyle}
+                onPress={() =>
+                  navigation.navigate(item.navigationScreen, {
+                    initial: false,
+                  })
+                }>
+                <Image
+                  source={item.iconName}
+                  style={[styles.iconStyles, { tintColor: APP_PRIMARY_COLOR }]}
+                />
+                <AText small ml={15} fonts={FontStyle.semiBold}>
+                  {item.name}
+                </AText>
+              </TouchableOpacity>
+            ))}
+          </View>
+          <View style={styles.container}>
+            <AText medium ml={'15px'} fonts={FontStyle.semiBold}>
+              Important Information
+            </AText>
+            {impInfoFieldArray.map((item) => (
+              <TouchableOpacity
+                onPress={() => {
+                  item.navigationScreen
+                    ? navigation.navigate(item.navigationScreen, {
+                        initial: false,
+                      })
+                    : '';
+                }}
+                style={styles.infoBtnStyle}>
+                <AText
+                  color={'#8A8A8A'}
+                  mediu
+                  ml={15}
+                  fonts={FontStyle.semiBold}>
+                  {item.name}
+                </AText>
+                <FIcon color={'#8A8A8A'} name="chevron-right" size={15} />
+              </TouchableOpacity>
+            ))}
+          </View>
+        </>
+      ) : (
+        <AText mt="60px" large center bold>
+          Please sign in
+        </AText>
+      )}
+      <UserSection>
+        {!isLoggin ? (
           <>
-            <View
-              style={{ alignItems: 'center', marginTop: 60, marginBottom: 25 }}>
-              <Image source={require('../../assets/images/man.png')} />
-              <AText
-                mb="5px"
-                big
-                center
-                fonts={FontStyle.semiBold}
-                color="black">
-                Candice King
-              </AText>
-              <AText
-                mb="5px"
-                center
-                fonts={FontStyle.semiBold}
-                color={APP_PRIMARY_COLOR}>
-                Custom@ravendel.com
-              </AText>
-              <AText
-                center
-                fonts={FontStyle.semiBold}
-                color={APP_PRIMARY_COLOR}>
-                5452545545
-              </AText>
-            </View>
-            <View style={styles.container}>
-              <TouchableOpacity
-                style={styles.optionstyle}
-                onPress={() =>
-                  navigation.navigate('EditProfile', {
-                    initial: false,
-                  })
-                }>
-                <ListIcon>
-                  <Icon name="pencil" color={GREYTEXT} size={18} />
-                </ListIcon>
-                <ListTitleWrapper>
-                  <AText
-                    medium
-                    fonts={FontStyle.semiBold}
-                    color={GREYTEXT}
-                    mb="5px">
-                    Edit Information
-                  </AText>
-                  <FIcon name="chevron-right" size={15} />
-                  {/* <AText small>Track, Cancel and return orders</AText> */}
-                </ListTitleWrapper>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.optionstyle}
-                onPress={() =>
-                  navigation.navigate('SavedAddress', {
-                    initial: false,
-                  })
-                }>
-                <ListIcon>
-                  <Icon name="map-marker" color={GREYTEXT} size={18} />
-                </ListIcon>
-                <ListTitleWrapper>
-                  <AText
-                    medium
-                    fonts={FontStyle.semiBold}
-                    color={GREYTEXT}
-                    mb="5px">
-                    Shopping Address
-                  </AText>
-                  <FIcon name="chevron-right" size={15} />
-                  {/* <AText small>Update your personal information</AText> */}
-                </ListTitleWrapper>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.optionstyle}
-                onPress={() =>
-                  navigation.navigate('ChangePassword', {
-                    initial: false,
-                  })
-                }>
-                <ListIcon>
-                  <Icon name="heart-o" color={GREYTEXT} size={18} />
-                </ListIcon>
-                <ListTitleWrapper>
-                  <AText
-                    medium
-                    fonts={FontStyle.semiBold}
-                    color={GREYTEXT}
-                    mb="5px">
-                    My Wishlist
-                  </AText>
-                  <FIcon name="chevron-right" size={15} />
-                </ListTitleWrapper>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.optionstyle}
-                onPress={() =>
-                  navigation.navigate('Orders', {
-                    initial: false,
-                  })
-                }>
-                <ListIcon>
-                  <FIcon name="trello" color={GREYTEXT} size={18} />
-                </ListIcon>
-                <ListTitleWrapper>
-                  <AText
-                    medium
-                    fonts={FontStyle.semiBold}
-                    color={GREYTEXT}
-                    mb="5px">
-                    My Orders
-                  </AText>
-                  <FIcon name="chevron-right" size={15} />
-                </ListTitleWrapper>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.optionstyle}
-                onPress={() =>
-                  navigation.navigate('SavedAddress', {
-                    initial: false,
-                  })
-                }>
-                <ListIcon>
-                  <Icon name="bell-o" color={GREYTEXT} size={18} />
-                </ListIcon>
-                <ListTitleWrapper>
-                  <AText
-                    medium
-                    fonts={FontStyle.semiBold}
-                    color={GREYTEXT}
-                    mb="5px">
-                    Notification
-                  </AText>
-                  <FIcon name="chevron-right" size={15} />
-                </ListTitleWrapper>
-              </TouchableOpacity>
-            </View>
+            <AButton
+              title="Sign In"
+              block
+              round
+              onPress={() =>
+                navigation.navigate(NavigationConstants.LOGIN_SIGNUP_SCREEN, {
+                  initial: false,
+                })
+              }
+            />
           </>
         ) : (
-          <AText mt="60px" large center bold>
-            Please sign in
-          </AText>
+          <AButton
+            round
+            title="Sign Out"
+            onPress={() => {
+              Logout();
+            }}
+          />
         )}
-        <UserSection>
-          {!isLoggin ? (
-            <>
-              <AButton
-                title="Sign In"
-                block
-                round
-                onPress={() =>
-                  navigation.navigate('LoginSignUp', {
-                    initial: false,
-                  })
-                }
-              />
-            </>
-          ) : (
-            <AButton
-              round
-              title="Sign Out"
-              onPress={() => {
-                Logout();
-              }}
-            />
-          )}
-          <AppFooter>
-            <AppInfo>
-              <AText large heavy color={GREYTEXT} mr="5px">
-                Ravendel
-              </AText>
-              <AText small color={GREYTEXT} ml="5px">
-                App Version: 1.0
-              </AText>
-            </AppInfo>
-          </AppFooter>
-        </UserSection>
-      </View>
-    </>
+        <AppFooter>
+          <AppInfo>
+            <AText large heavy color={GREYTEXT} mr="5px">
+              Ravendel
+            </AText>
+            <AText small color={GREYTEXT} ml="5px">
+              App Version: 1.0
+            </AText>
+          </AppInfo>
+        </AppFooter>
+      </UserSection>
+    </MainLayout>
   );
 };
 
@@ -268,11 +251,37 @@ const AppInfo = styled.View`
   align-items: center;
 `;
 const styles = StyleSheet.create({
+  headerContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    width: '100%',
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  boxContainerBtnStyle: {
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    flexDirection: 'row',
+    width: '45%',
+    margin: 3,
+    borderColor: '#D4D4D4',
+    paddingHorizontal: 12,
+    paddingVertical: 15,
+    borderRadius: 5,
+    borderWidth: 0.9,
+  },
+  iconStyles: {
+    resizeMode: 'contain',
+    width: 20,
+    height: 20,
+  },
   container: {
-    borderRadius: 10,
-    elevation: 3,
-    padding: 10,
-    marginHorizontal: 30,
+    // borderRadius: 10,
+    // elevation: 1,
+    // padding: 10,
+    paddingVertical: 16,
+    marginHorizontal: 5,
     backgroundColor: 'white',
   },
   header: {
@@ -292,12 +301,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     paddingHorizontal: 10,
-    paddingVertical: 15,
+    paddingVertical: 12,
     borderWidth: 0,
     borderBottomWidth: 0.3,
     borderRadius: 10,
     marginBottom: 10,
     borderColor: 'grey',
+  },
+  infoBtnStyle: {
+    width: '95%',
+    paddingVertical: 5,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 });
 export default AccountScreen;

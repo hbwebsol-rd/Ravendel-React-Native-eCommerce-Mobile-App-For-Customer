@@ -7,7 +7,8 @@ import {
   AContainer,
   AHeader,
   AText,
-  ZHeader,
+  BackHeader,
+  MainLayout,
 } from '../../theme-components';
 import { isEmpty } from '../../utils/helper';
 import male from '../../assets/images/man.png';
@@ -23,7 +24,6 @@ import Colors from '../../constants/Colors';
 const EditProfileScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const userData = useSelector((state) => state.customer.userDetails);
-  console.log(userData, 'udata');
   const [genderArr, setGenderArr] = useState([
     { id: 1, type: 'male' },
     { id: 2, type: 'female' },
@@ -56,7 +56,7 @@ const EditProfileScreen = ({ navigation }) => {
     onSubmit: (values, { setSubmitting, resetForm }) => {
       setSubmitting(false);
       profileUpdate(values);
-      resetForm({ values: '' });
+      // resetForm({ values: '' });
     },
   });
 
@@ -74,8 +74,8 @@ const EditProfileScreen = ({ navigation }) => {
 
   return (
     <>
-      <View style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
-        <ZHeader name="My Account" navigation={navigation} />
+      <MainLayout style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
+        <BackHeader name="My Account" navigation={navigation} />
         {/* <UpperCurve /> */}
 
         <View
@@ -152,7 +152,7 @@ const EditProfileScreen = ({ navigation }) => {
             title="Save Changes"
           />
         </View>
-      </View>
+      </MainLayout>
     </>
   );
 };
@@ -169,71 +169,7 @@ const TextInputArea = styled.TextInput`
   align-self: center;
   padding: 9px;
 `;
-const ProfileImage = styled.Image`
-  width: 80px;
-  height: 60px;
-  resize-mode: contain;
-`;
-const ImageWrapper = styled.View`
-    flex-direction:row
-    align-self:center;
-    justify-content: space-evenly;
-    align-items: center;
-    margin-bottom:25px;
-`;
-const ImageButton = styled.TouchableOpacity`
-  align-self: center;
-  justify-content: center;
-  align-items: center;
-`;
-const EditButton = styled.TouchableOpacity`
-  position: absolute;
-  top: 30px;
-  right: -7px;
-`;
 
-const ItemWrapper = styled.View`
-  border-radius: 10;
-  padding-horizontal: 40px;
-  padding-bottom: 30px;
-  margin-horizontal: 30px;
-  margin-top: 120px;
-  //   height: 50%;
-  justify-content: center;
-  width: 90%;
-  align-self: center;
-  background-color: white;
-`;
-
-const UpperCurve = styled.View`
-  height: 180px;
-  width: 100%;
-  background: #312f2d;
-  border-bottom-left-radius: 30px;
-  border-bottom-right-radius: 30px;
-  align-self: center;
-`;
-const ProfileView = styled.View`
-    height:180px;
-    flex-direction:row;
-    width:85%;
-    align-items: center;
-    justify-content:center;
-    background:#f7f7f7;
-    border-radius:10px;
-    position:absolute;
-    top:100px;
-    z-index:1;
-    align-self:center;
-    shadow-color: #000;
-    shadow-offset: {
-        width: 0;
-        height: 2;
-    },
-    shadow-opacity: 0.25px;
-    shadow-radius: 3.84px;
-    elevation: 5;
- `;
 const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
@@ -253,7 +189,14 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   container: {
-    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
     borderRadius: 10,
     paddingHorizontal: 40,
     paddingBottom: 30,

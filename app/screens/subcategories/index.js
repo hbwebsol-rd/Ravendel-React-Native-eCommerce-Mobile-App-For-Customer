@@ -5,33 +5,39 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import styled from 'styled-components/native';
 import {
   AText,
-  AContainer,
-  AHeader,
   ARow,
-  ACol,
   AppLoader,
   TextInput,
   AButton,
+  ProductCard,
+  MainLayout,
 } from '../../theme-components';
 import { useDispatch, useSelector } from 'react-redux';
 import URL from '../../utils/baseurl';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { CommonActions, useIsFocused } from '@react-navigation/native';
+import IonIcon from 'react-native-vector-icons/Ionicons';
+
 import FastImage from 'react-native-fast-image';
-import { capitalizeFirstLetter, isEmpty } from '../../utils/helper';
 import {
-  // FlatList,
+  capitalizeFirstLetter,
+  formatCurrency,
+  isEmpty,
+} from '../../utils/helper';
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
   ImageBackground,
-  // ScrollView,
+  Modal,
+  Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { ScrollView, FlatList } from 'react-native-gesture-handler';
 import AIcon from 'react-native-vector-icons/AntDesign';
 import {
   APP_PRIMARY_COLOR,
@@ -40,72 +46,133 @@ import {
   windowWidth,
 } from '../../utils/config';
 import { catProductAction } from '../../store/action';
-import { ProductPriceText } from '../components';
-import Feather from 'react-native-vector-icons/Feather';
 import StarRating from 'react-native-star-rating';
-import LinearGradient from 'react-native-linear-gradient';
-import { CAT_PRODUCTS_CLEAR } from '../../store/action/productAction';
 import Colors from '../../constants/Colors';
 import {
   BottomSheetModal,
   BottomSheetModalProvider,
 } from '@gorhom/bottom-sheet';
-import MultiSlider from '@ptomasroos/react-native-multi-slider';
+
+import NavigationConstants from '../../navigation/NavigationConstants';
+import PropTypes from 'prop-types';
+import BrandFilter from '../components/BrandFilter';
+import RangeFilter from '../components/RangeFilter';
+import RatingFilter from '../components/RatingFilter';
+import FilterModal from './filter';
 
 const SubCategoriesScreen = ({ navigation, route }) => {
-  const isFocused = useIsFocused();
   const dispatch = useDispatch();
-  const [values, setValues] = useState([0, 10000]);
-
-  const multiSliderValuesChange = (values) => {
-    setValues(values);
-  };
-  const bottomSheetModalRef = useRef(null);
+  const [amountRange, setAmountRange] = useState([0, 10000]);
+  const [loader, setLoader] = useState(false);
 
   // variables
-  const snapPoints = useMemo(() => ['60%'], []);
-
+  const snapPoints = useMemo(() => ['60%'], []); // For Bottomsheet Modal
+  const { currencyOptions, currencySymbol } = useSelector(
+    (state) => state.settings,
+  );
   // callbacks
   const handlePresentModalPress = useCallback(() => {
-    console.log('pressing', bottomSheetModalRef.current);
-    bottomSheetModalRef.current?.present();
+    setFilterModal(!filterModal);
+    // bottomSheetModalRef.current?.present();
   }, []);
+
   const handleSheetChanges = useCallback((index) => {
     console.log('handleSheetChanges', index);
   }, []);
-  const [starCount, setStarCount] = useState(3.5);
+
+  const [starCount, setStarCount] = useState(0);
 
   const onStarRatingPress = (rating) => {
     setStarCount(rating);
   };
   const [selectedCat, setSelectedCat] = useState('All');
-  const [selectedCatId, setSelectedCatId] = useState('');
   const singleCat = route?.params?.singleCategory;
+  const [selectedCatId, setSelectedCatId] = useState(singleCat.url);
   const singleCatChildern = route?.params?.withChildern;
   const loading = useSelector((state) => state.products.loading);
-  const singleCateogry = useSelector(
-    (state) => state.products.singleCategoryDetails,
-  );
+  const {
+    filterData,
+    singleCategoryDetails: singleCateogry,
+    totalCount,
+  } = useSelector((state) => state.products);
   const { brands } = useSelector((state) => state.settings);
   const [categorydata, setCategorydata] = useState(null);
   const [optionSelect, setOptionSelect] = useState(['All']);
   const [withChild, setWithChild] = useState([]);
   const [inpvalue, setInpvalue] = useState('');
-  const [ActiveBrand, setActiveBrand] = useState('');
-
+  const [ActiveBrand, setActiveBrand] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPage, setTotalPage] = useState('');
+  const [filterModal, setFilterModal] = useState(false);
+  const [filterList, setFilterList] = useState([]);
+  const [filterSelect, setFilterSelect] = useState(0);
+  const [sortBy, setSortBy] = useState({
+    field: 'date',
+    type: 'desc',
+  });
   //Custom Functions
   const handleinpiut = (e) => {
     setInpvalue(e);
   };
+  const sortData = {
+    heading: 'Sort',
+    type: 'choice',
+    field: 'sort',
+    category: 'static',
+    valueType: 'ObjectId',
+    data: [
+      {
+        label: 'Lowest to highest',
+        value: {
+          field: 'pricing.sellprice',
+          type: 'asc',
+        },
+        select: false,
+      },
+      {
+        label: 'highest to Lowest',
+        value: {
+          field: 'pricing.sellprice',
+          type: 'desc',
+        },
+        select: false,
+      },
+      {
+        label: 'Newest',
+        value: {
+          field: 'date',
+          type: 'desc',
+        },
+        select: false,
+      },
+    ],
+  };
 
+  useEffect(() => {
+    setFilterList([sortData, ...filterData]);
+  }, [filterData]);
+  const handleLoadMore = () => {
+    setLoader(true);
+    const filter = {
+      mainFilter: {
+        categoryUrl: selectedCatId,
+      },
+      filters: [],
+      pageNo: 1,
+      limit: 10 * (currentPage + 1),
+    };
+    dispatch(
+      catProductAction(filter, true, setLoader, setCurrentPage, currentPage),
+    );
+  };
   // Custom Call
   const handleselectedCat = (name, id) => {
-    if (name == selectedCat) {
-      setSelectedCat(null);
-      setSelectedCatId(null);
+    if (name === 'All') {
+      setSelectedCat('All');
+      setSelectedCatId(singleCat.url);
     } else {
       setSelectedCat(name);
-      setSelectedCatId(id);
+      setSelectedCatId(name);
     }
   };
   useEffect(() => {
@@ -115,27 +182,19 @@ const SubCategoriesScreen = ({ navigation, route }) => {
       selectedCat === 'All' &&
       !isEmpty(singleCateogry)
     ) {
-      // console.log(JSON.stringify(singleCateogry));
       setCategorydata(singleCateogry);
       return array;
     } else if (selectedCat !== 'All' && !isEmpty(inpvalue)) {
       let reg = new RegExp(inpvalue.toLowerCase());
       array = singleCateogry.filter((item) => {
         let name = item.name;
-        if (
-          !isEmpty(name) &&
-          name.toLowerCase().match(reg) &&
-          selectedCat === item.url
-        ) {
+        if (!isEmpty(name) && name.toLowerCase().match(reg)) {
           return item;
         }
       });
     } else if (selectedCat !== 'All' && isEmpty(inpvalue)) {
-      console.log(selectedCat, 'this filter is running');
       array = singleCateogry.filter((item) => {
-        if (selectedCat === item.url) {
-          return item;
-        }
+        return item;
       });
     } else if (!isEmpty(inpvalue) && selectedCat === 'All') {
       let reg = new RegExp(inpvalue.toLowerCase());
@@ -155,197 +214,87 @@ const SubCategoriesScreen = ({ navigation, route }) => {
     }
   }, [singleCatChildern]);
 
-  const handlefilter = (type) => {
-    if (!optionSelect.includes(type)) {
-      setOptionSelect((old) => [...old, type]);
-    } else {
-      setOptionSelect((old) => old.filter((val) => val !== type));
-    }
-  };
-
   useEffect(() => {
-    // if (!isEmpty(singleCateogry)) {
     setCategorydata(singleCateogry);
-    // }
-  }, [singleCateogry]);
-
-  useEffect(() => {
-    if (singleCat) {
-      console.log('heyyy');
-      let filter = {
-        category: singleCat.id,
-        brand: '',
-        most_reviewed: false,
-        product_type: '',
-        rating: {
-          min: 0,
-          max: 5,
-        },
-        price: {
-          min: 1,
-          max: 100000,
-        },
-        search: '',
-      };
-      console.log(filter, 'filter data');
-      dispatch(catProductAction(filter, true));
-    } else {
-      console.log('out of foucus runn');
-      dispatch({
-        type: CAT_PRODUCTS_CLEAR,
-      });
+    if (totalCount > 0) {
+      setTotalPage(Math.ceil(totalCount / 10));
     }
-  }, [isFocused]);
-
-  // useEffect(() => {
-  //   return () => {
-  //     console.log('out of foucus runn 2');
-  //     dispatch({
-  //       type: CAT_PRODUCTS_CLEAR,
-  //     });
-  //   };
-  // }, []);
+  }, [singleCateogry, totalCount]);
 
   useEffect(() => {
-    console.log(selectedCat);
     if (selectedCat !== 'All') {
-      let filter = {
-        category: selectedCatId,
-        brand: '',
-        most_reviewed: false,
-        product_type: '',
-        rating: {
-          min: 0,
-          max: 5,
+      const filter = {
+        mainFilter: {
+          categoryUrl: selectedCatId,
         },
-        price: {
-          min: 1,
-          max: 100000,
-        },
-        search: '',
+        filters: [],
+        pageNo: 1,
+        limit: 10,
       };
-      console.log(filter, 'filter data on different type');
-      dispatch(catProductAction(filter, true));
+      dispatch(catProductAction(filter));
     } else {
-      let filter = {
-        category: singleCat.id,
-        brand: '',
-        most_reviewed: false,
-        product_type: '',
-        rating: {
-          min: 0,
-          max: 5,
+      const filter = {
+        mainFilter: {
+          categoryUrl: selectedCatId,
         },
-        price: {
-          min: 1,
-          max: 100000,
-        },
-        search: '',
+        filters: [],
+        pageNo: 1,
+        limit: 10,
       };
-      dispatch(catProductAction(filter, true));
+
+      dispatch(catProductAction(filter));
     }
   }, [selectedCat]);
 
   const handleFilter = () => {
-    // console.log(starCount, values, ActiveBrand);
-    const brandobj = !isEmpty(ActiveBrand)
-      ? brands
-          .filter((item) => item.name === ActiveBrand)
-          .map((item) => {
-            return { id: item.id, name: item.name };
-          })
-      : '';
-    let filter = {
-      category: selectedCatId,
-      brand: !isEmpty(brandobj) ? brandobj[0] : '',
-      most_reviewed: false,
-      product_type: '',
-      rating: {
-        min: 0,
-        max: starCount,
+    const filter = {
+      mainFilter: {
+        categoryUrl: selectedCatId,
       },
-      price: {
-        min: values[0],
-        max: values[1],
-      },
-      search: '',
+      sort: sortBy,
+      filters: filterList.filter(
+        (item) => item.field !== 'sort' && !isEmpty(item.select),
+      ),
+      pageNo: 1,
+      limit: 10,
     };
-    console.log(filter, 'filtering modal');
+    dispatch(catProductAction(filter, true));
+    setFilterModal(false);
+    // bottomSheetModalRef.current?.dismiss();
+  };
+
+  const handleReset = () => {
+    setActiveBrand([]);
+    setStarCount(0);
+    setAmountRange[(0, 10000)];
+    setFilterModal(false);
+    // bottomSheetModalRef.current?.dismiss();
+    const filter = {
+      mainFilter: {
+        categoryUrl: selectedCatId,
+      },
+      filters: [],
+      pageNo: 1,
+      limit: 10,
+    };
     dispatch(catProductAction(filter, true));
   };
   function renderItem({ item }) {
     return (
-      <TouchableOpacity
-        onPress={() => {
-          navigation.navigate('CateGories', {
-            screen: 'SingleProduct',
-            initial: false,
-            params: { productID: item._id, productUrl: item.url },
+      <ProductCard
+        category={item}
+        displayImage={item.feature_image}
+        fontsizesmall={true}
+        showRating={true}
+        showItemLeft={true}
+        productWidth={windowWidth * 0.48}
+        navigateNextScreen={() => {
+          navigation.navigate(NavigationConstants.SINGLE_PRODUCT_SCREEN, {
+            productID: item._id,
+            productUrl: item.url,
           });
         }}
-        style={styles.cardstyle}>
-        {/* <Icon
-          onPress={() => alert('Save it Wishlist')}
-          name="heart-o"
-          color={'red'}
-          size={15}
-          style={styles.heart}
-        /> */}
-        <ImageBackground
-          source={{
-            uri: !isEmpty(item.feature_image)
-              ? URL + item.feature_image
-              : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
-            priority: FastImage.priority.normal,
-          }}
-          style={styles.centeredItemImage}
-          imageStyle={{ borderRadius: 10, resizeMode: 'contain' }}>
-          <View style={styles.blurWrap}>
-            <ImageBackground
-              source={{
-                uri: !isEmpty(item.feature_image)
-                  ? URL + item.feature_image
-                  : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
-                priority: FastImage.priority.normal,
-              }}
-              blurRadius={Platform.OS === 'ios' ? 20 : 20}
-              style={styles.blurImageStyle}
-              imageStyle={{
-                borderRadius: 10,
-                resizeMode: 'cover',
-              }}></ImageBackground>
-          </View>
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => {
-              // navigatetonext(item);
-            }}
-            style={styles.overlay}></TouchableOpacity>
-          <View style={styles.textContainer}>
-            <AText mb="5px" small fonts={FontStyle.fontBold}>
-              {item.name.length > 14
-                ? item.name.substring(0, 14) + '...'
-                : item.name}
-            </AText>
-            <AText small fonts={FontStyle.fontBold} style={styles.text}>
-              $ {item.pricing.sellprice + '.00'}
-            </AText>
-          </View>
-          <View style={styles.textContainer2}>
-            <TouchableOpacity style={styles.iconcontainer}>
-              <Icon name="shopping-cart" color={'black'} size={14} />
-            </TouchableOpacity>
-            <StarRating
-              disabled={true}
-              maxStars={5}
-              rating={item.rating}
-              fullStarColor={'#FFDB20'}
-              emptyStarColor={'gray'}
-              starSize={10}
-            />
-          </View>
-        </ImageBackground>
-      </TouchableOpacity>
+      />
     );
   }
 
@@ -356,26 +305,28 @@ const SubCategoriesScreen = ({ navigation, route }) => {
   return (
     <>
       <BottomSheetModalProvider>
-        <View style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
+        <MainLayout
+          hideScroll
+          style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
           <View style={styles.header}>
             <AIcon
-              onPress={() => navigation.navigate('Home')}
+              onPress={() => navigation.goBack()}
               name="arrowleft"
               size={22}
             />
-            <AText fonts={FontStyle.semiBold} ml="20px">
-              {capitalizeFirstLetter(singleCat.url)}
+            <AText fonts={FontStyle.fontBold} ml="20px">
+              {capitalizeFirstLetter(singleCat.url).replace(/-/g, ' ')}
             </AText>
           </View>
           <ARow
             ml="30px"
             mr="30px"
-            mt={'50px'}
+            mt={'10px'}
             row
             justifyContent="space-between"
             alignItems="center"
             position="relative">
-            <View style={{ width: '65%', justifyContent: 'center' }}>
+            <View style={{ width: '85%', justifyContent: 'center' }}>
               <Icon
                 style={styles.iconstyle}
                 name={'search'}
@@ -383,30 +334,33 @@ const SubCategoriesScreen = ({ navigation, route }) => {
                 color={'black'}
               />
               <TextInput
-                height={30}
+                height={40}
                 bc={'#E0E0E0'}
                 value={inpvalue}
                 onchange={handleinpiut}
                 padding={0}
                 pl={35}
-                inputBgColor={Colors.whiteColor}
+                inputBgColor={'#EFF0F0'}
                 fs={12}
-                placeholder={'Search'}
-                placeholdercolor={'black'}
+                placeholder={'Search..'}
                 br={30}
+                placeholdercolor={'#959696'}
               />
             </View>
             <TouchableOpacity
               onPress={() => handlePresentModalPress()}
-              style={styles.filterstyle}>
-              <AIcon name={'filter'} size={20} color={'black'} />
-              <AText color="black" ml="10px">
-                Filter
-              </AText>
+              style={[
+                styles.filterstyle,
+                { backgroundColor: APP_PRIMARY_COLOR },
+              ]}>
+              <Image
+                style={{ resizeMode: 'contain', width: 15 }}
+                source={require('../../assets/images/filter.png')}
+              />
             </TouchableOpacity>
           </ARow>
           {/* <HeaderContent /> */}
-          <View style={{ paddingHorizontal: 30 }}>
+          <View style={{ paddingHorizontal: 15 }}>
             <ScrollView
               contentContainerStyle={{
                 marginTop: 20,
@@ -418,51 +372,47 @@ const SubCategoriesScreen = ({ navigation, route }) => {
               keyboardShouldPersistTaps="always"
               horizontal={true}
               showsHorizontalScrollIndicator={false}>
-              <AButton
-                semi
-                mr="8px"
-                title={'All'}
+              <TouchableOpacity
                 onPress={() => handleselectedCat('All', null)}
-                bgColor={
-                  'All' == selectedCat ? APP_PRIMARY_COLOR : 'transparent'
-                }
-                color={'All' == selectedCat ? 'white' : 'black'}
-                round
-                minor={windowWidth < 330 ? true : false}
-                small={windowWidth < 400 && windowWidth > 330 ? true : false}
-                extramedium={windowWidth > 400 ? true : false}
-                xtrasmall
-                borderColor={'transparent'}
-              />
-              {/* {console.log(withChild, 'wothchaild')} */}
+                style={{
+                  borderRadius: 15,
+                  backgroundColor:
+                    'All' == selectedCat ? APP_PRIMARY_COLOR : 'transparent',
+                  paddingHorizontal: 12,
+                  paddingVertical: 5,
+                  margin: 5,
+                }}>
+                <AText
+                  color={'All' == selectedCat ? '#fff' : 'black'}
+                  font={FontStyle.semiBold}
+                  small>
+                  All
+                </AText>
+              </TouchableOpacity>
+
               {withChild.map((item) => (
-                <>
-                  <AButton
-                    semi
-                    mr="8px"
-                    key={item.id}
-                    title={item.name}
-                    onPress={() => handleselectedCat(item.url, item.id)}
-                    bgColor={
+                <TouchableOpacity
+                  onPress={() => handleselectedCat(item.url, item.id)}
+                  style={{
+                    borderRadius: 15,
+                    backgroundColor:
                       item.url == selectedCat
                         ? APP_PRIMARY_COLOR
-                        : 'transparent'
-                    }
-                    color={item.url == selectedCat ? 'white' : 'black'}
-                    round
-                    minor={windowWidth < 330 ? true : false}
-                    small={
-                      windowWidth < 400 && windowWidth > 330 ? true : false
-                    }
-                    extramedium={windowWidth > 400 ? true : false}
-                    xtrasmall
-                    borderColor={'transparent'}
-                  />
-                </>
+                        : 'transparent',
+                    paddingHorizontal: 12,
+                    paddingVertical: 5,
+                    margin: 5,
+                  }}>
+                  <AText
+                    color={item.url == selectedCat ? '#fff' : 'black'}
+                    font={FontStyle.semiBold}
+                    small>
+                    {item.name}
+                  </AText>
+                </TouchableOpacity>
               ))}
             </ScrollView>
           </View>
-          {/* {console.log(categorydata, 'catteee data')} */}
           <FlatList
             numColumns={2}
             data={categorydata}
@@ -474,7 +424,8 @@ const SubCategoriesScreen = ({ navigation, route }) => {
               marginTop: 10,
               flexDirection: 'column',
               margin: 'auto',
-              marginHorizontal: 30,
+              marginHorizontal: 5,
+              paddingBottom: 20,
             }}
             ListEmptyComponent={() => (
               <View>
@@ -484,113 +435,46 @@ const SubCategoriesScreen = ({ navigation, route }) => {
                 </AText>
               </View>
             )}
-          />
-          {/* {withChild.length ? menuListing(withChild) : null} */}
-        </View>
-        <BottomSheetModal
-          // enableDismissOnClose={false}
-          ref={bottomSheetModalRef}
-          snapPoints={snapPoints}
-          onChange={handleSheetChanges}
-          // handleStyle={{ backgroundColor: 'pink' }}
-          containerStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
-          style={{ flex: 1, elevation: 10, paddingHorizontal: 15 }}>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <View
-              style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <AText fonts={FontStyle.semiBold}>Filter</AText>
-              <AText fonts={FontStyle.semiBold}>Reset</AText>
-            </View>
-            <AText mt={'20px'} mb={'5px'} fonts={FontStyle.semiBold}>
-              Brands
-            </AText>
-            <View
-              style={{
-                elevation: 10,
-                flexDirection: 'row',
-                flexWrap: 'wrap',
-
-                // backgroundColor: 'orange',
-              }}>
-              {brands.map((item) => (
+            ListFooterComponent={() =>
+              // Render Load More button as a footer
+              currentPage < totalPage && (
                 <TouchableOpacity
-                  onPress={() => setActiveBrand(item.name)}
+                  onPress={() => handleLoadMore()}
                   style={{
-                    ...styles.chipstyle,
-                    backgroundColor:
-                      ActiveBrand === item.name
-                        ? Colors.green
-                        : Colors.lightGreen,
+                    width: '100%',
+                    alignItems: 'center',
+                    paddingVertical: 2,
                   }}>
-                  <AText
-                    fonts={FontStyle.semiBold}
-                    color={
-                      ActiveBrand === item.name
-                        ? Colors.whiteColor
-                        : Colors.blackColor
-                    }>
-                    {item.name}
-                  </AText>
+                  {loader ? (
+                    <ActivityIndicator />
+                  ) : (
+                    <AText color={Colors.blue}>Load More</AText>
+                  )}
                 </TouchableOpacity>
-              ))}
-            </View>
-            <AText
-              mt="20px"
-              color={Colors.blackColor}
-              fonts={FontStyle.semiBold}>
-              Price Range
-            </AText>
-            <Text>
-              Selected Range: {values[0]} - {values[1]}
-            </Text>
+              )
+            }
+          />
+        </MainLayout>
 
-            <MultiSlider
-              containerStyle={{ marginLeft: 20 }}
-              values={values}
-              sliderLength={300}
-              onValuesChange={multiSliderValuesChange}
-              min={0}
-              max={10000}
-              step={1}
-              allowOverlap={false}
-              snapped
-              selectedStyle={{
-                backgroundColor: APP_PRIMARY_COLOR,
-              }}
-              unselectedStyle={{
-                backgroundColor: APP_PRIMARY_COLOR,
-              }}
-              markerStyle={{
-                backgroundColor: APP_PRIMARY_COLOR,
-              }}
-            />
-            <AText color={Colors.blackColor} fonts={FontStyle.semiBold}>
-              Rating
-            </AText>
-            <View style={{ width: '35%' }}>
-              <StarRating
-                disabled={false}
-                maxStars={5}
-                rating={starCount}
-                selectedStar={(rating) => onStarRatingPress(rating)}
-                emptyStarColor={'gray'}
-                starSize={19}
-                containerStyle={{ marginTop: 5 }}
-                fullStarColor={'#FFDB20'}
-              />
-            </View>
-            <AButton
-              mt={'20px'}
-              title={'Apply Filter'}
-              round
-              onPress={() => handleFilter()}
-            />
-          </ScrollView>
-        </BottomSheetModal>
+        <FilterModal
+          filterModal={filterModal}
+          setFilterModal={(val) => setFilterModal(val)}
+          filterList={filterList}
+          setFilterList={(val) => setFilterList(val)}
+          handleReset={() => handleReset()}
+          handleFilter={() => handleFilter()}
+          setSortBy={(val) => setSortBy(val)}
+        />
       </BottomSheetModalProvider>
     </>
   );
 };
+
+SubCategoriesScreen.propTypes = {
+  navigation: PropTypes.object,
+  route: PropTypes.object,
+};
+
 const styles = StyleSheet.create({
   fastImageStyle: { flex: 1, resizeMode: 'cover' },
   chipstyle: {
@@ -614,15 +498,13 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    position: 'absolute',
-    width: '100%',
+    width: '90%',
+    alignSelf: 'center',
     justifyContent: 'flex-start',
     alignItems: 'center',
     left: 0,
     right: 0,
     marginTop: 10,
-    paddingHorizontal: 30,
-    zIndex: 10,
   },
   cardstyle: {
     width: '48%',
@@ -630,6 +512,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     borderRadius: 10,
     elevation: 5,
+    backgroundColor: '#fff',
   },
   iconstyle: {
     marginRight: 5,
@@ -637,17 +520,59 @@ const styles = StyleSheet.create({
     left: 10,
     zIndex: 2,
   },
-  filterstyle: {
+  filterBodyStyle: {
     flexDirection: 'row',
+    flex: 1,
+    // width:'100%',
+    // justifyContent: 'space-between',
+    // alignSelf: 'center',
+  },
+  filterListView: {
+    width: '10%',
+    backgroundColor: '#F1F1F1',
+    marginTop: 4,
+  },
+  filterListingWrapper: {
+    // marginVertical: 10,
+    marginBottom: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.whiteColor,
-    borderRadius: 30,
-    height: 30,
-    width: '30%',
-    borderWidth: 0.5,
-    borderColor: '#E0E0E0',
+    padding: 10,
+    paddingVertical: 15,
+    alignSelf: 'center',
+  },
+  filterModalHeader: {
+    flexDirection: 'row',
+    shadowColor: '#000',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+
+    elevation: 3,
+    paddingHorizontal: 15,
+    paddingVertical: 20,
+    backgroundColor: '#fff',
+  },
+  filterstyle: {
     justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: APP_PRIMARY_COLOR,
+    borderRadius: 70,
+    height: 40,
+    width: 40,
+    justifyContent: 'center',
+  },
+  filterListDatastyle: {
+    flexDirection: 'row',
+    marginBottom: 10,
+    marginHorizontal: 10,
+    alignItems: 'center',
+    flexWrap: 'wrap',
   },
   centeredItemImage: {
     width: '100%',
@@ -708,48 +633,4 @@ const styles = StyleSheet.create({
   },
 });
 
-const CollapseContainer = styled.View`
-  background: #f7f7f7;
-  border-radius: 10px;
-`;
-
-const CategoriesList = styled.TouchableOpacity``;
-
-const ListItem = styled.View`
-  flex: 1;
-  flex-wrap: wrap;
-  margin: 5px 2px 5px 5px;
-  flex-direction: row;
-  align-items: center;
-`;
-
-const SubCategoryContainer = styled.View``;
-
-const CategoryContainer = styled.View`
-  flex: 1;
-`;
-
-const CategoryImageWrapper = styled.View`
-  width: 30px;
-  height: 30px;
-  border-radius: 50px;
-  overflow: hidden;
-`;
-
-const CategoryImage = styled.Image`
-  width: null;
-  height: null;
-  flex: 1;
-  resize-mode: cover;
-`;
-const CollapseIcon = styled.Text`
-  align-self: flex-end;
-`;
-
-const CategoryName = styled.View`
-  flex: 1;
-  justify-content: space-between;
-  align-items: center;
-  flex-direction: row;
-`;
 export default SubCategoriesScreen;

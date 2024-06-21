@@ -7,6 +7,8 @@ import CreditCardImage from '../../assets/images/credit-card.png';
 import CashondelieveryImage from '../../assets/images/cash-on-delievery.png';
 import { formatCurrency } from '../../utils/helper';
 import { useSelector } from 'react-redux';
+import NavigationConstants from '../../navigation/NavigationConstants';
+import PropTypes from 'prop-types';
 
 const PaymentMethodScreen = ({ navigation, route }) => {
   const shippingValue = route.params.shippingValue;
@@ -67,7 +69,7 @@ const PaymentMethodScreen = ({ navigation, route }) => {
         title="Next"
         block
         onPress={() =>
-          navigation.navigate('Checkout', {
+          navigation.navigate(NavigationConstants.CHECKOUT_SCREEN, {
             paymentMethod: paymentMethod,
             cartAmount: cartAmount,
             shippingValue: shippingValue,
@@ -78,6 +80,11 @@ const PaymentMethodScreen = ({ navigation, route }) => {
       />
     </>
   );
+};
+
+PaymentMethodScreen.propTypes = {
+  navigation: PropTypes.object,
+  route: PropTypes.object,
 };
 
 const MainWrapper = styled.View`

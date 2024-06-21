@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { AText } from '../../theme-components';
 import styled from 'styled-components/native';
-import URL from '../../utils/baseurl';
-import FastImage from 'react-native-fast-image';
 import { formatCurrency, isEmpty } from '../../utils/helper';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
+import { FontStyle } from '../../utils/config';
 
 const ProductPriceText = ({
   Pricing,
@@ -18,58 +17,69 @@ const ProductPriceText = ({
     (state) => state.settings,
   );
 
+  const hasSalePrice = Pricing.sellprice && Pricing.sellprice < Pricing.price;
+  const discountPercentage = hasSalePrice
+    ? Math.round((100 / Pricing.price) * (Pricing.price - Pricing.sellprice))
+    : 0;
+  const priceTextStyles = {
+    color: hasSalePrice ? '#7b7b7b' : '#000000',
+    lineThrough: hasSalePrice,
+    fonts: hasSalePrice ? FontStyle.semiBold : FontStyle.fontBold,
+  };
+
   return (
-    <ProductPriceView fd={showInMulipleLine ? showInMulipleLine : 'row'}>
-      {Pricing.sellprice && Pricing.sellprice < Pricing.price ? (
-        <>
-          <AText
-            large={!isEmpty(fontsizesmall) ? !fontsizesmall : true}
-            color={!isEmpty(fontColor) ? fontColor : '#3a3a3a'}
-            heavy>
-            {formatCurrency(Pricing.sellprice, currencyOptions, currencySymbol)}
-            {'  '}
-          </AText>
-        </>
-      ) : null}
-      {/* ===============Has Sale Price============= */}
+    <View
+      style={{
+        ...styles.productPriceView,
+        flexDirection: showInMulipleLine ? showInMulipleLine : 'row',
+      }}>
       <AText
-        lineThrough={Pricing.sellprice < Pricing.price ? true : false}
-        large={
-          Pricing.sellprice < Pricing.price
+        center={
+          (isEmpty(DontshowPercentage) || !DontshowPercentage) && hasSalePrice
+            ? true
+            : false
+        }
+        right={
+          (isEmpty(DontshowPercentage) || !DontshowPercentage) && hasSalePrice
             ? false
-            : !isEmpty(fontsizesmall)
-            ? !fontsizesmall
             : true
         }
-        heavy={Pricing.sellprice < Pricing.price ? false : true}
-        color={Pricing.sellprice < Pricing.price ? '#7b7b7b' : '#000000'}>
-        {formatCurrency(Pricing.price, currencyOptions, currencySymbol)}
-      </AText>
-      {(isEmpty(DontshowPercentage) || !DontshowPercentage) &&
-      Pricing.sellprice < Pricing.price ? (
-        <>
-          {/* ===============Has Discount Price============= */}
-          {!isEmpty(Pricing.sellprice) && !isEmpty(Pricing.price) && (
-            <AText small heavy color="#DB3022">
-              {'  '}(
-              {Math.round(
-                (100 / Pricing.price) * (Pricing.price - Pricing.sellprice),
-              )}
-              % off)
+        medium={!isEmpty(fontsizesmall) ? !fontsizesmall : true}
+        small={!isEmpty(fontsizesmall) ? fontsizesmall : false}
+        color={
+          !isEmpty(fontColor) ? fontColor : hasSalePrice ? '#7b7b7b' : '#3a3a3a'
+        }
+        fonts={FontStyle.fontBold}>
+        {hasSalePrice &&
+          formatCurrency(Pricing.sellprice, currencyOptions, currencySymbol)}
+        {'  '}
+        <AText
+          center
+          {...priceTextStyles}
+          small={hasSalePrice || (!isEmpty(fontsizesmall) && fontsizesmall)}>
+          {formatCurrency(Pricing.price, currencyOptions, currencySymbol)}
+        </AText>
+        {(isEmpty(DontshowPercentage) || !DontshowPercentage) &&
+          hasSalePrice && (
+            <AText center xtrasmall fonts={FontStyle.fontBold} color="#DB3022">
+              {' '}
+              {discountPercentage}% off
             </AText>
           )}
-        </>
-      ) : null}
-    </ProductPriceView>
+      </AText>
+    </View>
   );
 };
 const styles = StyleSheet.create({
   productImage: { flex: 1, resizeMode: 'cover' },
+  productPriceView: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    width: '90%',
+    // justifyContent: 'center',
+    // backgroundColor: 'red',
+  },
 });
-
-const ProductPriceView = styled.View`
-  flex-direction: ${(props) => props.fd ?? 'row'};
-  align-items: center;
-`;
 
 export default ProductPriceText;
