@@ -1,5 +1,11 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { AText, AButton, AppLoader, BackHeader } from '../../theme-components';
+import {
+  AText,
+  AButton,
+  AppLoader,
+  BackHeader,
+  MainLayout,
+} from '../../theme-components';
 import styled from 'styled-components/native';
 import {
   ScrollView,
@@ -28,6 +34,7 @@ import {
 import Colors from '../../constants/Colors';
 import PropTypes from 'prop-types';
 import { checkPincodeValid } from '../../store/action/checkoutAction';
+import IonIcon from 'react-native-vector-icons/Ionicons';
 import { Checkbox } from 'react-native-paper';
 
 const CheckoutScreen = ({ navigation }) => {
@@ -184,7 +191,7 @@ const CheckoutScreen = ({ navigation }) => {
   };
 
   return (
-    <>
+    <MainLayout hideScroll style={styles.container}>
       {loading ? <AppLoader /> : null}
       {(isEmpty(userDetails) && isEmpty(userDetails.addressBook)) ||
       addressForm ? (
@@ -203,174 +210,173 @@ const CheckoutScreen = ({ navigation }) => {
         />
       ) : (
         <>
-          <View style={styles.container}>
-            <BackHeader navigation={navigation} name="Checkout" />
+          <BackHeader navigation={navigation} name="Checkout" />
 
-            <ScrollView
-              style={{ marginHorizontal: 20, marginTop: 10, flex: 1 }}
-              showsVerticalScrollIndicator={false}
-              nestedScrollEnabled={true}
-              scrollEnabled={scrollenable}>
-              <AText medium fonts={FontStyle.semiBold} color="black">
-                Billing Address
-              </AText>
-              <AddressWrapper>
-                {userDetails.addressBook.map((item, index) => (
-                  <View
-                    style={[
-                      styles.addresscard,
-                      addressDefault === item._id,
-                      {
-                        backgroundColor:
-                          addressDefault === item._id
-                            ? APP_SECONDARY_COLOR
-                            : '#fff',
-                        borderColor:
-                          addressDefault === item._id
-                            ? APP_PRIMARY_COLOR
-                            : '#c8c8c8',
-                      },
-                    ]}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setaddressDefault(item._id);
-                      }}>
+          <ScrollView
+            style={{ marginHorizontal: 20, marginTop: 10, flex: 1 }}
+            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled={true}
+            scrollEnabled={scrollenable}>
+            <AText medium fonts={FontStyle.semiBold} color="black">
+              Billing Address
+            </AText>
+            <AddressWrapper>
+              {userDetails.addressBook.map((item, index) => (
+                <View
+                  style={[
+                    styles.addresscard,
+                    addressDefault === item._id,
+                    {
+                      backgroundColor:
+                        addressDefault === item._id
+                          ? APP_SECONDARY_COLOR
+                          : '#fff',
+                      borderColor:
+                        addressDefault === item._id
+                          ? APP_PRIMARY_COLOR
+                          : '#c8c8c8',
+                    },
+                  ]}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setaddressDefault(item._id);
+                    }}>
+                    <MIcon
+                      name={
+                        addressDefault === item._id
+                          ? 'radiobox-marked'
+                          : 'radiobox-blank'
+                      }
+                      size={18}
+                      color={APP_PRIMARY_COLOR}
+                    />
+                  </TouchableOpacity>
+                  <View style={{ marginStart: 15, width: '85%' }}>
+                    <View style={{ flexDirection: 'row' }}>
                       <MIcon
                         name={
-                          addressDefault === item._id
-                            ? 'radiobox-marked'
-                            : 'radiobox-blank'
+                          item.addressType == 'Home'
+                            ? 'home-outline'
+                            : 'briefcase-outline'
                         }
-                        size={18}
+                        size={22}
                         color={APP_PRIMARY_COLOR}
                       />
-                    </TouchableOpacity>
-                    <View style={{ marginStart: 15, width: '85%' }}>
-                      <View style={{ flexDirection: 'row' }}>
-                        <MIcon
-                          name={
-                            item.addressType == 'Home'
-                              ? 'home-outline'
-                              : 'briefcase-outline'
-                          }
-                          size={22}
-                          color={APP_PRIMARY_COLOR}
-                        />
-                        <AText
-                          ml="5px"
-                          color={Colors.blackColor}
-                          fonts={FontStyle.semiBold}
-                          medium>
-                          {item.addressType}
-                        </AText>
-                      </View>
-
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          width: '80%',
-                          justifyContent: 'space-between',
-                        }}>
-                        <AText color={GREYTEXT} fonts={FontStyle.semiBold}>
-                          {item.firstName}
-                        </AText>
-                        <AText color={GREYTEXT} fonts={FontStyle.semiBold}>
-                          {item.phone}
-                        </AText>
-                      </View>
-                      <AText mt={'10px'} color={GREYTEXT}>
-                        {item.addressLine1}, {item.addressLine2}, {item.city}{' '}
-                        {item.state}, {item.pincode}
+                      <AText
+                        ml="5px"
+                        color={Colors.blackColor}
+                        fonts={FontStyle.semiBold}
+                        medium>
+                        {item.addressType}
                       </AText>
                     </View>
-                    <TouchableOpacity
-                      style={styles.editBtnStyle}
-                      onPress={() => {
-                        editFormValues(item);
+
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        width: '80%',
+                        justifyContent: 'space-between',
                       }}>
-                      <MIcon
-                        name={'pencil-outline'}
-                        size={15}
-                        color={APP_PRIMARY_COLOR}
-                      />
-                    </TouchableOpacity>
+                      <AText color={GREYTEXT} fonts={FontStyle.semiBold}>
+                        {item.firstName}
+                      </AText>
+                      <AText color={GREYTEXT} fonts={FontStyle.semiBold}>
+                        {item.phone}
+                      </AText>
+                    </View>
+                    <AText mt={'10px'} color={GREYTEXT}>
+                      {item.addressLine1}, {item.addressLine2}, {item.city}{' '}
+                      {item.state}, {item.pincode}
+                    </AText>
                   </View>
-                ))}
-              </AddressWrapper>
+                  <TouchableOpacity
+                    style={styles.editBtnStyle}
+                    onPress={() => {
+                      editFormValues(item);
+                    }}>
+                    <MIcon
+                      name={'pencil-outline'}
+                      size={15}
+                      color={APP_PRIMARY_COLOR}
+                    />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </AddressWrapper>
 
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => {
-                  setAddressForm(true);
-                }}
-                style={styles.addaddresscard}>
-                <AIcon
-                  style={{
-                    height: 26,
-                    width: 26,
-                    borderRadius: 30,
-                    backgroundColor: '#DCF0EF',
-                  }}
-                  name="pluscircleo"
-                  size={25}
-                  color={'black'}
-                />
-                <AText ml="20px" color="black" fonts={FontStyle.semiBold}>
-                  Add a new address
-                </AText>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                activeOpacity={0.5}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => {
+                setAddressForm(true);
+              }}
+              style={styles.addaddresscard}>
+              <AIcon
                 style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginStart: 5,
+                  height: 26,
+                  width: 26,
+                  borderRadius: 30,
+                  backgroundColor: '#DCF0EF',
                 }}
-                onPress={() => {
-                  setSameShippingAdress(!sameShipingAdress);
-                }}>
-                <Checkbox
-                  status={sameShipingAdress ? 'checked' : 'unchecked'}
-                  color={APP_PRIMARY_COLOR}
-                  onPress={() => setSameShippingAdress(!sameShipingAdress)}
-                />
-                <Text>Same as Billing address</Text>
-              </TouchableOpacity>
-
-              <AddressWrapper>
-                {!sameShipingAdress && (
-                  <AdressForm
-                    navigation={navigation}
-                    handleSubmit={formSubmit}
-                    addForm={onSubmit}
-                    onStopScroll={() => {
-                      setScrollEnable(!scrollenable);
-                    }}
-                    cancelAddForm={() => {
-                      setAddressForm(false);
-                    }}
-                    initialFormValues={initialFormValues}
-                  />
-                )}
-              </AddressWrapper>
-              <AButton
-                ml="50px"
-                mr="50px"
-                onPress={() => {
-                  sameShipingAdress ? handleShipping() : setFormSubmit(true);
-                  setTimeout(() => {
-                    setFormSubmit(false);
-                  }, 700);
-                }}
-                round
-                title="Next"
+                name="pluscircleo"
+                size={25}
+                color={'black'}
               />
-            </ScrollView>
-          </View>
+              <AText ml="20px" color="black" fonts={FontStyle.semiBold}>
+                Add a new address
+              </AText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              activeOpacity={0.5}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginStart: 5,
+              }}
+              onPress={() => {
+                setSameShippingAdress(!sameShipingAdress);
+              }}>
+              <IonIcon
+                color={APP_PRIMARY_COLOR}
+                name={sameShipingAdress ? 'checkbox-outline' : 'square-outline'}
+                style={{ marginHorizontal: 5 }}
+                size={20}
+              />
+              <Text>Same as Billing address</Text>
+            </TouchableOpacity>
+
+            <AddressWrapper>
+              {!sameShipingAdress && (
+                <AdressForm
+                  navigation={navigation}
+                  handleSubmit={formSubmit}
+                  addForm={onSubmit}
+                  onStopScroll={() => {
+                    setScrollEnable(!scrollenable);
+                  }}
+                  cancelAddForm={() => {
+                    setAddressForm(false);
+                  }}
+                  initialFormValues={initialFormValues}
+                />
+              )}
+            </AddressWrapper>
+            <AButton
+              ml="50px"
+              mr="50px"
+              onPress={() => {
+                sameShipingAdress ? handleShipping() : setFormSubmit(true);
+                setTimeout(() => {
+                  setFormSubmit(false);
+                }, 700);
+              }}
+              round
+              title="Next"
+            />
+          </ScrollView>
         </>
       )}
-    </>
+    </MainLayout>
   );
 };
 
@@ -407,8 +413,17 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     backgroundColor: Colors.whiteColor,
     borderRadius: 8,
-    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+    elevation: 4,
     flexDirection: 'row',
+    borderWidth: 1,
+    borderColor: '#c8c8c8',
     justifyContent: 'center',
     alignItems: 'center',
   },

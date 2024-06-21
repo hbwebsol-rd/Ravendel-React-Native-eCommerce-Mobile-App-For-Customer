@@ -8,6 +8,7 @@ const MainLayout = ({
   navigation,
   isFocused,
   bgColor,
+  style,
 }) => {
   const ref = React.useRef(null);
 
@@ -25,9 +26,10 @@ const MainLayout = ({
       style={{
         flex: 1,
         backgroundColor: bgColor ?? '#fff',
+        ...style,
       }}>
       <SafeAreaView
-        style={{ flex: 1, paddingBottom: Platform.OS === 'ios' ? 100 : 0 }}>
+        style={{ flex: 1, paddingBottom: Platform.OS === 'ios' ? 50 : 0 }}>
         {hideScroll ? (
           <>{children}</>
         ) : (

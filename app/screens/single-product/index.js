@@ -25,6 +25,7 @@ import {
   AppLoader,
   AButton,
   ProductCard,
+  MainLayout,
 } from '../../theme-components';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -300,7 +301,6 @@ const SingleProductScreen = ({ navigation, route }) => {
     let cleanedHtml = html.trim();
     // Remove span tags but keep their content
     // cleanedHtml = cleanedHtml.replace(/<\/?span[^>]*>/g, '');
-    console.log(cleanedHtml, 'cleanedHtml');
     return cleanedHtml;
   };
 
@@ -322,9 +322,9 @@ const SingleProductScreen = ({ navigation, route }) => {
     var res = await dispatch(checkPincodeValid({ zipcode: pinCode }));
     setDeliverable(res);
   };
-  console.log(SingleProduct.description, 'SingleProduct.description');
+
   return (
-    <BottomSheetModalProvider>
+    <MainLayout hideScroll>
       {singleProductLoading || Loading ? <AppLoader /> : null}
 
       {!isEmpty(SingleProduct) ? (
@@ -788,7 +788,7 @@ const SingleProductScreen = ({ navigation, route }) => {
           </ModalBody>
         </ModalConatiner>
       </Modal>
-    </BottomSheetModalProvider>
+    </MainLayout>
   );
 };
 

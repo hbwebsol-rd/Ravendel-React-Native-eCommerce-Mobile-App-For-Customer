@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { AText } from '../../theme-components';
+import { AText, MainLayout } from '../../theme-components';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 import { isEmpty } from '../../utils/helper';
 import {
@@ -104,126 +104,133 @@ const FilterModal = ({
       visible={filterModal}
       contentContainerStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
       style={{ flex: 1, flexDirection: 'row' }}>
-      <View style={styles.filterModalHeader}>
-        <View style={{ flexDirection: 'row' }}>
-          <TouchableOpacity style={{ marginEnd: 10 }} onPress={handleReset}>
-            <AIcon
-              onPress={() => setFilterModal(false)}
-              name="arrowleft"
-              size={20}
-            />
-          </TouchableOpacity>
-          <AText fonts={FontStyle.semiBold}>Filter</AText>
+      <MainLayout hideScroll>
+        <View style={styles.filterModalHeader}>
+          <View style={{ flexDirection: 'row' }}>
+            <TouchableOpacity style={{ marginEnd: 10 }} onPress={handleReset}>
+              <AIcon
+                onPress={() => setFilterModal(false)}
+                name="arrowleft"
+                size={20}
+              />
+            </TouchableOpacity>
+            <AText fonts={FontStyle.semiBold}>Filter</AText>
+          </View>
         </View>
-      </View>
-      <View style={styles.filterBodyStyle}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          style={styles.filterListView}>
-          {!isEmpty(filterList) && filterList.length > 0
-            ? filterList.map((category, index) => {
-                return !isEmpty(category.data) ? (
-                  <Pressable
-                    activeOpacity={0.9}
-                    style={[
-                      styles.filterListingWrapper,
-                      filterSelect === index && styles.selectedFilter,
-                    ]}
-                    onPress={() => {
-                      setFilterSelect(index);
-                    }}>
-                    <AText uppercase xtrasmall color="#000" center>
-                      {category.heading}
-                    </AText>
-                  </Pressable>
-                ) : null;
-              })
-            : null}
-        </ScrollView>
-        <ScrollView
-          style={styles.filterOptionsView}
-          showsVerticalScrollIndicator={false}>
-          {!isEmpty(filterSelect) &&
-          !isEmpty(filterList[filterSelect]) &&
-          !isEmpty(filterList[filterSelect].type)
-            ? filterList[filterSelect].type == 'choice' &&
-              filterList[filterSelect].field == 'rating'
-              ? rangeFilterRenderComponent('rating')
-              : filterList[filterSelect].type == 'array' ||
-                filterList[filterSelect].type == 'choice'
-              ? filterList[filterSelect].data &&
-                filterList[filterSelect].data.map((item, index) => (
-                  <Pressable
-                    key={index}
-                    activeOpacity={0.9}
-                    style={styles.filterListDatastyle}
-                    onPress={() => {
-                      const newFilterList = JSON.parse(
-                        JSON.stringify(filterList),
-                      );
-                      newFilterList[filterSelect].select =
-                        newFilterList[filterSelect].select || [];
-                      if (filterList[filterSelect].type == 'array') {
-                        if (!newFilterList[filterSelect].data[index].select) {
-                          newFilterList[filterSelect].select.push(item.value);
+        <View style={styles.filterBodyStyle}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            style={styles.filterListView}>
+            {!isEmpty(filterList) && filterList.length > 0
+              ? filterList.map((category, index) => {
+                  return !isEmpty(category.data) ? (
+                    <Pressable
+                      activeOpacity={0.9}
+                      style={[
+                        styles.filterListingWrapper,
+                        filterSelect === index && styles.selectedFilter,
+                      ]}
+                      onPress={() => {
+                        setFilterSelect(index);
+                      }}>
+                      <AText uppercase xtrasmall color="#000" center>
+                        {category.heading}
+                      </AText>
+                    </Pressable>
+                  ) : null;
+                })
+              : null}
+          </ScrollView>
+          <ScrollView
+            style={styles.filterOptionsView}
+            showsVerticalScrollIndicator={false}>
+            {!isEmpty(filterSelect) &&
+            !isEmpty(filterList[filterSelect]) &&
+            !isEmpty(filterList[filterSelect].type)
+              ? filterList[filterSelect].type == 'choice' &&
+                filterList[filterSelect].field == 'rating'
+                ? rangeFilterRenderComponent('rating')
+                : filterList[filterSelect].type == 'array' ||
+                  filterList[filterSelect].type == 'choice'
+                ? filterList[filterSelect].data &&
+                  filterList[filterSelect].data.map((item, index) => (
+                    <Pressable
+                      key={index}
+                      activeOpacity={0.9}
+                      style={styles.filterListDatastyle}
+                      onPress={() => {
+                        const newFilterList = JSON.parse(
+                          JSON.stringify(filterList),
+                        );
+                        newFilterList[filterSelect].select =
+                          newFilterList[filterSelect].select || [];
+                        if (filterList[filterSelect].type == 'array') {
+                          if (!newFilterList[filterSelect].data[index].select) {
+                            newFilterList[filterSelect].select.push(item.value);
+                          } else {
+                            newFilterList[filterSelect].select.filter(
+                              (id) => item.value !== id,
+                            );
+                          }
+                          newFilterList[filterSelect].data[index].select =
+                            !newFilterList[filterSelect].data[index].select;
                         } else {
-                          newFilterList[filterSelect].select.filter(
-                            (id) => item.value !== id,
-                          );
+                          if (filterList[filterSelect].field == 'sort') {
+                            setSortBy(
+                              filterList[filterSelect].data[index].value,
+                            );
+                          }
+                          newFilterList[filterSelect].data.map((key, i) => {
+                            key.select = i == index;
+                          });
                         }
-                        newFilterList[filterSelect].data[index].select =
-                          !newFilterList[filterSelect].data[index].select;
-                      } else {
-                        if (filterList[filterSelect].field == 'sort') {
-                          setSortBy(filterList[filterSelect].data[index].value);
+                        setFilterList(newFilterList);
+                      }}>
+                      <IonIcon
+                        color={APP_PRIMARY_COLOR}
+                        name={
+                          item.select
+                            ? filterList[filterSelect].type === 'choice'
+                              ? 'radio-button-on'
+                              : 'checkbox-outline'
+                            : filterList[filterSelect].type === 'choice'
+                            ? 'radio-button-off'
+                            : 'square-outline'
                         }
-                        newFilterList[filterSelect].data.map((key, i) => {
-                          key.select = i == index;
-                        });
-                      }
-                      setFilterList(newFilterList);
-                    }}>
-                    <IonIcon
-                      color={APP_PRIMARY_COLOR}
-                      name={
-                        item.select
-                          ? filterList[filterSelect].type === 'choice'
-                            ? 'radio-button-on'
-                            : 'checkbox-outline'
-                          : filterList[filterSelect].type === 'choice'
-                          ? 'radio-button-off'
-                          : 'square-outline'
-                      }
-                      style={{ marginHorizontal: 5 }}
-                      size={20}
-                    />
-                    <AText xtrasmall color="#000" center>
-                      {item.label}
-                    </AText>
-                  </Pressable>
-                ))
-              : filterList[filterSelect].type == 'range'
-              ? rangeFilterRenderComponent('range')
-              : null
-            : null}
-        </ScrollView>
-      </View>
-      <View style={styles.filterModalFooter}>
-        <TouchableOpacity
-          onPress={handleFilter}
-          style={[styles.clearBtnStyle, { borderColor: APP_PRIMARY_COLOR }]}>
-          <AText color={APP_PRIMARY_COLOR} fonts={FontStyle.semiBold}>
-            Clear Filter
-          </AText>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={handleFilter}
-          style={[styles.applyButton, { backgroundColor: APP_PRIMARY_COLOR }]}>
-          <AText color="#fff" fonts={FontStyle.semiBold}>
-            Apply
-          </AText>
-        </TouchableOpacity>
-      </View>
+                        style={{ marginHorizontal: 5 }}
+                        size={20}
+                      />
+                      <AText xtrasmall color="#000" center>
+                        {item.label}
+                      </AText>
+                    </Pressable>
+                  ))
+                : filterList[filterSelect].type == 'range'
+                ? rangeFilterRenderComponent('range')
+                : null
+              : null}
+          </ScrollView>
+        </View>
+        <View style={styles.filterModalFooter}>
+          <TouchableOpacity
+            onPress={handleFilter}
+            style={[styles.clearBtnStyle, { borderColor: APP_PRIMARY_COLOR }]}>
+            <AText color={APP_PRIMARY_COLOR} fonts={FontStyle.semiBold}>
+              Clear Filter
+            </AText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleFilter}
+            style={[
+              styles.applyButton,
+              { backgroundColor: APP_PRIMARY_COLOR },
+            ]}>
+            <AText color="#fff" fonts={FontStyle.semiBold}>
+              Apply
+            </AText>
+          </TouchableOpacity>
+        </View>
+      </MainLayout>
     </Modal>
   );
 };
@@ -245,30 +252,29 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     justifyContent: 'space-between',
     alignItems: 'center',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.22,
-    shadowRadius: 2.22,
-    elevation: 3,
+    borderBottomWidth: 0.9,
+    borderBottomColor: '#c8c8c8  ',
+    // shadowOffset: { width: 0, height: 1 },
+    // shadowOpacity: 0.22,
+    // shadowRadius: 2.22,
+    // elevation: 3,
     paddingHorizontal: 15,
-    paddingVertical: 20,
+    paddingVertical: 12,
     backgroundColor: '#fff',
   },
   filterModalFooter: {
     flexDirection: 'row',
-    shadowColor: '#000',
     justifyContent: 'flex-end',
     alignItems: 'center',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.22,
-    shadowRadius: 2.22,
-    elevation: 3,
+    borderTopColor: '#c8c8c8',
+    borderTopWidth: 0.9,
     paddingHorizontal: 15,
-    paddingVertical: 20,
+    paddingVertical: 7,
     backgroundColor: '#fff',
   },
   applyButton: {
     paddingHorizontal: 15,
-    paddingVertical: 10,
+    paddingVertical: 7,
     borderRadius: 15,
     width: 90,
     alignItems: 'center',
@@ -282,7 +288,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginHorizontal: 14,
     paddingHorizontal: 15,
-    paddingVertical: 10,
+    paddingVertical: 7,
     borderRadius: 15,
   },
   filterListDatastyle: {

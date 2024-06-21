@@ -6,6 +6,7 @@ import {
   ACol,
   AppLoader,
   TextInput,
+  MainLayout,
 } from '../../theme-components';
 import styled from 'styled-components/native';
 import { useSelector, useDispatch } from 'react-redux';
@@ -99,7 +100,6 @@ const HomeScreen = ({ navigation }) => {
     try {
       const token = await getToken();
       const userdata = await getValue('userDetails');
-      console.log(token, 'tokentokentokentoken');
       if (token !== null) {
         var loginDetails = {
           user_token: token,
@@ -203,9 +203,11 @@ const HomeScreen = ({ navigation }) => {
   // }, []);
 
   useEffect(() => {
-    dispatch(AppSettingAction());
-    setSearchTerm('');
-  }, [isFocused]);
+    if (isFocused) {
+      dispatch(AppSettingAction());
+      setSearchTerm('');
+    }
+  }, [isFocused, loginState]);
   useEffect(() => {
     // Filter data as per categories
     if (!isEmpty(homeData)) {
@@ -253,7 +255,7 @@ const HomeScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={Styles.mainContainer}>
+    <MainLayout hideScroll style={Styles.mainContainer}>
       {settingLoading ? <AppLoader /> : null}
       <StatusBar backgroundColor={APP_PRIMARY_COLOR} />
       <Header
@@ -377,7 +379,7 @@ const HomeScreen = ({ navigation }) => {
           </>
         ) : null}
       </AContainer>
-    </View>
+    </MainLayout>
   );
 };
 
@@ -405,11 +407,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#EFF0F0',
     height: 50,
-    marginTop: 30,
     borderRadius: 30,
     paddingHorizontal: 10,
     alignItems: 'center',
-    marginTop: 60,
+    marginTop: 10,
     marginHorizontal: 10,
     justifyContent: 'center',
     borderColor: '#E0E0E0',

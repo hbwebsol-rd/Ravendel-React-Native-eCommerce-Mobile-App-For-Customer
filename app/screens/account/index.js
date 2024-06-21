@@ -5,6 +5,7 @@ import {
   AHeader,
   AButton,
   BackHeader,
+  MainLayout,
 } from '../../theme-components';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -89,125 +90,112 @@ const AccountScreen = ({ navigation }) => {
     ]);
   };
   return (
-    <>
-      <View style={Styles.mainContainer}>
-        <Header navigation={navigation} title={'My Account'} />
-        {isLoggin ? (
-          <>
-            <View
-              style={{ alignItems: 'center', marginTop: 60, marginBottom: 10 }}>
-              <Image source={require('../../assets/images/man.png')} />
-              <AText
-                mb="5px"
-                big
-                center
-                fonts={FontStyle.semiBold}
-                color="black">
-                {userDetails.firstName} {userDetails.lastName}
-              </AText>
-              <AText
-                mb="5px"
-                center
-                fonts={FontStyle.semiBold}
-                color={APP_PRIMARY_COLOR}>
-                {userDetails.email}
-              </AText>
-              <AText
-                center
-                fonts={FontStyle.semiBold}
-                color={APP_PRIMARY_COLOR}>
-                {userDetails.phone}
-              </AText>
-            </View>
-            <View style={styles.headerContainer}>
-              {headerFieldArray.map((item) => (
-                <TouchableOpacity
-                  style={styles.boxContainerBtnStyle}
-                  onPress={() =>
-                    navigation.navigate(item.navigationScreen, {
-                      initial: false,
-                    })
-                  }>
-                  <Image
-                    source={item.iconName}
-                    style={[
-                      styles.iconStyles,
-                      { tintColor: APP_PRIMARY_COLOR },
-                    ]}
-                  />
-                  <AText small ml={15} fonts={FontStyle.semiBold}>
-                    {item.name}
-                  </AText>
-                </TouchableOpacity>
-              ))}
-            </View>
-            <View style={styles.container}>
-              <AText medium ml={'15px'} fonts={FontStyle.semiBold}>
-                Important Information
-              </AText>
-              {impInfoFieldArray.map((item) => (
-                <TouchableOpacity
-                  onPress={() => {
-                    item.navigationScreen
-                      ? navigation.navigate(item.navigationScreen, {
-                          initial: false,
-                        })
-                      : '';
-                  }}
-                  style={styles.infoBtnStyle}>
-                  <AText
-                    color={'#8A8A8A'}
-                    mediu
-                    ml={15}
-                    fonts={FontStyle.semiBold}>
-                    {item.name}
-                  </AText>
-                  <FIcon color={'#8A8A8A'} name="chevron-right" size={15} />
-                </TouchableOpacity>
-              ))}
-            </View>
-          </>
-        ) : (
-          <AText mt="60px" large center bold>
-            Please sign in
-          </AText>
-        )}
-        <UserSection>
-          {!isLoggin ? (
-            <>
-              <AButton
-                title="Sign In"
-                block
-                round
+    <MainLayout style={Styles.mainContainer}>
+      <Header navigation={navigation} title={'My Account'} />
+      {isLoggin ? (
+        <>
+          <View
+            style={{ alignItems: 'center', marginTop: 60, marginBottom: 10 }}>
+            <Image source={require('../../assets/images/man.png')} />
+            <AText mb="5px" big center fonts={FontStyle.semiBold} color="black">
+              {userDetails.firstName} {userDetails.lastName}
+            </AText>
+            <AText
+              mb="5px"
+              center
+              fonts={FontStyle.semiBold}
+              color={APP_PRIMARY_COLOR}>
+              {userDetails.email}
+            </AText>
+            <AText center fonts={FontStyle.semiBold} color={APP_PRIMARY_COLOR}>
+              {userDetails.phone}
+            </AText>
+          </View>
+          <View style={styles.headerContainer}>
+            {headerFieldArray.map((item) => (
+              <TouchableOpacity
+                style={styles.boxContainerBtnStyle}
                 onPress={() =>
-                  navigation.navigate(NavigationConstants.LOGIN_SIGNUP_SCREEN, {
+                  navigation.navigate(item.navigationScreen, {
                     initial: false,
                   })
-                }
-              />
-            </>
-          ) : (
+                }>
+                <Image
+                  source={item.iconName}
+                  style={[styles.iconStyles, { tintColor: APP_PRIMARY_COLOR }]}
+                />
+                <AText small ml={15} fonts={FontStyle.semiBold}>
+                  {item.name}
+                </AText>
+              </TouchableOpacity>
+            ))}
+          </View>
+          <View style={styles.container}>
+            <AText medium ml={'15px'} fonts={FontStyle.semiBold}>
+              Important Information
+            </AText>
+            {impInfoFieldArray.map((item) => (
+              <TouchableOpacity
+                onPress={() => {
+                  item.navigationScreen
+                    ? navigation.navigate(item.navigationScreen, {
+                        initial: false,
+                      })
+                    : '';
+                }}
+                style={styles.infoBtnStyle}>
+                <AText
+                  color={'#8A8A8A'}
+                  mediu
+                  ml={15}
+                  fonts={FontStyle.semiBold}>
+                  {item.name}
+                </AText>
+                <FIcon color={'#8A8A8A'} name="chevron-right" size={15} />
+              </TouchableOpacity>
+            ))}
+          </View>
+        </>
+      ) : (
+        <AText mt="60px" large center bold>
+          Please sign in
+        </AText>
+      )}
+      <UserSection>
+        {!isLoggin ? (
+          <>
             <AButton
+              title="Sign In"
+              block
               round
-              title="Sign Out"
-              onPress={() => {
-                Logout();
-              }}
+              onPress={() =>
+                navigation.navigate(NavigationConstants.LOGIN_SIGNUP_SCREEN, {
+                  initial: false,
+                })
+              }
             />
-          )}
-          <AppFooter>
-            <AppInfo>
-              <AText large heavy color={GREYTEXT} mr="5px">
-                Ravendel
-              </AText>
-              <AText small color={GREYTEXT} ml="5px">
-                App Version: 1.0
-              </AText>
-            </AppInfo>
-          </AppFooter>
-        </UserSection>
-      </View>
-    </>
+          </>
+        ) : (
+          <AButton
+            round
+            title="Sign Out"
+            onPress={() => {
+              Logout();
+            }}
+          />
+        )}
+        <AppFooter>
+          <AppInfo>
+            <AText large heavy color={GREYTEXT} mr="5px">
+              Ravendel
+            </AText>
+            <AText small color={GREYTEXT} ml="5px">
+              App Version: 1.0
+            </AText>
+          </AppInfo>
+        </AppFooter>
+      </UserSection>
+    </MainLayout>
   );
 };
 

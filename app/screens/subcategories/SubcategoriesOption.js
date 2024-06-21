@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
 import Colors from '../../constants/Colors';
-import { ACol, ARow, AText, AppLoader } from '../../theme-components';
+import {
+  ACol,
+  ARow,
+  AText,
+  AppLoader,
+  MainLayout,
+} from '../../theme-components';
 import { FontStyle } from '../../utils/config';
 import AIcon from 'react-native-vector-icons/AntDesign';
 import { capitalizeFirstLetter, isEmpty } from '../../utils/helper';
@@ -138,16 +144,18 @@ const SubcategoryOption = ({ navigation, route }) => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
+    <MainLayout
+      hideScroll
+      style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
       {loading ? <AppLoader /> : null}
       <View style={styles.header}>
         <AIcon onPress={() => navigation.goBack()} name="arrowleft" size={22} />
-        <AText fonts={FontStyle.semiBold} ml="20px">
+        <AText large fonts={FontStyle.semiBold} ml="20px">
           {capitalizeFirstLetter(singleCat?.url)}
         </AText>
       </View>
-      <ScrollView style={{ backgroundColor: Colors.whiteColor, marginTop: 50 }}>
-        <View style={{ marginTop: 15 }} />
+      <ScrollView style={{ backgroundColor: Colors.whiteColor, marginTop: 15 }}>
+        <View style={{ marginTop: 5 }} />
         {!isEmpty(subcategoriesData) && subcategoriesData.length > 0 ? (
           <ARow row wrap>
             {menuListing(subcategoriesData)}
@@ -166,7 +174,7 @@ const SubcategoryOption = ({ navigation, route }) => {
           </View>
         )}
       </ScrollView>
-    </View>
+    </MainLayout>
   );
 };
 
@@ -215,7 +223,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     flex: 1,
-    marginTop: 55,
+    marginTop: 15,
   },
   text: {
     fontSize: 24,
@@ -223,13 +231,13 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    position: 'absolute',
+    // position: 'absolute',
     width: '100%',
     justifyContent: 'flex-start',
     alignItems: 'center',
     left: 0,
     right: 0,
-    marginTop: 10,
+    marginTop: Platform.OS == 'ios' ? 0 : 10,
     paddingHorizontal: 30,
     zIndex: 10,
   },

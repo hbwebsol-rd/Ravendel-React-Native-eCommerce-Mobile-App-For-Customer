@@ -1,17 +1,26 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  SafeAreaView,
+  TouchableOpacity,
+} from 'react-native';
 import Header from '../components/Header';
 import Styles from '../../Theme';
 import Colors from '../../constants/Colors';
-import { AText } from '../../theme-components';
+import { AText, BackHeader } from '../../theme-components';
 import FIcon from 'react-native-vector-icons/Feather';
 import EIcon from 'react-native-vector-icons/Entypo';
 import { APP_PRIMARY_COLOR } from '../../utils/config';
+import { ImageBackground } from 'react-native';
 
 const ContactUs = ({ navigation }) => {
   const ContactDetail = ({ color, iconName, title, info }) => {
     return (
-      <View
+      <TouchableOpacity
+        activeOpacity={0.9}
         style={{
           marginLeft: 20,
           marginBottom: 10,
@@ -25,15 +34,17 @@ const ContactUs = ({ navigation }) => {
           </AText>
           <AText>{info}</AText>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
   return (
-    <View style={Styles.mainContainer}>
-      <Header navigation={navigation} title={'Contact Us'} />
-      <Image
-        style={{ width: '100%' }}
+    <SafeAreaView style={Styles.mainContainer}>
+      <View style={{ position: 'absolute' }}>
+        <BackHeader navigation={navigation} name={'Contact Us'} />
+      </View>
+      <ImageBackground
+        style={{ flex: 1 }}
         source={require('../../assets/images/map.png')}
       />
       <View style={styles.cardStyle}>
@@ -88,7 +99,7 @@ const ContactUs = ({ navigation }) => {
           <FIcon name="send" size={20} color={Colors.whiteColor} />
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -116,6 +127,13 @@ const styles = StyleSheet.create({
   cardStyle: {
     backgroundColor: Colors.whiteColor,
     paddingVertical: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowOpacity: 0.34,
+    shadowRadius: 6.27,
     elevation: 10,
     borderRadius: 10,
     position: 'absolute',

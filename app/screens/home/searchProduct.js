@@ -13,7 +13,13 @@ import {
   catProductSearchAction,
 } from '../../store/action/productAction';
 import { useDispatch, useSelector } from 'react-redux';
-import { ARow, AText, AppLoader, TextInput } from '../../theme-components';
+import {
+  ARow,
+  AText,
+  AppLoader,
+  TextInput,
+  MainLayout,
+} from '../../theme-components';
 import URL from '../../utils/baseurl';
 import StarRating from 'react-native-star-rating';
 import Colors from '../../constants/Colors';
@@ -75,7 +81,12 @@ const SearchProduct = ({ navigation, route }) => {
   }
 
   return (
-    <>
+    <MainLayout
+      hideScroll
+      contentContainerStyle={{ flexGrow: 1 }}
+      style={{
+        backgroundColor: Colors.whiteColor,
+      }}>
       <View style={styles.header}>
         <AIcon
           onPress={() => navigation.navigate(NavigationConstants.HOME_SCREEN)}
@@ -139,7 +150,7 @@ const SearchProduct = ({ navigation, route }) => {
           </View>
         )}
       </ScrollView>
-    </>
+    </MainLayout>
   );
 };
 

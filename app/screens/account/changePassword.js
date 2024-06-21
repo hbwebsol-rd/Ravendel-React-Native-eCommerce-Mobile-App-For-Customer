@@ -6,6 +6,7 @@ import {
   AHeader,
   BackHeader,
   TextInput,
+  MainLayout,
 } from '../../theme-components';
 import { isEmpty } from '../../utils/helper';
 import { changePasswordAction } from '../../store/action';
@@ -61,7 +62,7 @@ const ChangePasswordScreen = ({ navigation }) => {
     dispatch(changePasswordAction(profileUpdateObject, navigation));
   };
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
+    <MainLayout style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
       <BackHeader navigation={navigation} name="Change Password" back />
       <View
         style={{
@@ -146,7 +147,7 @@ const ChangePasswordScreen = ({ navigation }) => {
           />
         </View>
       </View>
-    </View>
+    </MainLayout>
   );
 };
 
@@ -181,7 +182,15 @@ const ItemDescription = styled.View`
 `;
 const styles = StyleSheet.create({
   container: {
-    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+
+    elevation: 5,
     borderRadius: 10,
     paddingHorizontal: 40,
     paddingBottom: 30,

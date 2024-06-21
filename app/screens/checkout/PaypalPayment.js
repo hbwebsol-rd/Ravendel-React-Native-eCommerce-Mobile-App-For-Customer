@@ -5,6 +5,7 @@ import RazorpayCheckout from 'react-native-razorpay';
 import URL from '../../utils/baseurl';
 import { useDispatch, useSelector } from 'react-redux';
 import { paymentStatus } from '../../store/action/checkoutAction';
+import { MainLayout } from '../../theme-components';
 
 const Paypalpayment = ({ navigation, route }) => {
   const dispatch = useDispatch();
@@ -35,7 +36,7 @@ const Paypalpayment = ({ navigation, route }) => {
     }
   };
   return (
-    <View style={styles.container}>
+    <MainLayout hideScroll style={styles.container}>
       <WebView
         source={{
           uri: `https://a666-116-75-243-3.ngrok-free.app/reactNativePaypal?orderData=${JSON.stringify(
@@ -47,7 +48,7 @@ const Paypalpayment = ({ navigation, route }) => {
           onNavigationStateChange(path);
         }}
       />
-    </View>
+    </MainLayout>
   );
 };
 

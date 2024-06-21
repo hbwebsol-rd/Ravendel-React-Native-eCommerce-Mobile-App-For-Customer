@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { AText, AppLoader, AButton } from '../../theme-components';
+import {
+  AText,
+  AppLoader,
+  AButton,
+  MainLayout,
+  BackHeader,
+} from '../../theme-components';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   productsAction,
@@ -9,10 +15,15 @@ import {
 import { formatCurrency, isEmpty } from '../../utils/helper';
 import styled from 'styled-components/native';
 import { useIsFocused } from '@react-navigation/native';
-import { Modal, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  Modal,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  ScrollView,
+} from 'react-native';
 import moment from 'moment';
 import { FontStyle } from '../../utils/config';
-import { ScrollView } from 'react-native-gesture-handler';
 import Colors from '../../constants/Colors';
 import Header from '../components/Header';
 import NavigationConstants from '../../navigation/NavigationConstants';
@@ -46,14 +57,14 @@ const OrderScreen = ({ navigation }) => {
   return (
     <>
       {loadingproduct || loading ? <AppLoader /> : null}
-      <View style={styles.container}>
-        <Header navigation={navigation} title="Orders" />
-        <ScrollView style={{ marginTop: 50 }}>
+      <MainLayout hideScroll style={styles.container}>
+        <BackHeader navigation={navigation} name="Orders" />
+        <ScrollView style={{ marginTop: 10 }}>
           <>
             {cartProducts && cartProducts.length ? (
               <>
                 {cartProducts.map((prod, index) => (
-                  <OrderWrapper key={index}>
+                  <View style={styles.OrderWrapper} key={index}>
                     <AttributedWrapper>
                       <ProfileDetailWrapper>
                         <AText
@@ -104,7 +115,7 @@ const OrderScreen = ({ navigation }) => {
                         </TouchableOpacity>
                       </View>
                     </AttributedWrapper>
-                  </OrderWrapper>
+                  </View>
                 ))}
               </>
             ) : (
@@ -122,13 +133,12 @@ const OrderScreen = ({ navigation }) => {
             )}
           </>
         </ScrollView>
-      </View>
+      </MainLayout>
     </>
   );
 };
 
 const OrderWrapper = styled.View`
-  // flex: 1;
   flex-direction: column;
   justify-content: center;
   padding: 15px 10px;
@@ -164,6 +174,29 @@ const AttributedWrapper = styled.View`
   flex-direction: column;
 `;
 const styles = StyleSheet.create({
+  OrderWrapper: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    paddingHorizontal: 5,
+    paddingVertical: 10,
+    background: 'white',
+    marginVertical: 5,
+    marginHorizontal: 30,
+    borderRadius: 10,
+    position: 'relative',
+    borderColor: '#f7f7f7',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+
+    elevation: 5,
+  },
   container: {
     flex: 1,
     // paddingTop: 40,

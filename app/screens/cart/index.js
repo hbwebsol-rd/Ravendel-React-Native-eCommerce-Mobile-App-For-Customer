@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { AText, AppLoader, AButton } from '../../theme-components';
+import { AText, AppLoader, AButton, MainLayout } from '../../theme-components';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   productsAction,
@@ -82,7 +82,7 @@ const CartScreen = ({ navigation }) => {
       updateRelatedProducts();
     }
   }, [cartProducts]);
-  
+
   useEffect(() => {
     if (!isEmpty(cartSummaryPrice)) {
       setCartSummary(cartSummaryPrice);
@@ -266,81 +266,87 @@ const CartScreen = ({ navigation }) => {
   return (
     <>
       {loading ? <AppLoader /> : null}
-      <Header navigation={navigation} title={'My Cart'} />
-      <View style={styles.container}>
-        <>
-          {cartProducts && cartProducts.length ? (
-            <>
-              <ScrollView
-                keyboardShouldPersistTaps={'always'}
-                contentContainerStyle={{ flexGrow: 1 }}
-                style={{ width: '100%', flex: 1 }}
-                showsVerticalScrollIndicator={false}>
-                {cartProducts.map((product, index) => (
-                  <TouchableOpacity
-                    style={styles.productitem}
-                    key={index}
-                    onPress={() => {
-                      console.log(product);
-                      navigation.navigate(
-                        NavigationConstants.SINGLE_PRODUCT_SCREEN,
-                        {
-                          productID: product.productId,
-                          productUrl: product.url,
-                        },
-                      );
-                    }}>
-                    <ItemImage
-                      style={{ width: 90, height: 90 }}
-                      source={{
-                        uri: !isEmpty(product.productImage)
-                          ? URL + product.productImage
-                          : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
-                      }}
-                    />
-                    <ItemDescription>
-                      <View style={{ width: '97%', alignSelf: 'flex-start' }}>
-                        <AText nol={2} fonts={FontStyle.semiBold} medium heavy>
-                          {product.productTitle}
-                        </AText>
-                        <View style={styles.contentCardStyle}>
-                          <ProductPriceText
-                            fontsizesmall={true}
-                            fontColor={Colors.blackColor}
-                            Pricing={{
-                              sellprice: product.productPrice,
-                              price: product.mrp,
-                            }}
-                          />
-                          <QtyWrapper>
-                            <QtyButton
-                              onPress={() => {
-                                product.qty === 1
-                                  ? removeCartItem(product)
-                                  : decreaseItemQty(product);
-                              }}>
-                              <AText color="#fff">
-                                <AIcon
-                                  color={'#72787e'}
-                                  name="minussquare"
-                                  size={16}
-                                />
+      <MainLayout hideScroll style={styles.container}>
+        <Header navigation={navigation} title={'My Cart'} />
+        <View style={styles.container}>
+          <>
+            {cartProducts && cartProducts.length ? (
+              <>
+                <ScrollView
+                  keyboardShouldPersistTaps={'always'}
+                  contentContainerStyle={{ flexGrow: 1 }}
+                  style={{ width: '100%', flex: 1 }}
+                  showsVerticalScrollIndicator={false}>
+                  {cartProducts.map((product, index) => (
+                    <TouchableOpacity
+                      style={styles.productitem}
+                      key={index}
+                      onPress={() => {
+                        console.log(product);
+                        navigation.navigate(
+                          NavigationConstants.SINGLE_PRODUCT_SCREEN,
+                          {
+                            productID: product.productId,
+                            productUrl: product.url,
+                          },
+                        );
+                      }}>
+                      <ItemImage
+                        style={{ width: 90, height: 90 }}
+                        source={{
+                          uri: !isEmpty(product.productImage)
+                            ? URL + product.productImage
+                            : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
+                        }}
+                      />
+                      <ItemDescription>
+                        <View style={{ width: '97%', alignSelf: 'flex-start' }}>
+                          <AText
+                            nol={2}
+                            fonts={FontStyle.semiBold}
+                            medium
+                            heavy>
+                            {product.productTitle}
+                          </AText>
+                          <View style={styles.contentCardStyle}>
+                            <ProductPriceText
+                              fontsizesmall={true}
+                              fontColor={Colors.blackColor}
+                              Pricing={{
+                                sellprice: product.productPrice,
+                                price: product.mrp,
+                              }}
+                            />
+                            <QtyWrapper>
+                              <QtyButton
+                                onPress={() => {
+                                  product.qty === 1
+                                    ? removeCartItem(product)
+                                    : decreaseItemQty(product);
+                                }}>
+                                <AText color="#fff">
+                                  <AIcon
+                                    color={'#72787e'}
+                                    name="minussquare"
+                                    size={16}
+                                  />
+                                </AText>
+                              </QtyButton>
+                              <AText center medium bold ml="10px" mr="10px">
+                                {product.qty}
                               </AText>
-                            </QtyButton>
-                            <AText center medium bold ml="10px" mr="10px">
-                              {product.qty}
-                            </AText>
-                            <QtyButton onPress={() => increaseItemQty(product)}>
-                              <AText color="#fff">
-                                <AIcon
-                                  color={'#72787e'}
-                                  name="plussquare"
-                                  size={16}
-                                />
-                              </AText>
-                            </QtyButton>
-                          </QtyWrapper>
-                          {/* <View style={styles.qtyContainerStyle}>
+                              <QtyButton
+                                onPress={() => increaseItemQty(product)}>
+                                <AText color="#fff">
+                                  <AIcon
+                                    color={'#72787e'}
+                                    name="plussquare"
+                                    size={16}
+                                  />
+                                </AText>
+                              </QtyButton>
+                            </QtyWrapper>
+                            {/* <View style={styles.qtyContainerStyle}>
                             <AText ml={'5px'} center small bold>
                               Qty: {product.qty}
                             </AText>
@@ -372,7 +378,7 @@ const CartScreen = ({ navigation }) => {
                               </TouchableOpacity>
                             </View>
                           </View> */}
-                          {/* {product.productQuantity <= 5 ? (
+                            {/* {product.productQuantity <= 5 ? (
                             <Text
                               style={{
                                 color: '#ff0000',
@@ -382,55 +388,56 @@ const CartScreen = ({ navigation }) => {
                               {'Only ' + product.productQuantity + ' Left'}
                             </Text>
                           ) : null} */}
+                          </View>
                         </View>
-                      </View>
-                    </ItemDescription>
-                    <RemoveItem
-                      style={{ zIndex: 10 }}
-                      onPress={() => removeCartItem(product)}>
-                      <AText color="#fff">
-                        <Icon color={'#72787e'} name="close" size={12} />
-                      </AText>
-                    </RemoveItem>
-                  </TouchableOpacity>
-                ))}
-                {cartProducts && cartProducts.length > 0 ? (
-                  <View style={styles.itemsInStyle}>
-                    <AText color="gray" small fonts={FontStyle.semiBold}>
-                      {cartProducts.length}{' '}
-                      {cartProducts.length > 1 ? 'Items' : 'Item'} in your cart
-                    </AText>
-                    <TouchableOpacity
-                      onPress={() => clearCart()}
-                      style={{
-                        paddingHorizontal: 5,
-                      }}>
-                      <AText color="gray" small fonts={FontStyle.semiBold}>
-                        Clear
-                      </AText>
+                      </ItemDescription>
+                      <RemoveItem
+                        style={{ zIndex: 10 }}
+                        onPress={() => removeCartItem(product)}>
+                        <AText color="#fff">
+                          <Icon color={'#72787e'} name="close" size={12} />
+                        </AText>
+                      </RemoveItem>
                     </TouchableOpacity>
-                  </View>
-                ) : null}
+                  ))}
+                  {cartProducts && cartProducts.length > 0 ? (
+                    <View style={styles.itemsInStyle}>
+                      <AText color="gray" small fonts={FontStyle.semiBold}>
+                        {cartProducts.length}{' '}
+                        {cartProducts.length > 1 ? 'Items' : 'Item'} in your
+                        cart
+                      </AText>
+                      <TouchableOpacity
+                        onPress={() => clearCart()}
+                        style={{
+                          paddingHorizontal: 5,
+                        }}>
+                        <AText color="gray" small fonts={FontStyle.semiBold}>
+                          Clear
+                        </AText>
+                      </TouchableOpacity>
+                    </View>
+                  ) : null}
 
-                {!isEmpty(relatedProducts) &&
-                !isEmpty(relatedProducts[1]) &&
-                !isEmpty(relatedProducts[1].products) ? (
-                  <ImageSliderNew
-                    title={'People who bought this also bought'}
-                    dataItems={relatedProducts[1].products}
-                    productWidth={150}
-                    navigatetonext={(item) => {
-                      navigation.navigate(
-                        NavigationConstants.SINGLE_PRODUCT_SCREEN,
-                        {
-                          productID: item._id,
-                          productUrl: item.url,
-                        },
-                      );
-                    }}
-                  />
-                ) : null}
-                {/* <View style={styles.couponConatinerStyle}>
+                  {!isEmpty(relatedProducts) &&
+                  !isEmpty(relatedProducts[1]) &&
+                  !isEmpty(relatedProducts[1].products) ? (
+                    <ImageSliderNew
+                      title={'People who bought this also bought'}
+                      dataItems={relatedProducts[1].products}
+                      productWidth={150}
+                      navigatetonext={(item) => {
+                        navigation.navigate(
+                          NavigationConstants.SINGLE_PRODUCT_SCREEN,
+                          {
+                            productID: item._id,
+                            productUrl: item.url,
+                          },
+                        );
+                      }}
+                    />
+                  ) : null}
+                  {/* <View style={styles.couponConatinerStyle}>
                   <TextInput
                     type="text"
                     style={styles.coupanTextInputstyle}
@@ -453,67 +460,67 @@ const CartScreen = ({ navigation }) => {
                 </View>
                 {couponApplied && <AText>Coupon Applied successfully</AText>} */}
 
-                <View
-                  style={{ width: '100%', marginBottom: 25, marginTop: 15 }}>
-                  <View style={styles.summary}>
-                    <AText fonts={FontStyle.semiBold}>Total MRP</AText>
-                    <AText color={Colors.grayColor}>
-                      {formatCurrency(
-                        cartSummary?.mrpTotal,
-                        currencyOptions,
-                        currencySymbol,
-                      )}
-                    </AText>
-                  </View>
-                  <View style={styles.summary}>
-                    <AText fonts={FontStyle.semiBold}>Discount On MRP</AText>
-                    <AText color={Colors.green}>
-                      -{' '}
-                      {formatCurrency(
-                        cartSummary?.discountTotal,
-                        currencyOptions,
-                        currencySymbol,
-                      )}
-                    </AText>
-                  </View>
-                  {couponApplied && (
+                  <View
+                    style={{ width: '100%', marginBottom: 25, marginTop: 15 }}>
                     <View style={styles.summary}>
-                      <AText fonts={FontStyle.semiBold}>
-                        Discount By Coupon
-                      </AText>
-                      <AText color={Colors.green}>
+                      <AText fonts={FontStyle.semiBold}>Total MRP</AText>
+                      <AText color={Colors.grayColor}>
                         {formatCurrency(
-                          couponDiscount,
+                          cartSummary?.mrpTotal,
                           currencyOptions,
                           currencySymbol,
                         )}
                       </AText>
                     </View>
-                  )}
-                  <View
-                    style={{
-                      ...styles.summary,
-                      borderBottomWidth: 0.5,
-                      paddingBottom: 15,
-                    }}>
-                    <AText fonts={FontStyle.semiBold}>Shipping Fee</AText>
-                    <AText
-                      fonts={
-                        cartSummary?.totalShipping === 0
-                          ? FontStyle.semiBold
-                          : FontStyle.fontRegular
-                      }
-                      color={Colors.grayColor}>
-                      {cartSummary?.totalShipping === 0
-                        ? 'FREE SHIPPING'
-                        : formatCurrency(
-                            cartSummary?.totalShipping,
+                    <View style={styles.summary}>
+                      <AText fonts={FontStyle.semiBold}>Discount On MRP</AText>
+                      <AText color={Colors.green}>
+                        -{' '}
+                        {formatCurrency(
+                          cartSummary?.discountTotal,
+                          currencyOptions,
+                          currencySymbol,
+                        )}
+                      </AText>
+                    </View>
+                    {couponApplied && (
+                      <View style={styles.summary}>
+                        <AText fonts={FontStyle.semiBold}>
+                          Discount By Coupon
+                        </AText>
+                        <AText color={Colors.green}>
+                          {formatCurrency(
+                            couponDiscount,
                             currencyOptions,
                             currencySymbol,
                           )}
-                    </AText>
-                  </View>
-                  {/* <View
+                        </AText>
+                      </View>
+                    )}
+                    <View
+                      style={{
+                        ...styles.summary,
+                        borderBottomWidth: 0.5,
+                        paddingBottom: 15,
+                      }}>
+                      <AText fonts={FontStyle.semiBold}>Shipping Fee</AText>
+                      <AText
+                        fonts={
+                          cartSummary?.totalShipping === 0
+                            ? FontStyle.semiBold
+                            : FontStyle.fontRegular
+                        }
+                        color={Colors.grayColor}>
+                        {cartSummary?.totalShipping === 0
+                          ? 'FREE SHIPPING'
+                          : formatCurrency(
+                              cartSummary?.totalShipping,
+                              currencyOptions,
+                              currencySymbol,
+                            )}
+                      </AText>
+                    </View>
+                    {/* <View
                     style={{
                       ...styles.summary,
                       borderBottomWidth: 0.5,
@@ -522,39 +529,40 @@ const CartScreen = ({ navigation }) => {
                     <AText fonts={FontStyle.semiBold}>Tax</AText>
                     <AText color="gray">{cartSummary?.totalTax}</AText>
                   </View> */}
-                  <View
-                    style={{
-                      ...styles.summary,
-                      marginTop: 5,
-                      marginBottom: 25,
-                    }}>
-                    <AText fonts={FontStyle.semiBold}>Total Amount</AText>
-                    <AText color="gray">
-                      {formatCurrency(
-                        cartSummary?.grandTotal,
-                        currencyOptions,
-                        currencySymbol,
-                      )}
-                    </AText>
+                    <View
+                      style={{
+                        ...styles.summary,
+                        marginTop: 5,
+                        marginBottom: 25,
+                      }}>
+                      <AText fonts={FontStyle.semiBold}>Total Amount</AText>
+                      <AText color="gray">
+                        {formatCurrency(
+                          cartSummary?.grandTotal,
+                          currencyOptions,
+                          currencySymbol,
+                        )}
+                      </AText>
+                    </View>
                   </View>
-                </View>
-              </ScrollView>
-            </>
-          ) : (
-            <EmptyWrapper>
-              <AText heavy large center mb="10px">
-                Your cart is currently empty.
-              </AText>
-              <AButton
-                title="Shop Now"
-                onPress={() =>
-                  navigation.navigate(NavigationConstants.CATEGORIES_SCREEN)
-                }
-              />
-            </EmptyWrapper>
-          )}
-        </>
-      </View>
+                </ScrollView>
+              </>
+            ) : (
+              <EmptyWrapper>
+                <AText heavy large center mb="10px">
+                  Your cart is currently empty.
+                </AText>
+                <AButton
+                  title="Shop Now"
+                  onPress={() =>
+                    navigation.navigate(NavigationConstants.CATEGORIES_SCREEN)
+                  }
+                />
+              </EmptyWrapper>
+            )}
+          </>
+        </View>
+      </MainLayout>
 
       {cartProducts && cartProducts.length ? (
         <View style={[styles.checkoutViewStyle]}>
@@ -710,7 +718,7 @@ const QtyButton = styled.TouchableOpacity`
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 40,
+    paddingTop: 5,
     paddingBottom: 20,
     paddingHorizontal: 5,
     backgroundColor: Colors.whiteColor,

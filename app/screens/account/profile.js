@@ -3,7 +3,13 @@ import { StatusBar, StyleSheet } from 'react-native';
 import { Appbar } from 'react-native-paper';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { AContainer, AHeader, AText, BackHeader } from '../../theme-components';
+import {
+  AContainer,
+  AHeader,
+  AText,
+  BackHeader,
+  MainLayout,
+} from '../../theme-components';
 import { isEmpty } from '../../utils/helper';
 import man from '../../assets/images/man.png';
 import woman from '../../assets/images/woman.png';
@@ -14,7 +20,7 @@ import NavigationConstants from '../../navigation/NavigationConstants';
 const ProfileScreen = ({ navigation }) => {
   const userDetails = useSelector((state) => state.customer.userDetails);
   return (
-    <>
+    <MainLayout hideScroll>
       <BackHeader
         navigation={navigation}
         title="Profile"
@@ -81,7 +87,7 @@ const ProfileScreen = ({ navigation }) => {
           </ProfileDetailWrapper>
         </ItemDescription>
       </ItemWrapper>
-    </>
+    </MainLayout>
   );
 };
 const styles = StyleSheet.create({

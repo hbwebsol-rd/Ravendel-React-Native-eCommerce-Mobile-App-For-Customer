@@ -103,10 +103,10 @@ const styles = StyleSheet.create({
   logincard: {
     backgroundColor: 'white',
     // marginTop: windowHeight > 750 ? 70 : 70,
-    paddingTop: windowHeight > 850 ? 119 : windowHeight > 750 ? 80 : 60,
+    paddingTop: 60,
     paddingHorizontal: 20,
     marginHorizontal: 30,
-    paddingBottom: windowHeight > 850 ? 120 : 30,
+    paddingBottom: 30,
     borderRadius: 15,
     elevation: 3,
     shadowOffset: {

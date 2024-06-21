@@ -35,7 +35,7 @@ import {
   SearchProduct,
   ContactUs,
 } from '../screens';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, Platform } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { getValue, isEmpty } from '../utils/helper';
 import AlertError from '../theme-components/alert';
@@ -122,6 +122,7 @@ const Navigation = () => {
         detachInactiveScreens={true}
         screenOptions={({ route }) => ({
           tabBarStyle: {
+            marginBottom: Platform.OS == 'ios' ? 10 : 0,
             backgroundColor: Colors.lightestPrimaryColor,
             paddingBottom: 10,
             paddingTop: 10,
@@ -269,7 +270,13 @@ const Navigation = () => {
         />
         <Stack.Screen
           name={NVC.THANK_YOU_SCREEN}
-          options={{ headerShown: false, tabBarButton: () => null }}
+          options={{
+            headerShown: false,
+            tabBarStyle: {
+              display: 'none',
+            },
+            tabBarButton: () => null,
+          }}
           component={ThankYou}
         />
         <Stack.Screen

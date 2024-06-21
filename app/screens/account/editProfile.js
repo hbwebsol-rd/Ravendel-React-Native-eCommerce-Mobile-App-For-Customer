@@ -8,6 +8,7 @@ import {
   AHeader,
   AText,
   BackHeader,
+  MainLayout,
 } from '../../theme-components';
 import { isEmpty } from '../../utils/helper';
 import male from '../../assets/images/man.png';
@@ -73,7 +74,7 @@ const EditProfileScreen = ({ navigation }) => {
 
   return (
     <>
-      <View style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
+      <MainLayout style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
         <BackHeader name="My Account" navigation={navigation} />
         {/* <UpperCurve /> */}
 
@@ -151,7 +152,7 @@ const EditProfileScreen = ({ navigation }) => {
             title="Save Changes"
           />
         </View>
-      </View>
+      </MainLayout>
     </>
   );
 };
@@ -188,7 +189,14 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   container: {
-    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
     borderRadius: 10,
     paddingHorizontal: 40,
     paddingBottom: 30,

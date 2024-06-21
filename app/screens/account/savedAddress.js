@@ -5,6 +5,7 @@ import {
   AppLoader,
   AHeader,
   BackHeader,
+  MainLayout,
 } from '../../theme-components';
 import { Formik } from 'formik';
 import { validationSchema } from '../checkout/validationSchema';
@@ -170,7 +171,7 @@ const SavedAddressScreen = ({ navigation, route }) => {
   };
 
   return (
-    <>
+    <MainLayout hideScroll>
       {loading ? <AppLoader /> : null}
       {(isEmpty(userDetails) && isEmpty(userDetails.addressBook)) ||
       addressForm ? (
@@ -266,7 +267,7 @@ const SavedAddressScreen = ({ navigation, route }) => {
         </>
       )}
       {/* </CheckouWrapper> */}
-    </>
+    </MainLayout>
   );
 };
 
@@ -298,6 +299,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginVertical: 7,
     justifyContent: 'space-evenly',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    backgroundColor: '#fff',
   },
   addAddressBtnStyle: {
     borderWidth: 1,

@@ -7,8 +7,9 @@ import {
   TouchableOpacity,
   ScrollView,
   BackHandler,
+  SafeAreaView,
 } from 'react-native';
-import { AButton, AText, AppLoader } from '../../theme-components';
+import { AButton, AText, AppLoader, MainLayout } from '../../theme-components';
 import Colors from '../../constants/Colors';
 import NavigationConstants from '../../navigation/NavigationConstants';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -55,7 +56,7 @@ const MyComponent = ({ navigation, route }) => {
   };
   console.log(orderDetails, 'orderDetails?.totalSummary');
   return (
-    <>
+    <MainLayout hideScroll>
       {loading ? <AppLoader /> : null}
       {orderDetails ? (
         <ScrollView
@@ -336,16 +337,17 @@ const MyComponent = ({ navigation, route }) => {
           </View>
 
           {/* <Text style={styles.text}>Thank you for Shopping from Raavendal</Text> */}
-          <AButton
-            ml="50px"
-            mr="50px"
-            onPress={() => navigation.navigate(NavigationConstants.HOME_SCREEN)}
-            round
-            title="Home"
-          />
         </ScrollView>
       ) : null}
-    </>
+      <AButton
+        ml="50px"
+        mr="50px"
+        mb="15px"
+        onPress={() => navigation.navigate(NavigationConstants.HOME_SCREEN)}
+        round
+        title="Home"
+      />
+    </MainLayout>
   );
 };
 const ItemImage = styled.ImageBackground`

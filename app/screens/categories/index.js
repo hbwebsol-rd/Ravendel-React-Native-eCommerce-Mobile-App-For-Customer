@@ -13,7 +13,15 @@ import URL from '../../utils/baseurl';
 import { isEmpty, unflatten } from '../../utils/helper';
 import NavigationConstants from '../../navigation/NavigationConstants';
 import Header from '../components/Header';
-import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  Image,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import Colors from '../../constants/Colors';
 import { getSubcategories } from '../../store/action/productAction';
 import { query } from '../../utils/service';
@@ -159,57 +167,59 @@ const CategoriesScreen = ({ navigation }) => {
   return (
     <>
       {mainLoading || loading ? <AppLoader /> : null}
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: Colors.whiteColor,
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-        }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
         <Header navigation={navigation} title="Categories" />
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          style={[
-            styles.categoriesMainViewStyle,
-            { backgroundColor: '#f1f1f1' },
-          ]}>
-          {!isEmpty(allCategoriesWithChildData) &&
-          allCategoriesWithChildData.length > 0 ? (
-            menuListing(allCategoriesWithChildData, 'mainCategory')
-          ) : (
-            <View style={{ alignSelf: 'center', marginTop: 20 }}>
-              <AText
-                style={{
-                  fontSize: 16,
-                  color: 'grey',
-                }}>
-                No Records Found
-              </AText>
-            </View>
-          )}
-        </ScrollView>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          style={styles.subCategoriesMainViewStyle}>
-          {!isEmpty(subcategoriesData) && subcategoriesData.length > 0 ? (
-            <ARow row wrap>
-              {menuListing(subcategoriesData, 'subCategory')}
-            </ARow>
-          ) : (
-            <View>
-              <AText
-                style={{
-                  fontSize: 16,
-                  alignSelf: 'center',
-                  color: 'grey',
-                  marginTop: 20,
-                }}>
-                No Records Found
-              </AText>
-            </View>
-          )}
-        </ScrollView>
-      </View>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: Colors.whiteColor,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            style={[
+              styles.categoriesMainViewStyle,
+              { backgroundColor: '#f1f1f1' },
+            ]}>
+            {!isEmpty(allCategoriesWithChildData) &&
+            allCategoriesWithChildData.length > 0 ? (
+              menuListing(allCategoriesWithChildData, 'mainCategory')
+            ) : (
+              <View style={{ alignSelf: 'center', marginTop: 20 }}>
+                <AText
+                  style={{
+                    fontSize: 16,
+                    color: 'grey',
+                  }}>
+                  No Records Found
+                </AText>
+              </View>
+            )}
+          </ScrollView>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            style={styles.subCategoriesMainViewStyle}>
+            {!isEmpty(subcategoriesData) && subcategoriesData.length > 0 ? (
+              <ARow row wrap>
+                {menuListing(subcategoriesData, 'subCategory')}
+              </ARow>
+            ) : (
+              <View>
+                <AText
+                  style={{
+                    fontSize: 16,
+                    alignSelf: 'center',
+                    color: 'grey',
+                    marginTop: 20,
+                  }}>
+                  No Records Found
+                </AText>
+              </View>
+            )}
+          </ScrollView>
+        </View>
+      </SafeAreaView>
     </>
   );
 };
@@ -255,14 +265,14 @@ const styles = StyleSheet.create({
     width: '60%',
     flexDirection: 'column',
     backgroundColor: Colors.whiteColor,
-    marginTop: 70,
+    marginTop: 10,
   },
   categoriesMainViewStyle: {
     width: '10%',
     flexDirection: 'column',
     elevation: 5,
     shadowColor: '#000',
-    marginTop: 50,
+    marginTop: Platform.OS ? 7 : 10,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.1,
     shadowRadius: 15,

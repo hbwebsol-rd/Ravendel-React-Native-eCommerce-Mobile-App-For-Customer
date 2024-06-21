@@ -8,7 +8,13 @@ import {
   Image,
   Text,
 } from 'react-native';
-import { AText, AButton, BackHeader, AppLoader } from '../../theme-components';
+import {
+  AText,
+  AButton,
+  BackHeader,
+  AppLoader,
+  MainLayout,
+} from '../../theme-components';
 import styled from 'styled-components/native';
 import { formatCurrency, isEmpty } from '../../utils/helper';
 import { useDispatch, useSelector } from 'react-redux';
@@ -194,7 +200,7 @@ const ShippingMethodScreen = ({ navigation }) => {
     return <AppLoader />;
   }
   return (
-    <View style={styles.container}>
+    <MainLayout hideScroll={true} style={styles.container}>
       <BackHeader navigation={navigation} name="Checkout" />
 
       <ScrollView
@@ -517,7 +523,7 @@ const ShippingMethodScreen = ({ navigation }) => {
           }
         />
       </View>
-    </View>
+    </MainLayout>
   );
 };
 
@@ -589,6 +595,7 @@ const styles = StyleSheet.create({
   },
   coupanTextInputstyle: {
     flex: 1,
+    paddingVertical: 10,
     textAlignVertical: 'center',
   },
   activedot: {

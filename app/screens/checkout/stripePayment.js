@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import WebView from 'react-native-webview';
 import { useDispatch } from 'react-redux';
 import { paymentStatus } from '../../store/action/checkoutAction';
+import { MainLayout } from '../../theme-components';
 
 const StripePayment = ({ navigation, route }) => {
   const dispatch = useDispatch();
@@ -31,7 +32,7 @@ const StripePayment = ({ navigation, route }) => {
     }
   };
   return (
-    <View style={styles.container}>
+    <MainLayout hideScroll style={styles.container}>
       <WebView
         source={{
           uri: `${url}`,
@@ -41,7 +42,7 @@ const StripePayment = ({ navigation, route }) => {
           onNavigationStateChange(path);
         }}
       />
-    </View>
+    </MainLayout>
   );
 };
 

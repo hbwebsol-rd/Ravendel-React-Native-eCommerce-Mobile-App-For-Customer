@@ -12,6 +12,7 @@ import {
   TextInput,
   AButton,
   ProductCard,
+  MainLayout,
 } from '../../theme-components';
 import { useDispatch, useSelector } from 'react-redux';
 import URL from '../../utils/baseurl';
@@ -304,7 +305,9 @@ const SubCategoriesScreen = ({ navigation, route }) => {
   return (
     <>
       <BottomSheetModalProvider>
-        <View style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
+        <MainLayout
+          hideScroll
+          style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
           <View style={styles.header}>
             <AIcon
               onPress={() => navigation.goBack()}
@@ -451,7 +454,8 @@ const SubCategoriesScreen = ({ navigation, route }) => {
               )
             }
           />
-        </View>
+        </MainLayout>
+
         <FilterModal
           filterModal={filterModal}
           setFilterModal={(val) => setFilterModal(val)}

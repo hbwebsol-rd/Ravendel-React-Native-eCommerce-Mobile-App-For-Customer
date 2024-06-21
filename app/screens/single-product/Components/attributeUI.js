@@ -49,17 +49,14 @@ const AttributeListing = ({
           ),
         );
       });
-      console.log('adsdasdasdad', result && !isEmpty(result.productUrl));
 
       if (result && !isEmpty(result.productUrl)) {
         let payLoad = { _id: result.productId, url: result.productUrl };
         onPress(payLoad);
       } else {
-        console.log('adsdasdasdad');
         alert('Product not found');
       }
     } else {
-      console.log('adsdasdasdad');
       alert('Product not found');
     }
   };
