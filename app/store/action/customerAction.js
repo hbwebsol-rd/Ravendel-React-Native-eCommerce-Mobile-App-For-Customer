@@ -9,6 +9,7 @@ import { CHANGE_PASSWORD, EDIT_CUSTOMER } from '../../queries/userQuery';
 import { getValue, isEmpty, storeData } from '../../utils/helper';
 import { mutation, query } from '../../utils/service';
 import { ALERT_ERROR, ALERT_SUCCESS } from '../reducers/alert';
+import { LogOut } from '../reducers/loginReducer';
 import { USER } from './loginAction';
 import _ from 'lodash';
 
@@ -91,7 +92,6 @@ export const changePasswordAction =
 
 export const userDetailsfetch = (id) => async (dispatch) => {
   dispatch({ type: CUSTOMER_LOADING });
-
   try {
     const response = await query(GET_CUSTOMER, { id: id });
 
@@ -119,6 +119,7 @@ export const userDetailsfetch = (id) => async (dispatch) => {
       });
     }
   } catch (error) {
+    dispatch(LogOut());
     dispatch({ type: CUSTOMER_LOADING_FAIL });
     dispatch({
       type: ALERT_ERROR,

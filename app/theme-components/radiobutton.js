@@ -28,9 +28,6 @@ export default class RadioButton extends Component {
               style={{
                 ...styles.container,
                 justifyContent: this.props.jc,
-                marginRight: this.props.mr ?? 0,
-                marginLeft: this.props.ml ?? 0,
-                marginTop: this.props.mt ?? 0,
               }}>
               <TouchableOpacity
                 style={styles.radioCircle}

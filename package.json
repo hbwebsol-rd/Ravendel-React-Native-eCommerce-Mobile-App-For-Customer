@@ -43,6 +43,7 @@
     "react-native-image-viewing": "^0.2.2",
     "react-native-input-credit-card": "^0.5.5",
     "react-native-linear-gradient": "^2.6.2",
+    "react-native-onesignal": "^4.5.0",
     "react-native-pager-view": "^6.2.0",
     "react-native-paper": "^4.11.2",
     "react-native-raw-bottom-sheet": "^2.2.0",

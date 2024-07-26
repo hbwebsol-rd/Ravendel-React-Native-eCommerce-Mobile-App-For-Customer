@@ -8,6 +8,7 @@ import {
   GET_FILTEREDPRODUCTS_WITH_PAGINATION,
   GET_SEARCH_PRODUCTS,
   GET_ADDITIONAL_PRODUCTS_QUERY,
+  GET_CARTADDITIONAL_PRODUCTS_QUERY,
 } from '../../queries/productQuery';
 import { isEmpty } from '../../utils/helper';
 import { mutation, query } from '../../utils/service';
@@ -47,7 +48,6 @@ export const productAction = (id) => async (dispatch) => {
       });
     }
   } catch (error) {
-    console.log('error in PA');
     dispatch({ type: PRODUCT_FAIL });
     return dispatch({
       type: PRODUCT_FAIL,
@@ -84,7 +84,6 @@ export const getSubcategories = (payload) => async (dispatch) => {
   dispatch({ type: CAT_LOADING });
   try {
     const response = await query(GET_FILTEREDPRODUCTS_WITH_PAGINATION, payload);
-    console.log(response, ' ressp');
     if (!isEmpty(response) && !isEmpty(_.get(response, 'data'))) {
       return dispatch({
         type: SUB_CATS_SUCCESS,
@@ -102,85 +101,82 @@ export const getSubcategories = (payload) => async (dispatch) => {
 
 export const catProductAction =
   (filters, loading, setLoader, setCurrentPage, currentPage) =>
-  async (dispatch) => {
-    if (!loading) {
-      dispatch({ type: PRODUCT_LOADING });
-    }
-    
-    try {
-      let response;
+    async (dispatch) => {
+      if (!loading) {
+        dispatch({ type: PRODUCT_LOADING });
+      }
 
-      response = await query(GET_FILTEREDPRODUCTS_WITH_PAGINATION, filters);
-      dispatch({
-        type: CAT_PRODUCTS,
-        payload: {
-          products: _.get(
-            response,
-            'data.getCategoryPageData.productData.products',
-            [],
-          ),
-          counts: _.get(
-            response,
-            'data.getCategoryPageData.productData.count',
-            1,
-          ),
-          filterData: _.get(
-            response,
-            'data.getCategoryPageData.filterData',
-            [],
-          ),
-        },
-      });
-      setLoader ? setLoader(false) : null;
-      setCurrentPage ? setCurrentPage(currentPage + 1) : null;
-    } catch (error) {
-      console.log(error, 'error when fetching products');
-      dispatch({ type: PRODUCT_FAIL });
-      return dispatch({
-        type: PRODUCT_FAIL,
-        payload: { boolean: true, message: error, error: true },
-      });
-    }
-  };
+      try {
+        let response;
+
+        response = await query(GET_FILTEREDPRODUCTS_WITH_PAGINATION, filters);
+        console.log(JSON.stringify(response.data.getCategoryPageData.filterData),'new filter apply')
+        dispatch({
+          type: CAT_PRODUCTS,
+          payload: {
+            products: _.get(
+              response,
+              'data.getCategoryPageData.productData.products',
+              [],
+            ),
+            counts: _.get(
+              response,
+              'data.getCategoryPageData.productData.count',
+              1,
+            ),
+            filterData: _.get(
+              response,
+              'data.getCategoryPageData.filterData',
+              [],
+            ),
+          },
+        });
+        setLoader ? setLoader(false) : null;
+        setCurrentPage ? setCurrentPage(currentPage + 1) : null;
+      } catch (error) {
+        dispatch({ type: PRODUCT_FAIL });
+        return dispatch({
+          type: PRODUCT_FAIL,
+          payload: { boolean: true, message: error, error: true },
+        });
+      }
+    };
 
 export const catProductSearchAction =
   (filters, loading, setLoader, setCurrentPage, currentPage) =>
-  async (dispatch) => {
-    if (!loading) {
-      dispatch({ type: PRODUCT_LOADING });
-    }
-    // console.log(JSON.stringify(filters), ' fill terrr you');
+    async (dispatch) => {
+      if (!loading) {
+        dispatch({ type: PRODUCT_LOADING });
+      }
 
-    try {
-      const response = await query(GET_SEARCH_PRODUCTS, filters);
-      console.log(response.data.searchProducts, ' prod respp');
-      dispatch({
-        type: CAT_PRODUCTS,
-        payload: {
-          products: _.get(response, 'data.searchProducts.products', []),
-          counts: _.get(
-            response,
-            'data.getCategoryPageData.productData.count',
-            1,
-          ),
-          filterData: _.get(
-            response,
-            'data.getCategoryPageData.filterData',
-            [],
-          ),
-        },
-      });
-      setLoader ? setLoader(false) : null;
-      setCurrentPage ? setCurrentPage(currentPage + 1) : null;
-    } catch (error) {
-      console.log(error, 'error when fetching products');
-      dispatch({ type: PRODUCT_FAIL });
-      return dispatch({
-        type: PRODUCT_FAIL,
-        payload: { boolean: true, message: error, error: true },
-      });
-    }
-  };
+      try {
+        const response = await query(GET_SEARCH_PRODUCTS, filters);
+        dispatch({
+          type: CAT_PRODUCTS,
+          payload: {
+            products: _.get(response, 'data.searchProducts.products', []),
+            counts: _.get(
+              response,
+              'data.getCategoryPageData.productData.count',
+              1,
+            ),
+            filterData: _.get(
+              response,
+              'data.getCategoryPageData.filterData',
+              [],
+            ),
+          },
+        });
+        setLoader ? setLoader(false) : null;
+        setCurrentPage ? setCurrentPage(currentPage + 1) : null;
+      } catch (error) {
+        dispatch({ type: PRODUCT_FAIL });
+        return dispatch({
+          type: PRODUCT_FAIL,
+          payload: { boolean: true, message: error, error: true },
+        });
+      }
+    };
 
 export const catRecentProductAction = (recentPayload) => async (dispatch) => {
   try {
@@ -196,7 +192,26 @@ export const catRecentProductAction = (recentPayload) => async (dispatch) => {
       return dispatch({ type: RELATED_CAT_PRODUCTS, payload: [] });
     }
   } catch (error) {
-    console.log(error, 'error when fetching products');
+    dispatch({ type: PRODUCT_FAIL });
+    return dispatch({
+      type: PRODUCT_FAIL,
+      payload: { boolean: true, message: error, error: true },
+    });
+  }
+};
+export const catAdditionalProductAction = (recentPayload) => async (dispatch) => {
+  try {
+    const response = await query(GET_CARTADDITIONAL_PRODUCTS_QUERY, recentPayload);
+    if (!isEmpty(_.get(response, 'data.cartAdditionalDetails'))) {
+      return dispatch({
+        type: 'RELATED_CART_PRODUCTS',
+        payload: _.get(response, 'data.cartAdditionalDetails', []),
+      });
+    } else {
+      dispatch({ type: PRODUCT_FAIL });
+      return dispatch({ type: 'RELATED_CART_PRODUCTS', payload: [] });
+    }
+  } catch (error) {
     dispatch({ type: PRODUCT_FAIL });
     return dispatch({
       type: PRODUCT_FAIL,
@@ -218,7 +233,6 @@ export const productReviewsAction = (id) => async (dispatch) => {
       });
     }
   } catch (error) {
-    console.log('erro in PRA');
     dispatch({ type: PRODUCT_FAIL });
     return dispatch({
       type: PRODUCT_FAIL,

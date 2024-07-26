@@ -23,15 +23,12 @@ const Textinputs = ({
   multi,
   linenumbers,
   afocus,
-  handleKeyboardSubmit,
-  autofillData,
-  max,
   editable,
-  autoFillText,
   // Single Style Props
   StylesHeadingText,
   StylesTextInput,
   StylesView,
+  inputViewStyle,
   //Style Props
   bgColor,
   width,
@@ -40,7 +37,6 @@ const Textinputs = ({
   br,
   padding,
   color,
-  fw,
   bb,
   iconSize,
   iconColor,
@@ -49,26 +45,15 @@ const Textinputs = ({
   inputBgColor,
   pl,
   inputtextalign,
-  pb,
   placeholdercolor,
   hmt,
-  mh,
-  pe,
-  ViewStyle,
-  fullIcon,
   hmb,
   hc,
-  ac,
-  fonts,
-  mt,
   hfs,
-  top,
-  pr,
-  sc,
   onSubmit,
-  pt,
   onfocus,
   textInputRef,
+
 }) => {
   const { passwordVisibility, rightIcon, handlePasswordVisibility } =
     useTogglePasswordVisibility();
@@ -109,12 +94,12 @@ const Textinputs = ({
           </TouchableWithoutFeedback>
         )}
       </ARow>
-      <View style={styles.inputviewstyle}>
+      <View style={[styles.inputviewstyle, inputViewStyle]}>
         <TextInput
           ref={textInputRef}
           onFocus={onfocus}
           onSubmitEditing={onSubmit}
-          pointerEvents={pe ?? 'auto'}
+          pointerEvents={'auto'}
           editable={editable ?? true}
           autoFocus={afocus ?? false}
           theme={{ roundness: 10 }}
@@ -140,12 +125,9 @@ const Textinputs = ({
               borderRadius: br ?? 8,
               padding: padding ?? 5,
               paddingLeft: pl ?? 12,
-              paddingBottom: pb ?? 0,
-              paddingTop: pt ?? 0,
               color: color ?? '#ABA7A7',
               fontFamily: FontStyle.fontBold,
               fontSize: fs ?? 12,
-              marginTop: mt ?? 0,
             },
             StylesTextInput,
           ]}

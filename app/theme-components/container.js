@@ -7,8 +7,8 @@ import { RefreshControl } from 'react-native';
 const AContainer = styled.ScrollView`
   flex: 1;
   background-color: ${Colors.whiteColor};
-  padding: ${(props) => (props.withoutPadding ? '0' : '10px')};
-`;
+   padding: ${(props) => (props.withoutPadding ? '0' : '10px')};
+  `;
 
 const ContainerStyle = (props) => {
   return (

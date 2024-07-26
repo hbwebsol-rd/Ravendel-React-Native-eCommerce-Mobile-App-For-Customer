@@ -37,7 +37,7 @@ const LevelWiseRating = ({ levelWiseRating, rating, ratingCount }) => {
   return (
     <View style={styles.ratingContainerView}>
       <View style={styles.ratingView}>
-        <AText title mr={'7px'} color={'#72787e'} fonts={FontStyle.semiBold}>
+        <AText style={styles.textStyle} title>
           {rating}
         </AText>
         <StarRating
@@ -87,6 +87,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     justifyContent: 'space-evenly',
+  },
+  textStyle: {
+    marginRight: 7,
+    color: '#72787e',
+    fontFamily: FontStyle.semiBold
   },
   ratingView: {
     width: '30%',

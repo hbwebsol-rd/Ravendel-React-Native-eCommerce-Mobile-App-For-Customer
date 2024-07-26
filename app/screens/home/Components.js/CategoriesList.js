@@ -9,21 +9,19 @@ import {
 } from 'react-native';
 import { AText } from '../../../theme-components';
 import { FontStyle, GREYTEXT } from '../../../utils/config';
-import URL from '../../../utils/baseurl';
-import { isEmpty } from '../../../utils/helper';
+import { uriImage } from '../../../utils/helper';
 import PropTypes from 'prop-types';
+
 function CategoryItem({ category, navigateNextScreen }) {
   return (
     <TouchableOpacity
       onPress={() => navigateNextScreen(category)}
       activeOpacity={0.9}
       style={styles.categoryItem}>
-      {/* {console.log(URL + category.image, 'imm')} */}
       <Image
         source={{
-          uri: !isEmpty(category.image)
-            ? URL + category.image
-            : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
+          uri: uriImage(category.image)
+
         }}
         style={{ width: 60, height: 60, borderRadius: 30 }}
       />
@@ -49,7 +47,7 @@ function CategoryList({ allCategories, navigateNextScreen }) {
 function Categories({ allCategories, navigateNextScreen }) {
   return (
     <View style={{ paddingHorizontal: 10, marginTop: 30 }}>
-      <AText mb={'10px'} large fonts={FontStyle.fontBold}>
+      <AText style={styles.textStyle} large>
         Categories
       </AText>
       <CategoryList
@@ -77,4 +75,8 @@ const styles = StyleSheet.create({
     marginTop: 5,
     textAlign: 'center',
   },
+  textStyle: {
+    fontFamily: FontStyle.fontBold,
+    marginBottom: 10
+  }
 });

@@ -8,9 +8,9 @@ const NoConnection = () => {
         style={styles.image}
         source={require('../assets/images/nointernet.png')} // Replace with your own image URL if needed
       />
-      <Text style={styles.title}>No Connection</Text>
+      <Text style={styles.title}>No Internet</Text>
       <Text style={styles.subtitle}>
-        Please check your internet connectivity and try again.
+        Please check your network connection and try again.
       </Text>
     </View>
   );

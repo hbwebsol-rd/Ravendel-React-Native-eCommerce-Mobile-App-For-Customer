@@ -14,7 +14,6 @@ export const mutation = (query, variables) => {
     })
     .catch(error => {
       const errors = JSON.parse(JSON.stringify(error));
-      console.log(errors);
       if (
         errors.graphQLErrors.length &&
         !isEmpty(errors.graphQLErrors[0].message)
@@ -42,7 +41,6 @@ export const query = (query, variables) => {
     })
     .catch(error => {
       const errors = JSON.parse(JSON.stringify(error));
-      console.log(error);
       if (
         errors.graphQLErrors.length &&
         !isEmpty(errors.graphQLErrors[0].message)
@@ -74,7 +72,7 @@ const service = config => {
     response => {
       return response;
     },
-    function(error) {
+    function (error) {
       if (!error.response) {
         error.response = {
           data: "net work error",
@@ -89,7 +87,6 @@ const service = config => {
       return Promise.reject(error);
     }
   );
-  //config.baseURL = baseUrl;
   return axios(config);
 };
 export default service;

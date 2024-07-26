@@ -1,15 +1,17 @@
 import { StatusBar, StyleSheet, Image, ImageBackground } from 'react-native';
 import React from 'react';
 import splash from '../../assets/images/welcomescreen.png';
-import logo from '../../assets/images/ravendel.png';
 import Colors from '../../constants/Colors';
+import { AText } from '../../theme-components';
+import { APP_NAME, FontStyle } from '../../utils/config';
 
 const SplashScreen = () => {
   return (
     <>
       <StatusBar hidden={false} backgroundColor={Colors.darkPrimaryColor} />
       <ImageBackground source={splash} style={styles.container}>
-        <Image source={logo} style={styles.imageStyle} />
+        <AText fonts={FontStyle.fontBold} color={'#fff'} jumbo>{APP_NAME}</AText>
+        {/* <Image source={logo} style={styles.imageStyle} /> */}
       </ImageBackground>
     </>
   );

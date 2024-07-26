@@ -1,98 +1,53 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Image, StatusBar, StyleSheet, View } from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
+import { useIsFocused } from '@react-navigation/native';
+
+import Icon from 'react-native-vector-icons/Feather';
+import styled from 'styled-components/native';
+
 import {
-  AText,
   AContainer,
   ARow,
   ACol,
   AppLoader,
   TextInput,
+  MainLayout,
 } from '../../theme-components';
-import styled from 'styled-components/native';
-import { useSelector, useDispatch } from 'react-redux';
-import {
-  downloadImageFromS3,
-  getToken,
-  getValue,
-  isEmpty,
-  unflatten,
-  wait,
-} from '../../utils/helper';
-import { useIsFocused } from '@react-navigation/native';
-import { useState } from 'react';
-import {
-  AppSettingAction,
-  featureDataAction,
-  productByPerticulareAction,
-  productOnSaleAction,
-  recentaddedproductAction,
-  categoriesAction,
-  addCartAction,
-  updateCartAction,
-  catProductAction,
-} from '../../store/action';
-import HomeCategoryShowViews from './Components.js/CategoryShow';
-import HomeComponentShowViews from './Components.js/HomeComponentShowViews';
-import SwiperFlatList from 'react-native-swiper-flatlist';
-import {
-  Dimensions,
-  Image,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import {
-  AllDataInOne,
-  homeScreenFields,
-  brandAction,
-} from '../../store/action/settingAction';
-import HomeBrandViews from './Components.js/BrandShow';
-import {
-  APP_PRIMARY_COLOR,
-  APP_SECONDARY_COLOR,
-  FontStyle,
-  changeWindowHeightWidth,
-  windowWidth,
-} from '../../utils/config';
-import Icon from 'react-native-vector-icons/Feather';
+import { getToken, getValue, isEmpty, uriImage, wait } from '../../utils/helper';
+import { AppSettingAction, addCartAction } from '../../store/action';
+import { homeScreenFields } from '../../store/action/settingAction';
+import { APP_NAME, APP_PRIMARY_COLOR, BASEURL, windowWidth } from '../../utils/config';
 import Categories from './Components.js/CategoriesList';
-import ImageSliderNew from './Components.js/CustomSliderNew';
-import CardContainer from './Components.js/RandomCard';
+import ProductsSlider from '../../theme-components/ProductsSlider';
 import { ALREADY_HAS_LOGIN } from '../../store/action/loginAction';
 import { USER_ALREADY_HAS_LOGIN } from '../../store/action/customerAction';
 import Colors from '../../constants/Colors';
 import Header from '../components/Header';
 import Styles from '../../Theme';
 import NavigationConstants from '../../navigation/NavigationConstants';
-import URL from '../../utils/baseurl';
 import Carousel from 'react-native-snap-carousel';
-import NoConnection from '../../theme-components/nointernet';
-import NetInfo from '@react-native-community/netinfo';
-import { NET_OFF, NET_ON } from '../../store/reducers/alert';
+import GridCardContainer from '../../theme-components/GridCardContainer';
 
 const HomeScreen = ({ navigation }) => {
   // States and Variables
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const allCategoriesWithChild = useSelector(
-    (state) => state.products.categories,
+    state => state.products.categories,
   );
-  const { cartId, cartChecked } = useSelector((state) => state.cart);
-  const cartItems = useSelector((state) => state.cart.products);
-  const userDetails = useSelector((state) => state.customer.userDetails);
-  const loginState = useSelector((state) => state.login);
+  const { cartId, cartChecked } = useSelector(state => state.cart);
+  const cartItems = useSelector(state => state.cart.products);
+  const userDetails = useSelector(state => state.customer.userDetails);
+  const loginState = useSelector(state => state.login);
   const [refreshing, setRefreshing] = useState(false);
   const { homeData, allSections, homeslider } = useSelector(
-    (state) => state.settings,
+    state => state.settings,
   );
 
-  const settingLoading = useSelector((state) => state.settings.loading);
-  const { netConnection } = useSelector((state) => state.alert);
-  console.log(netConnection, ' netinfo');
+  const settingLoading = useSelector(state => state.settings.loading);
   const [allCategories, setAllCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [size, setSize] = useState(0);
   const carouselRef = useRef(null);
 
   //Custom Functions
@@ -100,7 +55,6 @@ const HomeScreen = ({ navigation }) => {
     try {
       const token = await getToken();
       const userdata = await getValue('userDetails');
-
       if (token !== null) {
         var loginDetails = {
           user_token: token,
@@ -116,7 +70,7 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
-  const handleinpiut = (e) => {
+  const handleinpiut = e => {
     setSearchTerm(e);
   };
 
@@ -128,11 +82,11 @@ const HomeScreen = ({ navigation }) => {
       cartProduct = JSON.parse(cartProduct);
       var mergedArr = [...cartProduct, ...cartItems];
       var filteredProducts = [];
-      mergedArr.filter((val) => {
+      mergedArr.filter(val => {
         let exist = mergedArr.find(
-          (n) => n.productId === val.productId && n.qty > val.qty,
+          n => n.productId === val.productId && n.qty > val.qty,
         );
-        if (!filteredProducts.find((n) => n.productId === val.productId)) {
+        if (!filteredProducts.find(n => n.productId === val.productId)) {
           if (isEmpty(exist)) {
             filteredProducts.push({
               productId: val.productId,
@@ -162,7 +116,7 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
-  const navigateNextScreen = (category) => {
+  const navigateNextScreen = category => {
     var nestedCategory = [];
     if (!isEmpty(category.children)) {
       nestedCategory = category.children;
@@ -179,40 +133,19 @@ const HomeScreen = ({ navigation }) => {
     });
   };
 
-  //Get URL of banners
-  const getCategoryImage = (name) => {
-    const category = homeData.find((item) => item.label === name);
-    const cat = category ? `${URL}${category.section_img}` : null;
-    return cat;
-  };
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
     dispatch(AppSettingAction());
     wait(2000).then(() => setRefreshing(false));
   }, []);
 
-  // Use Effect Call
   useEffect(() => {
-    NetInfo.addEventListener((networkState) => {
-      dispatch({ type: networkState.isConnected ? NET_ON : NET_OFF });
-    });
-  }, [NetInfo]);
+    if (isFocused) {
+      dispatch(AppSettingAction());
+      setSearchTerm('');
+    }
+  }, [isFocused, loginState]);
 
-  // useEffect(() => {
-  //   const updateWindowHeight = () => {
-  //     const newWindowHeight = Dimensions.get('window').height;
-  //     const newWindowWidth = Dimensions.get('window').width;
-  //     changeWindowHeightWidth(newWindowHeight, newWindowWidth);
-  //     setSize(newWindowWidth);
-  //   };
-
-  //   Dimensions.addEventListener('change', updateWindowHeight);
-
-  // }, []);
-
-  useEffect(() => {
-    dispatch(AppSettingAction());
-  }, [isFocused]);
   useEffect(() => {
     // Filter data as per categories
     if (!isEmpty(homeData)) {
@@ -250,48 +183,36 @@ const HomeScreen = ({ navigation }) => {
             borderRadius: 10,
           }}
           source={{
-            uri: !isEmpty(item.image)
-              ? URL + item.image
-              : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
+            uri: uriImage(item.image)
           }}
         />
       </View>
     );
   };
-  if (netConnection) {
-    return <NoConnection />;
-  }
+
   return (
-    <View style={Styles.mainContainer}>
+    <MainLayout hideScroll style={Styles.mainContainer}>
       {settingLoading ? <AppLoader /> : null}
       <StatusBar backgroundColor={APP_PRIMARY_COLOR} />
       <Header
         titleColor={APP_PRIMARY_COLOR}
         showProfileIcon
         navigation={navigation}
-        title={'Ravendal'}
+        title={APP_NAME}
       />
       <View style={styles.searchstyle}>
-        <Icon
-          style={styles.iconstyle}
-          name={'search'}
-          size={15}
-          color={'black'}
-        />
         <TextInput
-          height={50}
-          onSubmit={() => handleSearchProduct()}
+          StylesTextInput={styles.textInputViewStyle}
+          onSubmit={() => !isEmpty(searchTerm) && handleSearchProduct()}
+          icon={'search'}
+          inputViewStyle={{ flexDirection: 'row-reverse' }}
           value={searchTerm}
           onchange={handleinpiut}
-          padding={0}
-          pl={35}
-          inputBgColor={'#EFF0F0'}
           fs={12}
           placeholder={'Search'}
           placeholdercolor={'black'}
         />
       </View>
-      <View style={{ padding: 10, backgroundColor: Colors.whiteColor }}></View>
       <AContainer
         onRefresh={onRefresh}
         refreshing={refreshing}
@@ -301,7 +222,6 @@ const HomeScreen = ({ navigation }) => {
           <Carousel
             ref={carouselRef}
             autoplayDelay={3000}
-            // loop={true}
             data={homeslider}
             renderItem={renderItem}
             sliderWidth={windowWidth}
@@ -309,83 +229,66 @@ const HomeScreen = ({ navigation }) => {
             activeSlideAlignment={'start'}
             inactiveSlideOpacity={1}
             inactiveSlideScale={1}
-            slideStyle={{ marginHorizontal: 5, borderRadius: 10 }}
+            slideStyle={styles.slideStyle}
           />
         )}
         <Categories
           navigation
-          navigateNextScreen={(item) => {
+          navigateNextScreen={item => {
             navigateNextScreen(item);
           }}
           allCategories={allCategories}
         />
-        {allSections && allSections.length > 0 ? (
-          <>
-            {allSections.map((item) =>
-              item.display_type === 'SLIDER' ? (
-                <>
-                  <ARow mb="20px" wrap row>
-                    <ACol col={1}>
-                      <PopularPicksWrapper>
-                        <PopularPicksImage
-                          source={{
-                            uri: getCategoryImage(item.name),
-                          }}
-                        />
-                      </PopularPicksWrapper>
-                    </ACol>
-                  </ARow>
-                  <SectionView>
-                    <ImageSliderNew
-                      title={item.name}
-                      dataItems={item.products}
-                      navigatetonext={(item) => {
-                        navigation.navigate(
-                          NavigationConstants.SINGLE_PRODUCT_SCREEN,
-                          {
-                            productID: item._id,
-                            productUrl: item.url,
-                          },
-                        );
-                      }}
-                    />
-                  </SectionView>
-                </>
-              ) : (
-                <>
-                  <ARow mb="20px" wrap row>
-                    <ACol col={1}>
-                      <PopularPicksWrapper>
-                        <PopularPicksImage
-                          source={{
-                            uri: getCategoryImage(item.name),
-                          }}
-                        />
-                      </PopularPicksWrapper>
-                    </ACol>
-                  </ARow>
-                  <SectionView>
-                    <CardContainer
-                      title={item.name}
-                      dataItems={item.products ? item.products : []}
-                      navigatetonext={(item) => {
-                        navigation.navigate(
-                          NavigationConstants.SINGLE_PRODUCT_SCREEN,
-                          {
-                            productID: item._id,
-                            productUrl: item.url,
-                          },
-                        );
-                      }}
-                    />
-                  </SectionView>
-                </>
-              ),
-            )}
-          </>
-        ) : null}
+        {allSections && allSections.length > 0 &&
+          allSections.map(item =>
+            item.display_type === 'SLIDER' ? (
+              <SectionView>
+                <PopularPicksImage
+                  source={{
+                    uri: `${BASEURL}${item.section_img}`
+                  }}
+                />
+                <ProductsSlider
+                  title={item.name}
+                  dataItems={item.products}
+                  navigatetonext={item => {
+                    navigation.navigate(
+                      NavigationConstants.SINGLE_PRODUCT_SCREEN,
+                      {
+                        productID: item._id,
+                        productUrl: item.url,
+                      },
+                    );
+                  }}
+                />
+              </SectionView>
+            ) : (
+              <SectionView>
+                <PopularPicksImage
+                  source={{
+                    uri: `${BASEURL}${item.section_img}`
+                  }}
+                />
+                <GridCardContainer
+                  title={item.name}
+                  dataItems={item.products ? item.products : []}
+                  navigatetonext={item => {
+                    navigation.navigate(
+                      NavigationConstants.SINGLE_PRODUCT_SCREEN,
+                      {
+                        productID: item._id,
+                        productUrl: item.url,
+                      },
+                    );
+                  }}
+                />
+              </SectionView>
+            ),
+
+
+          )}
       </AContainer>
-    </View>
+    </MainLayout>
   );
 };
 
@@ -394,15 +297,12 @@ const SectionView = styled.View`
   border-bottom-width: 2px;
   border-color: #ddd;
 `;
-const PopularPicksWrapper = styled.TouchableOpacity`
-  height: 170px;
-  width: 100%;
-  margin-top: 30px;
-`;
-
 const PopularPicksImage = styled.Image`
-  width: 100%;
-  height: 100%;
+  height: 170px;
+  width: 97%;
+  alignSelf:center;
+  margin-top: 20px;
+  margin-bottom: 20px;
   resize-mode: stretch;
 `;
 
@@ -413,23 +313,38 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#EFF0F0',
     height: 50,
-    marginTop: 30,
     borderRadius: 30,
     paddingHorizontal: 10,
     alignItems: 'center',
-    marginTop: 60,
+    marginTop: 10,
     marginHorizontal: 10,
     justifyContent: 'center',
     borderColor: '#E0E0E0',
     borderWidth: 0.9,
+    marginBottom: 20
   },
-
+  textInputViewStyle: {
+    height: 50,
+    padding: 0,
+    paddingLeft: 35,
+    backgroundColor: '#EFF0F0',
+    borderColor: '#EFF0F0',
+  },
+  rowStyle: {
+    marginBottom: 20,
+    flexWrap: 'wrap',
+    flexDirection: 'row'
+  },
   iconstyle: {
     marginRight: 5,
     position: 'absolute',
     left: 10,
     zIndex: 2,
   },
+  slideStyle: {
+    marginHorizontal: 5,
+    borderRadius: 10
+  }
 });
 const itemWidth = windowWidth * 0.65;
 export default HomeScreen;

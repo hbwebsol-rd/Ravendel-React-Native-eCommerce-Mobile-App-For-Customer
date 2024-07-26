@@ -1,6 +1,5 @@
 import React from 'react';
 import { AText } from '../../theme-components';
-import styled from 'styled-components/native';
 import { formatCurrency, isEmpty } from '../../utils/helper';
 import { StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
@@ -51,8 +50,7 @@ const ProductPriceText = ({
         }
         fonts={FontStyle.fontBold}>
         {hasSalePrice &&
-          formatCurrency(Pricing.sellprice, currencyOptions, currencySymbol)}
-        {'  '}
+          formatCurrency(Pricing.sellprice, currencyOptions, currencySymbol)}{' '}
         <AText
           center
           {...priceTextStyles}
@@ -77,8 +75,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexWrap: 'wrap',
     width: '90%',
-    // justifyContent: 'center',
-    // backgroundColor: 'red',
   },
 });
 

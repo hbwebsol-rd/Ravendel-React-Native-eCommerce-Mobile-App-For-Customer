@@ -1,10 +1,4 @@
 import { StyleSheet } from 'react-native';
-import {
-  APP_PRIMARY_COLOR,
-  APP_SECONDARY_COLOR,
-  FontStyle,
-  windowHeight,
-} from '../utils/config';
 import Colors from '../constants/Colors';
 
 const Styles = StyleSheet.create({

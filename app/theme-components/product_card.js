@@ -9,9 +9,8 @@ import {
   Dimensions,
 } from 'react-native';
 import { AText } from '.';
-import { APP_PRIMARY_COLOR, FontStyle, GREYTEXT } from '../utils/config';
-import URL from '../utils/baseurl';
-import { isEmpty } from '../utils/helper';
+import { FontStyle } from '../utils/config';
+import { uriImage } from '../utils/helper';
 import PropTypes from 'prop-types';
 import { ProductPriceText } from '../screens/components';
 import FastImage from 'react-native-fast-image';
@@ -41,25 +40,22 @@ function ProductCard({
           height: itemHeight,
         },
       ]}
-      onPress={() => {
-        navigateNextScreen(category);
-        // setSelectedId(item._id);
-      }}>
+      onPress={() => navigateNextScreen(category)}>
       {(stock_display_format == 'leftStock' &&
         category.quantity <= stock_left_quantity) ||
-      stock_display_format == 'inStock' ? (
+        stock_display_format == 'inStock' ? (
         //  && category.quantity < 5
         <View style={[styles.overlay]}>
           <AText color={'#fff'} xtrasmall fonts={FontStyle.fontBold}>
-            {category.quantity} left
+            {category.quantity > 0
+              ? `${category.quantity} left`
+              : `Out of stock`}
           </AText>
         </View>
       ) : null}
       <Image
         source={{
-          uri: !isEmpty(displayImage)
-            ? URL + displayImage
-            : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
+          uri: uriImage(displayImage),
           priority: FastImage.priority.normal,
         }}
         style={styles.imageStyle}
@@ -73,13 +69,13 @@ function ProductCard({
             fullStarColor={'#ffb400'}
             starSize={14}
           />
-          <AText xtrasmall ml={'5px'} fonts={FontStyle.fontBold}>
+          <AText style={styles.ratingTextStyle} xtrasmall >
             {category.rating}
           </AText>
         </View>
       ) : null}
       <View style={styles.textContainer}>
-        <AText numberOfLines={2} mb="5px" small fonts={FontStyle.fontBold}>
+        <AText numberOfLines={2} style={{ marginBottom: 5, fontFamily: FontStyle.fontBold }} small>
           {category.name}
         </AText>
         <ProductPriceText fontsizesmall={true} Pricing={category.pricing} />
@@ -103,6 +99,9 @@ const styles = StyleSheet.create({
     // justifyContent: 'space-between',
     // alignItems: 'center',
   },
+  ratingTextStyle: {
+    marginLeft: 5, fontFamily: FontStyle.fontBold
+  },
   overlay: {
     position: 'absolute',
     top: 8,
@@ -123,7 +122,7 @@ const styles = StyleSheet.create({
     bottom: 72,
     left: 10,
     // width: 20,
-    borderRadius:5,
+    borderRadius: 5,
     overflow: 'hidden',
     paddingHorizontal: 5,
     paddingVertical: 4,

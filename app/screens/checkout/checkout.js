@@ -18,6 +18,7 @@ import { formatCurrency, isEmpty } from '../../utils/helper';
 import { APP_PRIMARY_COLOR, FontStyle, GREYTEXT } from '../../utils/config';
 import Colors from '../../constants/Colors';
 import PropTypes from 'prop-types';
+import RazorpayCheckout from 'react-native-razorpay';
 
 const CheckoutScreen = ({ navigation, route }) => {
   var shippingValue = route.params.shippingValue;
@@ -56,11 +57,9 @@ const CheckoutScreen = ({ navigation, route }) => {
   const [productArr, setProductArr] = useState([]);
   const [checked, setChecked] = React.useState('Cash On Delivery');
   const { couponDiscount } = useSelector((state) => state.cart);
-  const { currencyOptions, currencySymbol } = useSelector(
+  const { currencyOptions, currencySymbol, paymentSetting } = useSelector(
     (state) => state.settings,
   );
-
-  const isFocused = useIsFocused();
   React.useLayoutEffect(() => {
     navigation.setOptions({
       title: 'Order Summary',
@@ -139,16 +138,22 @@ const CheckoutScreen = ({ navigation, route }) => {
       // couponCode: !isEmpty(couponCode) ? couponCode : '',
       // grandTotal: !isEmpty(cartAmount) ? cartAmount.toString() : '',
     };
-    console.log(JSON.stringify(payload), 'payyyyl check');
+    console.log(checked, 'payyyyl check');
     // return;
-    if (checked !== 'Paypal') {
-      dispatch(checkoutDetailsAction(payload, cartId, navigation));
-    } else {
+    if (checked === 'Paypal') {
+      payload.billing.paymentMethod = 'paypal';
       navigation.navigate('PaypalPayment', { orderData: payload });
+    } else if (checked === 'Razorpay') {
+      payload.billing.paymentMethod = 'razorpay';
+      dispatch(checkoutDetailsAction(payload, cartId, navigation));
+    } else if (checked === 'Bank Transfer') {
+      dispatch(checkoutDetailsAction(payload, cartId, navigation));
+    } else if (checked === 'Stripe' || checked === 'Cash on Delivery') {
+      payload.billing.paymentMethod =
+        checked === 'Stripe' ? 'stripe' : 'cashondelivery';
+      console.log(' indiiii');
+      dispatch(checkoutDetailsAction(payload, cartId, navigation));
     }
-    // } else {
-    //   navigation.navigate('StripePayment');
-    // }
   };
   return (
     <>
@@ -283,62 +288,31 @@ const CheckoutScreen = ({ navigation, route }) => {
             Payment Mode
           </AText>
           <View style={styles.addresscard2}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <RadioButton
-                color={APP_PRIMARY_COLOR}
-                value="Cash On Delivery"
-                status={
-                  checked === 'Cash On Delivery' ? 'checked' : 'unchecked'
-                }
-                onPress={() => setChecked('Cash On Delivery')}
-              />
-              <AText style={{ color: 'black' }}>Cash On Delivery</AText>
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <RadioButton
-                color={APP_PRIMARY_COLOR}
-                value="Stripe"
-                status={checked === 'Stripe' ? 'checked' : 'unchecked'}
-                onPress={() => setChecked('Stripe')}
-              />
-              <AText style={{ color: 'black' }}>Stripe</AText>
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <RadioButton
-                color={APP_PRIMARY_COLOR}
-                value="Paypal"
-                status={checked === 'Paypal' ? 'checked' : 'unchecked'}
-                onPress={() => setChecked('Paypal')}
-              />
-              <AText style={{ color: 'black' }}>Paypal</AText>
-            </View>
-
-            {/* <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <RadioButton
-                color={APP_PRIMARY_COLOR}
-                value="Paypal"
-                status={checked === 'Paypal' ? 'checked' : 'unchecked'}
-                onPress={() => setChecked('Paypal')}
-              />
-              <AText style={{ color: 'black' }}>Paypal</AText>
-            </View> */}
+            {Object.keys(paymentSetting).map((item) => (
+              <>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <RadioButton
+                    color={APP_PRIMARY_COLOR}
+                    value={paymentSetting[item].title}
+                    status={
+                      checked === paymentSetting[item].title
+                        ? 'checked'
+                        : 'unchecked'
+                    }
+                    onPress={() => setChecked(paymentSetting[item].title)}
+                  />
+                  <AText style={{ color: 'black' }}>
+                    {paymentSetting[item].title}
+                  </AText>
+                </View>
+                {checked === paymentSetting[item].title ? (
+                  <AText ml={'30px'}>{paymentSetting[item].description}</AText>
+                ) : (
+                  ''
+                )}
+              </>
+            ))}
           </View>
-          {/* <AText ml="30px" color="black" fonts={FontStyle.semiBold} large>
-            Coupon Code
-          </AText>
-          <View style={styles.addresscard2}>
-            <TextInput bw={0} pb={15} placeholder={'Enter Coupon Code'} />
-            <View style={{ width: '60%', alignSelf: 'center', marginTop: 10 }}>
-              <AButton
-                small
-                title="Apply Coupon"
-                round
-                onPress={() => {
-                  alert('YOYO');
-                }}
-              />
-            </View>
-          </View> */}
           <AText ml="30px" color="black" fonts={FontStyle.semiBold} large>
             Cart Total
           </AText>

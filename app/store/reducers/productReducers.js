@@ -67,6 +67,7 @@ const initialState = {
   singleCategory: [],
   totalCount: 0,
   filterData: [],
+  additionalProduct: [],
 };
 
 export default (state = initialState, action) => {
@@ -168,8 +169,14 @@ export default (state = initialState, action) => {
         loading: false,
         success: true,
       };
+    case 'RELATED_CART_PRODUCTS':
+      return {
+        ...state,
+        additionalProduct: action.payload,
+        loading: false,
+        success: true,
+      };
     case CAT_PRODUCTS_CLEAR:
-      console.log('clear products');
       return {
         ...state,
         singleCategoryDetails: [],
@@ -184,7 +191,6 @@ export default (state = initialState, action) => {
         success: true,
       };
     case CLEAR_SEARCH_PRODUCT:
-      console.log(' clear productssss');
       return {
         ...state,
         singleCategoryDetails: [],

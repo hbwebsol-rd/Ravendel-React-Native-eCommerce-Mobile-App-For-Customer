@@ -3,16 +3,16 @@ import { View, Text, StyleSheet } from 'react-native';
 import WebView from 'react-native-webview';
 import { useDispatch } from 'react-redux';
 import { paymentStatus } from '../../store/action/checkoutAction';
+import { MainLayout } from '../../theme-components';
+import { BASEURL } from '../../utils/config';
 
 const StripePayment = ({ navigation, route }) => {
   const dispatch = useDispatch();
   const url = route.params.url;
   const navParams = route.params.navParams;
-  console.log(url, ' url stipe');
   const onNavigationStateChange = (path) => {
     const urls = path.nativeEvent.url;
-    console.log(urls, '---');
-    if (urls.includes('https://demo1-ravendel.hbwebsol.com')) {
+    if (urls.includes(BASEURL)) {
       const regex = /[?&]([^=#]+)=([^&#]*)/g;
       let match;
       const params = {};
@@ -22,7 +22,6 @@ const StripePayment = ({ navigation, route }) => {
         params[match[1]] = decodeURIComponent(match[2]);
       }
 
-      console.log(params);
       const payload = {
         id: params.orderId,
         paymentStatus: 'success',
@@ -31,7 +30,7 @@ const StripePayment = ({ navigation, route }) => {
     }
   };
   return (
-    <View style={styles.container}>
+    <MainLayout hideScroll style={styles.container}>
       <WebView
         source={{
           uri: `${url}`,
@@ -41,7 +40,7 @@ const StripePayment = ({ navigation, route }) => {
           onNavigationStateChange(path);
         }}
       />
-    </View>
+    </MainLayout>
   );
 };
 

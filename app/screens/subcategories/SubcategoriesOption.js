@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
 import Colors from '../../constants/Colors';
-import { ACol, ARow, AText, AppLoader } from '../../theme-components';
-import { FontStyle } from '../../utils/config';
+import {
+  ACol,
+  ARow,
+  AText,
+  AppLoader,
+  MainLayout,
+} from '../../theme-components';
+import { BASEURL, FontStyle } from '../../utils/config';
 import AIcon from 'react-native-vector-icons/AntDesign';
-import { capitalizeFirstLetter, isEmpty } from '../../utils/helper';
-import URL from '../../utils/baseurl';
+import { capitalizeFirstLetter, isEmpty, uriImage } from '../../utils/helper';
 import NavigationConstants from '../../navigation/NavigationConstants';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
@@ -34,7 +39,6 @@ const SubcategoryOption = ({ navigation, route }) => {
 
   useEffect(() => {
     return () => {
-      console.log(' clear run');
       dispatch({ type: CLEAR_SUBCATEGORY });
     };
   }, []);
@@ -78,7 +82,6 @@ const SubcategoryOption = ({ navigation, route }) => {
   }, []);
 
   const handleGetSubcategory = async (url) => {
-    console.log(url);
     const subcatPayload = {
       mainFilter: {
         categoryUrl: url,
@@ -91,7 +94,6 @@ const SubcategoryOption = ({ navigation, route }) => {
       GET_FILTEREDPRODUCTS_WITH_PAGINATION,
       subcatPayload,
     );
-    console.log(res, ' new sub data');
     if (!res.data.getCategoryPageData.isMostParentCategory) {
       navigation.navigate(NavigationConstants.SUBCATEGORIES_SCREEN, {
         singleCategory: res.data.getCategoryPageData.categoryTree.subCategories,
@@ -106,7 +108,7 @@ const SubcategoryOption = ({ navigation, route }) => {
     return Categories.map((category) => {
       // if (category.parentId === null) {
       return (
-        <ACol mt={'60px'} col={2} key={category.id}>
+        <ACol style={{ marginTop: 60 }} col={2} key={category.id}>
           <CategoriesListingWrapper
             activeOpacity={0.9}
             onPress={() => {
@@ -117,15 +119,13 @@ const SubcategoryOption = ({ navigation, route }) => {
                 <CategoryImageWrapper>
                   <CategoryImage
                     source={{
-                      uri: !isEmpty(category.image)
-                        ? URL + category.image
-                        : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
+                      uri: uriImage(category.image)
                     }}
                   />
                 </CategoryImageWrapper>
               </ACol>
               <ACol col={1}>
-                <AText small uppercase color="#000" center>
+                <AText style={styles.catNameStyle} small >
                   {category.name}
                 </AText>
               </ACol>
@@ -138,16 +138,18 @@ const SubcategoryOption = ({ navigation, route }) => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
+    <MainLayout
+      hideScroll
+      style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
       {loading ? <AppLoader /> : null}
       <View style={styles.header}>
         <AIcon onPress={() => navigation.goBack()} name="arrowleft" size={22} />
-        <AText fonts={FontStyle.semiBold} ml="20px">
+        <AText style={styles.categorytextStyle} large >
           {capitalizeFirstLetter(singleCat?.url)}
         </AText>
       </View>
-      <ScrollView style={{ backgroundColor: Colors.whiteColor, marginTop: 50 }}>
-        <View style={{ marginTop: 15 }} />
+      <ScrollView style={{ backgroundColor: Colors.whiteColor, marginTop: 15 }}>
+        <View style={{ marginTop: 5 }} />
         {!isEmpty(subcategoriesData) && subcategoriesData.length > 0 ? (
           <ARow row wrap>
             {menuListing(subcategoriesData)}
@@ -166,7 +168,7 @@ const SubcategoryOption = ({ navigation, route }) => {
           </View>
         )}
       </ScrollView>
-    </View>
+    </MainLayout>
   );
 };
 
@@ -209,13 +211,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  categorytextStyle: {
+    fontFamily: FontStyle.semiBold,
+    marginLeft: 20
+  },
+  catNameStyle: {
+    textTransform: "uppercase",
+    color: "#000",
+    textAlign: 'center'
+  },
   catcontainer: {
     marginHorizontal: 30,
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     flex: 1,
-    marginTop: 55,
+    marginTop: 15,
   },
   text: {
     fontSize: 24,
@@ -223,13 +234,13 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    position: 'absolute',
+    // position: 'absolute',
     width: '100%',
     justifyContent: 'flex-start',
     alignItems: 'center',
     left: 0,
     right: 0,
-    marginTop: 10,
+    marginTop: Platform.OS == 'ios' ? 0 : 10,
     paddingHorizontal: 30,
     zIndex: 10,
   },

@@ -49,23 +49,20 @@ const AttributeListing = ({
           ),
         );
       });
-      console.log('adsdasdasdad', result && !isEmpty(result.productUrl));
 
       if (result && !isEmpty(result.productUrl)) {
         let payLoad = { _id: result.productId, url: result.productUrl };
         onPress(payLoad);
       } else {
-        console.log('adsdasdasdad');
         alert('Product not found');
       }
     } else {
-      console.log('adsdasdasdad');
       alert('Product not found');
     }
   };
   return (
     <View style={styles.containerViewStyle}>
-      <AText large fonts={FontStyle.fontBold} mb="10px">
+      <AText large style={styles.textStyle}>
         {attributeName}
       </AText>
       <View style={styles.attributeView}>
@@ -99,6 +96,10 @@ const styles = StyleSheet.create({
   attributeView: {
     flexDirection: 'row',
     marginVertical: 7,
+  },
+  textStyle: {
+    fontFamily: FontStyle.fontBold,
+    marginBottom: 10
   },
   attributeBoxStyle: {
     borderWidth: 1,

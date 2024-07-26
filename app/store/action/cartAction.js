@@ -41,7 +41,6 @@ export const checkStorageAction = (userID, load) => async (dispatch) => {
         payload: { cartProducts, cartSummary, cartID },
       });
     } catch (error) {
-      console.log('error in check storage', error);
       if (_.get(error, 'message') === 'Cart not found') {
         const cartProduct = await AsyncStorage.getItem('cartproducts');
         if (!isEmpty(cartProduct)) {
@@ -72,12 +71,12 @@ export const checkStorageAction = (userID, load) => async (dispatch) => {
       const cartProduct = await AsyncStorage.getItem('cartproducts');
       const cartPayload = cartProduct
         ? JSON.parse(cartProduct).map((item) => ({
-            productId: _.get(item, 'productId', ''),
-            variantId: '',
-            productTitle: _.get(item, 'productTitle', ''),
-            attributes: _.get(item, 'attributes', []),
-            qty: _.get(item, 'qty', 0),
-          }))
+          productId: _.get(item, 'productId', ''),
+          variantId: '',
+          productTitle: _.get(item, 'productTitle', ''),
+          attributes: _.get(item, 'attributes', []),
+          qty: _.get(item, 'qty', 0),
+        }))
         : [];
 
       const response = await query(CALCULATE_CART_WITHOUT_LOGIN, {
@@ -93,7 +92,6 @@ export const checkStorageAction = (userID, load) => async (dispatch) => {
         },
       });
     } catch (error) {
-      console.log('Cart Reducers', error);
     }
   }
 };
@@ -108,7 +106,6 @@ export const addToCartAction = (payload) => async (dispatch) => {
   dispatch({ type: CART_LOADING });
   try {
     const response = await mutation(ADD_TOCART, payload);
-    console.log(response, 'cart add response');
 
     const addToCartSuccess = _.get(response, 'data.addToCart.success', false);
     if (addToCartSuccess) {
@@ -116,7 +113,6 @@ export const addToCartAction = (payload) => async (dispatch) => {
       dispatch(checkStorageAction(payload.userId));
     }
   } catch (error) {
-    console.log('error', error);
     dispatch({ type: CART_FAIL });
   }
 };
@@ -129,14 +125,12 @@ export const CartQtyAction = (payload) => async (dispatch) => {
       dispatch(checkStorageAction(payload.userId, true));
     }
   } catch (error) {
-    console.log('error', error);
     dispatch({ type: CART_FAIL });
   }
 };
 
 export const addCartAction = (payload, isLoggin) => async (dispatch) => {
   dispatch({ type: CART_LOADING });
-  console.log('payload', payload);
   try {
     const response = await mutation(ADD_CART, payload);
     if (
@@ -151,7 +145,6 @@ export const addCartAction = (payload, isLoggin) => async (dispatch) => {
       await AsyncStorage.removeItem('cartproducts');
     }
   } catch (error) {
-    console.log('error', error);
     dispatch({ type: CART_FAIL });
   }
 };
@@ -169,7 +162,6 @@ export const updateCartAction = (payload, userID) => async (dispatch) => {
       await AsyncStorage.removeItem('cartproducts');
     }
   } catch (error) {
-    console.log('error', error);
     dispatch({ type: CART_FAIL });
   }
 };
@@ -190,7 +182,6 @@ export const removeFromCartAction = (payload, userID) => async (dispatch) => {
       }
     }
   } catch (error) {
-    console.log('error cartupdate', error);
     dispatch({ type: CART_FAIL });
     dispatch({
       type: ALERT_ERROR,
@@ -208,7 +199,6 @@ export const removeCartAction = (userID) => async (dispatch) => {
 
   try {
     const response = await mutation(DELETE_CART, { userId: userID });
-    console.log(response, 'delete cart response');
 
     // Check if response is not empty and has expected properties
     if (
@@ -220,7 +210,6 @@ export const removeCartAction = (userID) => async (dispatch) => {
       dispatch(checkStorageAction(userID));
     }
   } catch (error) {
-    console.log('error cart update', error);
     dispatch({ type: CART_FAIL });
     dispatch({
       type: ALERT_ERROR,
@@ -239,14 +228,12 @@ export const applyCouponAction =
 
     try {
       const response = await query(APPLY_COUPON_CODE, payload);
-      console.log(JSON.stringify(response), 'coupon response');
-
       // Check if response is not empty and has expected properties
       if (
         !isEmpty(response) &&
         !isEmpty(response.data.calculateCoupon) &&
         response.data.calculateCoupon.message ===
-          'Coupon code applied successfully'
+        'Coupon code applied successfully'
       ) {
         dispatch({
           type: COUPON_APPLIED,
@@ -285,7 +272,6 @@ export const applyCouponAction =
         });
       }
     } catch (error) {
-      console.log('error', error);
       dispatch({ type: CART_FAIL });
       dispatch({
         type: ALERT_ERROR,
@@ -299,7 +285,6 @@ export const orderHistoryAction = (payload) => async (dispatch) => {
 
   try {
     const response = await query(ORDER_HISTORY, payload);
-    console.log(response, 'order response');
 
     // Check if response is not empty and has expected properties
     if (
@@ -323,7 +308,6 @@ export const orderHistoryAction = (payload) => async (dispatch) => {
       });
     }
   } catch (error) {
-    console.log('error', error);
     dispatch({ type: ORDER_LOAD_STOP });
     dispatch({
       type: ALERT_ERROR,

@@ -32,7 +32,6 @@ const setDataInStorage = async (product) => {
   try {
     await AsyncStorage.setItem('cartproducts', JSON.stringify(product));
   } catch (error) {
-    console.log('Something went Wrong!!!!');
   }
 };
 
@@ -40,7 +39,6 @@ const clearCartStorage = async () => {
   try {
     await AsyncStorage.removeItem('cartproducts');
   } catch (error) {
-    console.log('Something went Wrong!!!!');
   }
 };
 

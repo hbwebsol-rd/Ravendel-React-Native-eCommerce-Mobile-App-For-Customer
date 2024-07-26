@@ -1,20 +1,30 @@
 import React, { useRef, useState } from 'react';
-import { AText, AButton, TextInput } from '../../theme-components';
 import { useFormik } from 'formik';
-import { signupValidationSchema } from '../checkout/validationSchema';
 import { useDispatch } from 'react-redux';
-import { registerAction } from '../../store/action';
-import { Checkbox } from 'react-native-paper';
-import { Linking, TouchableOpacity, View } from 'react-native';
-import Styles from '../../Theme';
+import { Linking, TouchableOpacity, View, Platform } from 'react-native';
 import PropTypes from 'prop-types';
+import { Checkbox } from 'react-native-paper';
 import { CountryPicker } from 'react-native-country-codes-picker';
+import Styles from '../../Theme';
+import { AText, AButton, TextInput } from '../../theme-components';
+import { signupValidationSchema } from '../checkout/validationSchema';
+import { registerAction } from '../../store/action';
+import { BASEURL } from '../../utils/config';
+import { create } from 'lodash';
+import { StyleSheet } from 'react-native';
 
 const SignupScreen = ({ navigation, handleActiveTab }) => {
-  // States and Variables
   const dispatch = useDispatch();
   const textInputRef = useRef(null);
-
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
+  const fieldArray = [
+    { id: 1, name: 'First Name', value: 'firstName', secureTextEntry: false },
+    { id: 1, name: 'Last name', value: 'lastName', secureTextEntry: false },
+    { id: 1, name: 'Email', value: 'email', secureTextEntry: false },
+    { id: 1, name: 'Phone No.', value: 'mobile', secureTextEntry: false },
+    { id: 1, name: 'Password', value: 'password', secureTextEntry: true },
+    { id: 1, name: 'Confirm password', value: 'confirmPassword', secureTextEntry: true },
+  ]
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
@@ -25,26 +35,19 @@ const SignupScreen = ({ navigation, handleActiveTab }) => {
       password: '',
       company: '',
       confirmPassword: '',
-      policy: '',
+      policy: false,
     },
     validationSchema: signupValidationSchema,
     onSubmit: (values, { setSubmitting, resetForm }) => {
       setSubmitting(false);
       sendValues(values);
-      resetForm({ values: '' });
+      resetForm();
     },
   });
-  const [show, setShow] = useState(false);
-  const [countryCode, setCountryCode] = useState('');
-  console.log(countryCode, ' ccd');
-  // Custom Function
-  const openLink = () => {
-    const url = 'https://demo1-ravendel.hbwebsol.com/abouts/terms&condition';
 
-    // Use Linking to open the URL
-    Linking.openURL(url).catch((err) =>
-      console.error('An error occurred', err),
-    );
+  const openLink = () => {
+    const url = `${BASEURL}/abouts/terms&condition`;
+    Linking.openURL(url).catch(() => { });
   };
 
   const sendValues = (values) => {
@@ -54,202 +57,95 @@ const SignupScreen = ({ navigation, handleActiveTab }) => {
       email: values.email,
       password: values.password,
       phone: values.mobile,
-      company: values.company,
     };
     dispatch(registerAction(registerValue, navigation, handleActiveTab));
   };
-
   return (
     <>
-      <TextInput
-        color={'#000'}
-        mt={30}
-        padding={0}
-        onchange={formik.handleChange('firstName')}
-        bw={0}
-        pb={10}
-        onerror={false}
-        placeholder={'Enter First name'}
-        value={formik.values.firstName}
-        placeholdercolor={'#ABA7A7'}
-        inputBgColor="transparent"
-      />
-      {formik.touched.firstName && formik.errors.firstName && (
-        <AText color="red" xtrasmall>
-          {formik.errors.firstName}
-        </AText>
-      )}
+      {fieldArray.map(({ name, value, secureTextEntry }) =>
+        <>
+          <View style={styles.textInputViewStyle}>
+            {value == 'mobile' ?
+              <>
+                <CountryPicker
+                  show={showCountryPicker}
+                  style={{
+                    modal: {
+                      height: 500,
+                    },
+                  }}
+                  // when picker button press you will get the country object with dial code
+                  pickerButtonOnPress={(item) => {
+                    formik.setFieldValue('mobile', item.dial_code);
+                    setShowCountryPicker(false);
+                    if (textInputRef.current) {
+                      // Focus on the input field if editable state changes to true
+                      // setTimeout(() => {
+                      textInputRef.current.focus();
+                      // }, 100);
+                    }
+                  }}
+                // showOnly={['UA', 'EN', 'IN', 'US', 'UA']}
+                />
 
-      <TextInput
-        color={'#000'}
-        mt={10}
-        padding={0}
-        onchange={formik.handleChange('lastName')}
-        bw={0}
-        pb={10}
-        onerror={false}
-        placeholder={'Enter Last name'}
-        value={formik.values.lastName}
-        placeholdercolor={'#ABA7A7'}
-        inputBgColor="transparent"
-      />
-      {formik.touched.lastName && formik.errors.lastName && (
-        <AText color="red" xtrasmall>
-          {formik.errors.lastName}{' '}
-        </AText>
-      )}
-
-      <TextInput
-        color={'#000'}
-        mt={10}
-        padding={0}
-        onchange={formik.handleChange('email')}
-        bw={0}
-        pb={10}
-        onerror={false}
-        placeholder={'Enter Email'}
-        value={formik.values.email}
-        placeholdercolor={'#ABA7A7'}
-        inputBgColor="transparent"
-      />
-      {formik.touched.email && formik.errors.email && (
-        <AText color="red" xtrasmall>
-          {formik.errors.email}
-        </AText>
-      )}
-      <View style={{ flexDirection: 'row' }}>
-        <CountryPicker
-          show={show}
-          style={{ height: 500 }}
-          // when picker button press you will get the country object with dial code
-          pickerButtonOnPress={(item) => {
-            setCountryCode(item.dial_code);
-            formik.setFieldValue('mobile', item.dial_code);
-            setShow(false);
-            if (textInputRef.current) {
-              // Focus on the input field if editable state changes to true
-              setTimeout(() => {
-                textInputRef.current.focus();
-              }, 100);
+                <TextInput
+                  textInputRef={textInputRef}
+                  onfocus={() => {
+                    setShowCountryPicker(true);
+                  }}
+                  keyboardtype={'numeric'}
+                  onchange={formik.handleChange('mobile')}
+                  onerror={false}
+                  StylesTextInput={styles.textInputStyle}
+                  placeholder={'Enter Phone No.'}
+                  value={formik.values.mobile}
+                  placeholdercolor={'#ABA7A7'}
+                  inputBgColor="transparent"
+                />
+              </>
+              :
+              <TextInput
+                StylesTextInput={styles.textInputStyle}
+                secureTextEntry={secureTextEntry}
+                placeholder={`Enter ${name}`}
+                onchange={(val) => formik.setFieldValue(value, val)}
+                value={formik.values[value]}
+                placeholdercolor="#ABA7A7"
+              />
             }
-          }}
-          showOnly={['UA', 'EN', 'IN', 'US', 'UA']}
-        />
+          </View>
+          {
+            formik.touched[value] && formik.errors[value] && (
+              <AText color="red" xtrasmall>
+                {formik.errors[value]}
+              </AText>
+            )
+          }
+        </>
 
-        <TextInput
-          textInputRef={textInputRef}
-          onfocus={() => {
-            setShow(true);
-          }}
-          color={'#000'}
-          mt={10}
-          padding={0}
-          keyboardtype={'numeric'}
-          onchange={formik.handleChange('mobile')}
-          bw={0}
-          pb={10}
-          onerror={false}
-          placeholder={'Enter Phone No.'}
-          value={formik.values.mobile}
-          placeholdercolor={'#ABA7A7'}
-          inputBgColor="transparent"
-        />
-      </View>
-      {formik.touched.mobile && formik.errors.mobile && (
-        <AText color="red" xtrasmall>
-          {formik.errors.mobile}
-        </AText>
       )}
-      <TextInput
-        color={'#000'}
-        mt={10}
-        padding={0}
-        onchange={formik.handleChange('company')}
-        bw={0}
-        pb={10}
-        onerror={false}
-        placeholder={'Enter Company'}
-        value={formik.values.company}
-        placeholdercolor={'#ABA7A7'}
-        inputBgColor="transparent"
-      />
-      {formik.touched.company && formik.errors.company && (
-        <AText color="red" xtrasmall>
-          {formik.errors.company}
-        </AText>
-      )}
-
-      <TextInput
-        secureTextEntry={true}
-        hookuse
-        iconColor={'#9F9F9F'}
-        icon={'eye-off'}
-        color={'#000'}
-        mt={10}
-        padding={0}
-        onchange={formik.handleChange('password')}
-        bw={0}
-        pb={10}
-        onerror={false}
-        placeholder={'Enter Password'}
-        value={formik.values.password}
-        placeholdercolor={'#ABA7A7'}
-        inputBgColor="transparent"
-      />
-      {formik.touched.password && formik.errors.password && (
-        <AText color="red" xtrasmall>
-          {formik.errors.password}
-        </AText>
-      )}
-
-      <TextInput
-        secureTextEntry={true}
-        hookuse
-        iconColor={'#9F9F9F'}
-        icon={'eye-off'}
-        color={'#000'}
-        mt={10}
-        padding={0}
-        onchange={formik.handleChange('confirmPassword')}
-        bw={0}
-        pb={10}
-        onerror={false}
-        placeholder={'Confirm Password'}
-        value={formik.values.confirmPassword}
-        placeholdercolor={'#ABA7A7'}
-        inputBgColor="transparent"
-      />
-      {formik.touched.confirmPassword && formik.errors.confirmPassword && (
-        <AText color="red" xtrasmall>
-          {formik.errors.confirmPassword}
-        </AText>
-      )}
-
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        {Platform.OS === 'ios' ? <View style={Styles.iosBox} /> : null}
-
+      <View style={styles.agreementContainer}>
+        {Platform.OS === 'ios' && <View style={Styles.iosBox} />}
         <Checkbox
           status={formik.values.policy ? 'checked' : 'unchecked'}
           onPress={() => formik.setFieldValue('policy', !formik.values.policy)}
         />
-        <TouchableOpacity activeOpacity={0.5} onPress={() => openLink()}>
+        <TouchableOpacity activeOpacity={0.5} onPress={openLink}>
           <AText underLine small color="#9F9F9F">
             I agree to terms and policy
           </AText>
         </TouchableOpacity>
       </View>
-
       {formik.touched.policy && formik.errors.policy && (
         <AText color="red" xtrasmall>
           {formik.errors.policy}
         </AText>
       )}
+
       <AButton
-        mt={'60px'}
-        round
+        buttonStyle={styles.singupBtnStyle}
         onPress={formik.handleSubmit}
         title="Sign up"
-        block
       />
     </>
   );
@@ -258,5 +154,11 @@ const SignupScreen = ({ navigation, handleActiveTab }) => {
 SignupScreen.propTypes = {
   handleActiveTab: PropTypes.func,
 };
+const styles = StyleSheet.create({
+  textInputViewStyle: { flexDirection: 'row', marginTop: 10, alignItems: 'center', justifyContent: 'center', },
+  textInputStyle: { borderWidth: 0, padding: 0, paddingBottom: 10, color: '#000', },
+  agreementContainer: { flexDirection: 'row', alignItems: 'center' },
+  singupBtnStyle: { marginTop: 60, borderRadius: 30 }
 
+})
 export default SignupScreen;

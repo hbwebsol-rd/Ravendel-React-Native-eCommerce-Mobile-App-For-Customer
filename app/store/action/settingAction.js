@@ -14,7 +14,6 @@ import { CATS_SUCCESS } from './productAction';
 
 export const AppSettingAction = () => async (dispatch) => {
   const response = await query(GET_APP_SETTING);
-  // console.log(JSON.stringify(response), ' sett');
   try {
     if (!isEmpty(_.get(response, 'data.getSettings'))) {
       const currencyOptions = _.get(
@@ -163,7 +162,7 @@ export const homeScreenFields = () => async (dispatch) => {
   dispatch({ type: SETTING_LOADING });
   try {
     const allDataInOnce = await query(GET_ALL_FIELDS, { deviceType: '2' });
-
+// console.log(' all data',JSON.stringify(allDataInOnce))
     const allData = {
       brands: _.get(allDataInOnce, 'data.getMobileHomePage.homepageBrands', []),
       allSection: allDataInOnce.data.getHomePage.sections,
@@ -174,7 +173,6 @@ export const homeScreenFields = () => async (dispatch) => {
       payload: _.get(allDataInOnce, 'data.getHomePage.parentCategories', []),
     });
   } catch (error) {
-    console.log(error);
     dispatch({ type: SETTING_FAIL });
   }
 };

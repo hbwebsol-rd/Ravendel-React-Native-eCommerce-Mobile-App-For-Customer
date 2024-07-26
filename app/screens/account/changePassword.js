@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components';
-import { AButton, AHeader, BackHeader } from '../../theme-components';
+import {
+  AButton,
+  BackHeader,
+  TextInput,
+  MainLayout,
+} from '../../theme-components';
 import { isEmpty } from '../../utils/helper';
 import { changePasswordAction } from '../../store/action';
 import { ALERT_ERROR } from '../../store/reducers/alert';
-import { View } from 'react-native';
-import Colors from '../../constants/Colors';
+import { StyleSheet, View } from 'react-native';
 
 const ChangePasswordScreen = ({ navigation }) => {
+
   const dispatch = useDispatch();
   const userData = useSelector((state) => state.customer.userDetails);
   const [userDetails, setuserDetails] = useState({
@@ -16,6 +20,11 @@ const ChangePasswordScreen = ({ navigation }) => {
     new_password: '',
     confirm_password: '',
   });
+  const fieldArray = [
+    { id: 1, name: 'Old Password', key: 'old_password' },
+    { id: 1, name: 'New Password', key: 'new_password' },
+    { id: 1, name: 'Confirm Password', key: 'confirm_password' }
+  ];
   useEffect(() => {
     if (!isEmpty(userData)) {
       var userDetailObject = {
@@ -56,85 +65,75 @@ const ChangePasswordScreen = ({ navigation }) => {
     dispatch(changePasswordAction(profileUpdateObject, navigation));
   };
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
+    <MainLayout>
       <BackHeader navigation={navigation} name="Change Password" back />
-      <ItemWrapper>
-        <ItemDescription>
-          <TextInputArea
-            placeholder="Old Password"
-            value={userDetails.old_password}
-            secureTextEntry={true}
-            onChangeText={(text) =>
-              setuserDetails({
-                ...userDetails,
-                old_password: text,
-              })
-            }
-          />
-          <TextInputArea
-            placeholder="New Password"
-            maxLength={10}
-            value={userDetails.new_password}
-            secureTextEntry={true}
-            onChangeText={(text) =>
-              setuserDetails({
-                ...userDetails,
-                new_password: text,
-              })
-            }
-          />
-          <TextInputArea
-            placeholder="Confirm Password"
-            value={userDetails.confirm_password}
-            secureTextEntry={true}
-            maxLength={10}
-            onChangeText={(text) =>
-              setuserDetails({
-                ...userDetails,
-                confirm_password: text,
-              })
-            }
-          />
+      <View
+        style={styles.container}>
+        <View style={styles.contentContainer}>
+          {fieldArray.map(({ name, key }) =>
+            <TextInput
+              placeholder={name}
+              value={userDetails[key]}
+              secureTextEntry={true}
+              onchange={(text) =>
+                setuserDetails({
+                  ...userDetails,
+                  [key]: text,
+                })
+              }
+              hookuse
+              iconColor={'#9F9F9F'}
+              icon={'eye-off'}
+              StylesTextInput={styles.textInputStyle}
+              onerror={false}
+              placeholdercolor={'#ABA7A7'}
+              inputBgColor="transparent"
+            />
+          )}
           <AButton
             onPress={() => {
               profileUpdate();
             }}
+            buttonStyle={{ marginTop: 20 }}
             title="Submit"
           />
-        </ItemDescription>
-      </ItemWrapper>
-    </View>
+        </View>
+      </View>
+    </MainLayout>
   );
 };
 
-const TextInputArea = styled.TextInput`
-  margin: 5px;
-  border-color: gray;
-  background: #e7e7e7;
-  width: 90%;
-  margin-bottom: 10px;
-  border-radius: 5px;
-  align-self: center;
-  padding: 9px;
-`;
-const ItemWrapper = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
-  margin-top: 100px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  //   background: #f7f7f7;
-  overflow: hidden;
-  position: relative;
-  //   border: 1px solid #f7f7f7;
-  box-shadow: 0 0 5px #eee;
-  elevation: 1;
-`;
-
-const ItemDescription = styled.View`
-  flex: 1;
-  padding: 10px;
-  background: #fff;
-`;
-
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  contentContainer: {
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    borderRadius: 10,
+    paddingHorizontal: 40,
+    paddingBottom: 30,
+    marginHorizontal: 30,
+    marginTop: 25,
+    paddingTop: 30,
+    justifyContent: 'center',
+    width: '90%',
+    alignSelf: 'center',
+    backgroundColor: 'white',
+  },
+  textInputStyle: {
+    padding: 0,
+    borderWidth: 0,
+    paddingBottom: 10,
+    color: '#000',
+    marginTop: 10,
+  },
+});
 export default ChangePasswordScreen;

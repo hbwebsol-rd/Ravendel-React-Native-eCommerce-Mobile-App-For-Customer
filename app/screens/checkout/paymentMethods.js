@@ -16,7 +16,6 @@ const PaymentMethodScreen = ({ navigation, route }) => {
   var cartProducts = route.params.cartProducts;
   var couponCode = route.params.couponCode;
   const defaultaddress = route.params.shippingValue;
-  console.log(defaultaddress, 'dd');
   const [paymentMethod, setPaymentMethod] = React.useState('cash');
   const { currencyOptions, currencySymbol } = useSelector(
     (state) => state.settings,
@@ -29,7 +28,7 @@ const PaymentMethodScreen = ({ navigation, route }) => {
       headerTransparent: false,
       headerTintColor: '#000',
       headerRight: () => (
-        <AText bold pr="10px">
+        <AText bold style={{ paddingRight: 10 }}>
           {formatCurrency(
             cartAmount - couponDiscount,
             currencyOptions,

@@ -1,6 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AWS3 } from 'react-native-aws3';
-import AWS from 'aws-sdk';
+import { BASEURL, dummyImage } from './config';
 
 export const isEmpty = (value) =>
   value === undefined ||
@@ -15,10 +14,11 @@ if (process.env.NODE_ENV === "production") {
   baseURL = "http://localhost:8000";
 }*/
 
-export const baseUrl = 'http://192.168.1.6:8000';
-// export const baseUrl = 'http://localhost:8000';
-// export const baseUrl = 'https://ravendel-backend.hbwebsol.com';
-
+export const uriImage = (value) => {
+  return !isEmpty(value)
+    ? BASEURL + value
+    : dummyImage
+}
 /*-------------------------------------------------------------------------------------------------------------------------------------- */
 //simple category array to Tree array
 export const unflatten = (items, id = null, link = 'parentId') => {
@@ -81,15 +81,12 @@ export const printTree = (tree) => {
   categoriesPrint += "<ul className='category-dropdown'>";
 
   for (let i in tree) {
-    categoriesPrint += `<li className="${
-      tree[i].children && tree[i].children.length ? 'has-submenu' : ''
-    }">                               
-                        <label for="${
-                          tree[i].name
-                        }" className="checkmark-container">${tree[i].name}
-                          <input type='checkbox' name="abc" id="${
-                            tree[i].name
-                          }">
+    categoriesPrint += `<li className="${tree[i].children && tree[i].children.length ? 'has-submenu' : ''
+      }">                               
+                        <label for="${tree[i].name
+      }" className="checkmark-container">${tree[i].name}
+                          <input type='checkbox' name="abc" id="${tree[i].name
+      }">
                           <span className="checkmark"></span>
                         </label>`;
     if (tree[i].children && tree[i].children.length) {
@@ -137,6 +134,7 @@ export const checkUserLoginStorage = async () => {
   };
 };
 
+
 export const formatCurrency = (amt, currencyOptions, currencySymbol) => {
   if (!amt || !currencyOptions || !currencySymbol) {
     return '';
@@ -145,11 +143,10 @@ export const formatCurrency = (amt, currencyOptions, currencySymbol) => {
   if (currencyOptions && currencySymbol) {
     let postion = currencyOptions.currency_position;
     let decimal = currencyOptions.number_of_decimals || 2;
-    return `${
-      postion == 'left' || postion === 'left_space' ? currencySymbol : ''
-    }${amount.toFixed(decimal)}${
-      postion == 'right' || postion === 'right_space' ? currencySymbol : ''
-    }`;
+    let thousand_separator = currencyOptions.thousand_separator || ',';
+    return `${postion == 'left' || postion === 'left_space' ? currencySymbol : ''
+      }${amount.toFixed(decimal).replace(/\B(?=(\d{3})+(?!\d))/g, thousand_separator)}${postion == 'right' || postion === 'right_space' ? currencySymbol : ''
+      }`;
   } else {
     return `$${amount}`;
   }

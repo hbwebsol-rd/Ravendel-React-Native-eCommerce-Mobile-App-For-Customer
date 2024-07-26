@@ -6,7 +6,7 @@ var margin = 2;
 const ACol = styled.View`
   background-color: ${props => props.bgColor ?? 'transparent'};
   margin: ${props => props.margin ?? margin / 2 + '%'};
-  ${({col}) => {
+${({ col }) => {
     switch (col) {
       case 12:
         return `width: ${100 / 12 - margin}%;`;
@@ -38,7 +38,7 @@ const ACol = styled.View`
   }}
 `;
 
-const ColStyle = ({...props}) => {
+const ColStyle = ({ ...props }) => {
   return <ACol {...props}>{props.children}</ACol>;
 };
 

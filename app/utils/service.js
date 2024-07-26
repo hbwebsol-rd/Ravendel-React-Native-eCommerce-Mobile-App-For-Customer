@@ -3,7 +3,7 @@ import axios from 'axios';
 import { getToken, isEmpty } from './helper';
 import APclient from '../Client';
 import { useQuery } from '@apollo/client';
-import { loginURL } from './baseurl';
+import { BASEURL } from './config';
 
 export const mutation = async (query, variables, refetchQuery) => {
   try {
@@ -15,7 +15,6 @@ export const mutation = async (query, variables, refetchQuery) => {
     return Promise.resolve(response);
   } catch (error) {
     const errors = JSON.parse(JSON.stringify(error));
-    console.log('Error is', errors);
     if (
       errors.graphQLErrors.length &&
       !isEmpty(errors.graphQLErrors[0].message)
@@ -42,12 +41,10 @@ export const query = async (query, variables) => {
     return Promise.resolve(response);
   } catch (error) {
     const errors = JSON.parse(JSON.stringify(error));
-    console.log('Error', errors.message);
     if (
       errors.graphQLErrors.length &&
       !isEmpty(errors.graphQLErrors[0].message)
     ) {
-      console.log('Error', errors.message);
       return Promise.reject(errors.graphQLErrors[0].message);
     }
     if (
@@ -72,7 +69,7 @@ export const PostFetchWithoutToken = (url, registerDetails) => {
     redirect: 'follow',
   };
   try {
-    const response = fetch(`${loginURL}${url}`, requestOptions).then((res) => {
+    const response = fetch(`${BASEURL}${url}`, requestOptions).then((res) => {
       return new Promise((resolve) => {
         const contentType = res.headers.get('content-type');
         if (contentType && contentType.indexOf('application/json') !== -1) {
@@ -90,7 +87,6 @@ export const PostFetchWithoutToken = (url, registerDetails) => {
 
     return Promise.resolve(response);
   } catch (error) {
-    console.log('er', error);
     return Promise.reject(error);
   }
 };
@@ -109,7 +105,7 @@ export const GetFetch = async (url) => {
     redirect: 'follow',
   };
   try {
-    const response = fetch(`${loginURL}${url}`, requestOptions).then((res) => {
+    const response = fetch(`${BASEURL}${url}`, requestOptions).then((res) => {
       return new Promise((resolve) => {
         const contentType = res.headers.get('content-type');
         if (contentType && contentType.indexOf('application/json') !== -1) {
@@ -127,7 +123,6 @@ export const GetFetch = async (url) => {
 
     return Promise.resolve(response);
   } catch (error) {
-    console.log('er', error);
     return Promise.reject(error);
   }
 };

@@ -4,24 +4,33 @@ import { APP_PRIMARY_COLOR, windowWidth } from '../utils/config';
 const AText = styled.Text`
   letter-spacing: 0.5px;
   color: ${(props) => props.color ?? '#3a3a3a'};
-  margin-bottom: ${(props) => props.mb ?? '0px'};
-  margin-top: ${(props) => props.mt ?? '0px'};
-  margin-left: ${(props) => props.ml ?? '0px'};
-  margin-right: ${(props) => props.mr ?? '0px'};
-  padding-bottom: ${(props) => props.pb ?? '0px'};
-  padding-top: ${(props) => props.pt ?? '0px'};
-  padding-left: ${(props) => props.pl ?? '0px'};
-  padding-right: ${(props) => props.pr ?? '0px'};
-  border-bottom-width: ${(props) => props.bbw ?? '0px'};
-  border-bottom-color: ${(props) => props.bbc ?? APP_PRIMARY_COLOR};
   text-decoration-line: ${(props) =>
     props.underLine
       ? 'underline'
       : props.lineThrough
-      ? 'line-through'
-      : 'none'};
+        ? 'line-through'
+        : 'none'};
   font-family: ${(props) => props.fonts ?? 'SegoeUI'};
-  z-index: ${(props) => props.zindex ?? '1'};
+  ${({ center, right }) => {
+    switch (true) {
+      case center:
+        return `text-align: center`;
+      case right:
+        return `text-align: right`;
+      default:
+        `text-align: left`;
+    }
+  }};
+  ${({ uppercase, capitalize }) => {
+    switch (true) {
+      case uppercase:
+        return `text-transform: uppercase`;
+      case capitalize:
+        return `text-transform: capitalize`;
+      default:
+        `text-transform: inherit`;
+    }
+  }};
   ${({
     jumbo,
     title,
@@ -64,28 +73,12 @@ const AText = styled.Text`
       default:
         return `font-size: 14px`;
     }
-  }}
-  ${({ center, right }) => {
-    switch (true) {
-      case center:
-        return `text-align: center`;
-      case right:
-        return `text-align: right`;
-      default:
-        `text-align: left`;
-    }
-  }}
-    ${({ uppercase,capitalize }) => {
-    switch (true) {
-      case uppercase:
-        return `text-transform: uppercase`;
-      case capitalize:
-        return `text-transform: capitalize`;
-      default:
-        `text-transform: inherit`;
-    }
   }};
+  ${(props) => props.textStyle}
 `;
+
+
+
 
 const TextStyle = ({ ...props }) => {
   return (

@@ -2,6 +2,8 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { AText, AButton, AHeader, BackHeader } from '../../theme-components';
 import { Formik, useFormik } from 'formik';
 import styled from 'styled-components/native';
+import IonIcon from 'react-native-vector-icons/Ionicons';
+
 import { Appbar, Checkbox, RadioButton, TextInput } from 'react-native-paper';
 import {
   KeyboardAvoidingView,
@@ -16,7 +18,11 @@ import {
 import DropDownPicker from 'react-native-dropdown-picker';
 import { countryArray } from '../../utils/CountryData';
 import { validationSchema } from '../checkout/validationSchema';
-import { APP_SECONDARY_COLOR, FontStyle } from '../../utils/config';
+import {
+  APP_PRIMARY_COLOR,
+  APP_SECONDARY_COLOR,
+  FontStyle,
+} from '../../utils/config';
 import Colors from '../../constants/Colors';
 import PropTypes from 'prop-types';
 import AIcon from 'react-native-vector-icons/AntDesign';
@@ -44,13 +50,11 @@ const AdressForm = ({
   });
   useEffect(() => {
     if (handleSubmit) {
-      console.log('heydasd')
       formik.handleSubmit();
     }
   }, [handleSubmit]);
 
   const onSubmit = (values) => {
-    console.log('in adress form')
     const FormValue = {
       firstname: values.firstname,
       lastname: values.lastname,
@@ -80,7 +84,7 @@ const AdressForm = ({
         {showHeader && (
           <View style={styles.header}>
             <AIcon name="arrowleft" onPress={cancelAddForm} size={22} />
-            <AText large fonts={FontStyle.semiBold} ml="20px">
+            <AText style={styles.newAddtextStyle} large>
               Add New Address
             </AText>
           </View>
@@ -163,6 +167,7 @@ const AdressForm = ({
             )}
 
             <DropDownPicker
+            searchable={true}
               open={openCountryModal}
               value={formik.values.country}
               label="Country"
@@ -229,84 +234,69 @@ const AdressForm = ({
               <TouchableOpacity
                 activeOpacity={0.5}
                 style={styles.radioBtnStyle}
-                onPress={() =>
-                  formik.setFieldValue(
-                    'defaultAddress',
-                    !formik.values.defaultAddress,
-                  )
-                }>
-                <RadioButton
-                  value="Home"
-                  status={
+                onPress={() => formik.setFieldValue('addressType', 'Home')}>
+                <IonIcon
+                  color={APP_PRIMARY_COLOR}
+                  name={
                     formik.values.addressType === 'Home'
-                      ? 'checked'
-                      : 'unchecked'
+                      ? 'radio-button-on'
+                      : 'radio-button-off'
                   }
-                  onPress={() => formik.setFieldValue('addressType', 'Home')}
+                  style={{ marginHorizontal: 5 }}
+                  size={20}
                 />
                 <Text>Home</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 activeOpacity={0.5}
                 style={styles.radioBtnStyle}
+                onPress={() => formik.setFieldValue('addressType', 'Office')}>
+                <IonIcon
+                  color={APP_PRIMARY_COLOR}
+                  name={
+                    formik.values.addressType === 'Office'
+                      ? 'radio-button-on'
+                      : 'radio-button-off'
+                  }
+                  style={{ marginHorizontal: 5 }}
+                  size={20}
+                />
+                <Text>Office</Text>
+              </TouchableOpacity>
+            </View>
+            {showBottomPanel && (
+              <TouchableOpacity
+                style={{ flexDirection: 'row', alignItems: 'center' }}
+                activeOpacity={0.5}
                 onPress={() =>
                   formik.setFieldValue(
                     'defaultAddress',
                     !formik.values.defaultAddress,
                   )
                 }>
-                <RadioButton
-                  value="Office"
-                  status={
-                    formik.values.addressType === 'Office'
-                      ? 'checked'
-                      : 'unchecked'
+                <IonIcon
+                  color={APP_PRIMARY_COLOR}
+                  name={
+                    formik.values.defaultAddress
+                      ? 'checkbox-outline'
+                      : 'square-outline'
                   }
-                  onPress={() => formik.setFieldValue('addressType', 'Office')}
+                  style={{ marginHorizontal: 5 }}
+                  size={20}
                 />
-                <Text>Office</Text>
+                <Text>Set Default Address</Text>
               </TouchableOpacity>
-            </View>
-            {showBottomPanel && (
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                {console.log(formik.values.defaultAddress, ' def add')}
-                <Checkbox
-                  status={
-                    formik.values.defaultAddress ? 'checked' : 'unchecked'
-                  }
-                  onPress={() =>
-                    formik.setFieldValue(
-                      'defaultAddress',
-                      !formik.values.defaultAddress,
-                    )
-                  }
-                />
-                <TouchableOpacity
-                  activeOpacity={0.5}
-                  onPress={() =>
-                    formik.setFieldValue(
-                      'defaultAddress',
-                      !formik.values.defaultAddress,
-                    )
-                  }>
-                  <Text>Set Default Address</Text>
-                </TouchableOpacity>
-              </View>
             )}
             {showBottomPanel && (
               <BottomSpacer>
                 <AButton
-                  width="40%"
-                  borderColor="transparent"
-                  round
+                  style={{ width: '40%', borderRadius: 40, borderColor: "transparent", backgroundColor: 'red' }}
                   title="Cancel"
-                  bgColor={'red'}
                   onPress={cancelAddForm}
                 />
                 <AButton
-                  width="40%"
                   borderColor="transparent"
-                  round
+                  style={{ width: '40%', borderRadius: 40, borderColor: "transparent" }}
                   title="Next"
                   disabled={!formik.isValid}
                   onPress={formik.handleSubmit}
@@ -341,6 +331,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 20,
     zIndex: 10,
+  },
+  newAddtextStyle: {
+    fontFamily: FontStyle.semiBold, marginLeft: 20
   },
   textinputstyle: {
     marginTop: 5,
@@ -386,6 +379,7 @@ const BottomSpacer = styled.View`
   flex-direction: row;
   justify-content: space-around;
   margin-bottom: 25px;
+  margin-top: 20px;
   align-items: center;
 `;
 

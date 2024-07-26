@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import Styles from '../../Theme';
 import { AText } from '../../theme-components';
 import { FontStyle } from '../../utils/config';
 import { Image } from 'react-native';
@@ -17,11 +16,7 @@ const Header = ({ navigation, title, showProfileIcon, titleColor }) => {
         ...styles.header,
         justifyContent: showProfileIcon ? 'space-between' : 'flex-start',
       }}>
-      {/* <TouchableOpacity style={{ marginTop: 10 }} onPress={handlePress}>
-        <View style={Styles.bar1}></View>
-        <View style={Styles.bar2}></View>
-      </TouchableOpacity> */}
-      <AText color={titleColor ?? '#000'} fonts={FontStyle.fontBold}>
+      <AText large color={titleColor ?? '#000'} fonts={FontStyle.fontBold}>
         {title}
       </AText>
       {showProfileIcon ? (
@@ -54,13 +49,11 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    position: 'absolute',
+    // position: 'absolute',
     width: '100%',
     justifyContent: 'flex-start',
     alignItems: 'center',
-    left: 0,
-    right: 0,
-    marginTop: 10,
+    marginTop: 5,
     paddingHorizontal: 17,
     zIndex: 10,
     // backgroundColor: Colors.whiteColor,

@@ -1,10 +1,10 @@
 import React from 'react';
-import { AText } from '../../theme-components';
-import styled from 'styled-components/native';
-import URL from '../../utils/baseurl';
-import FastImage from 'react-native-fast-image';
-import { isEmpty } from '../../utils/helper';
 import { StyleSheet } from 'react-native';
+import styled from 'styled-components/native';
+
+import { AText } from '../../theme-components';
+import FastImage from 'react-native-fast-image';
+import { uriImage } from '../../utils/helper';
 import ProductPriceText from './productPrice';
 
 const ProductCard = (props) => {
@@ -23,9 +23,7 @@ const ProductCard = (props) => {
           <FastImage
             style={styles.productImage}
             source={{
-              uri: !isEmpty(product.feature_image)
-                ? URL + product.feature_image
-                : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
+              uri: uriImage(product.feature_image),
               priority: FastImage.priority.normal,
             }}
             resizeMode={FastImage.resizeMode.contain}
@@ -64,20 +62,6 @@ const CardImageWrapper = styled.View`
   height: 200px;
   border-radius: 10px;
   overflow: hidden;
-`;
-
-const CardImage = styled.Image`
-  width: null;
-  height: null;
-  flex: 1;
-  resize-mode: cover;
-`;
-
-const CardNotImage = styled.Image`
-  width: null;
-  height: null;
-  flex: 1;
-  resize-mode: contain;
 `;
 
 const CardBody = styled.View`

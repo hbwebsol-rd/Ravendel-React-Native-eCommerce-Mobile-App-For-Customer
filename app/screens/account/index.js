@@ -5,20 +5,30 @@ import {
   AHeader,
   AButton,
   BackHeader,
+  MainLayout,
 } from '../../theme-components';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useDispatch, useSelector } from 'react-redux';
-import { LogOut } from '../../store/reducers/loginReducer';
+import {useDispatch, useSelector} from 'react-redux';
+import {LogOut} from '../../store/reducers/loginReducer';
 import {
+  APP_NAME,
   APP_PRIMARY_COLOR,
   APP_SECONDARY_COLOR,
   FontStyle,
+  VERSION,
 } from '../../utils/config';
 import AIcon from 'react-native-vector-icons/AntDesign';
 import FIcon from 'react-native-vector-icons/Feather';
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { GREYTEXT } from '../../utils/config';
+import {
+  Alert,
+  Image,
+  Linking,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {GREYTEXT} from '../../utils/config';
 import Colors from '../../constants/Colors';
 import Header from '../components/Header';
 import Styles from '../../Theme';
@@ -27,10 +37,26 @@ import editIcon from '../../assets/images/editIcon.png';
 import changePasswordIcon from '../../assets/images/changePasswordIcon.png';
 import locationIcon from '../../assets/images/locationIcon.png';
 import orderIcon from '../../assets/images/orderIcon.png';
+import {useMutation} from '@apollo/client';
+import {DELETE_CUSTOMER} from '../../queries/customerQuery';
 
-const AccountScreen = ({ navigation }) => {
-  const { isLoggin, userDetails } = useSelector((state) => state.customer);
+const AccountScreen = ({navigation}) => {
+  const {isLoggin, userDetails} = useSelector(state => state.customer);
+  console.log(userDetails, 'udd');
   const dispatch = useDispatch();
+  const [deleteCustomer, {loadings, errors}] = useMutation(DELETE_CUSTOMER, {
+    onError: error => {
+      // Handle error as needed
+      console.error('Error deleting attribute:', error);
+    },
+    onCompleted: data => {
+      // Handle completion as needed.
+      // GraphqlSuccess('Deleted successfully');
+      console.log('Customer deleted successfully:', data);
+      dispatch(LogOut(navigation));
+    },
+  });
+
   const headerFieldArray = [
     {
       id: 1,
@@ -61,179 +87,166 @@ const AccountScreen = ({ navigation }) => {
     {
       id: 1,
       name: 'Return and Refund Policy',
-      navigationScreen: '',
+      navigationScreen:
+        'https://demo1-ravendel.hbwebsol.com/abouts/privacypolicy',
+      openLink: true,
     },
     {
       id: 2,
       name: 'Terms and Condition',
-      navigationScreen: '',
+      navigationScreen:
+        'https://demo1-ravendel.hbwebsol.com/abouts/terms&condition',
+      openLink: true,
     },
     {
       id: 3,
       name: 'Privacy Policy',
-      navigationScreen: '',
+      navigationScreen:
+        'https://demo1-ravendel.hbwebsol.com/abouts/privacypolicy',
+      openLink: true,
     },
     {
       id: 3,
       name: 'Contact US',
       navigationScreen: NavigationConstants.ContactUs,
+      openLink: false,
     },
   ];
+
+  const deleteUser = () => {
+    Alert.alert('Logout', 'Are you sure you want to Delete this account?', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'OK',
+        onPress: () =>
+          deleteCustomer({
+            variables: {deleteCustomerId: userDetails._id},
+          }),
+      },
+    ]);
+  };
+
   const Logout = () => {
-    dispatch(LogOut(navigation));
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {text: 'OK', onPress: () => dispatch(LogOut(navigation))},
+    ]);
   };
   return (
-    <>
-      <View style={Styles.mainContainer}>
-        <Header navigation={navigation} title={'My Account'} />
-        {isLoggin ? (
-          <>
-            <View
-              style={{ alignItems: 'center', marginTop: 60, marginBottom: 10 }}>
-              <Image source={require('../../assets/images/man.png')} />
-              <AText
-                mb="5px"
-                big
-                center
-                fonts={FontStyle.semiBold}
-                color="black">
-                {userDetails.firstName} {userDetails.lastName}
-              </AText>
-              <AText
-                mb="5px"
-                center
-                fonts={FontStyle.semiBold}
-                color={APP_PRIMARY_COLOR}>
-                {userDetails.email}
-              </AText>
-              <AText
-                center
-                fonts={FontStyle.semiBold}
-                color={APP_PRIMARY_COLOR}>
-                {userDetails.phone}
-              </AText>
-            </View>
-            <View style={styles.headerContainer}>
-              {headerFieldArray.map((item) => (
-                <TouchableOpacity
-                  style={styles.boxContainerBtnStyle}
-                  onPress={() =>
-                    navigation.navigate(item.navigationScreen, {
-                      initial: false,
-                    })
-                  }>
-                  <Image
-                    source={item.iconName}
-                    style={[
-                      styles.iconStyles,
-                      { tintColor: APP_PRIMARY_COLOR },
-                    ]}
-                  />
-                  <AText small ml={15} fonts={FontStyle.semiBold}>
-                    {item.name}
-                  </AText>
-                </TouchableOpacity>
-              ))}
-            </View>
-            <View style={styles.container}>
-              <AText medium ml={'15px'} fonts={FontStyle.semiBold}>
-                Important Information
-              </AText>
-              {impInfoFieldArray.map((item) => (
-                <TouchableOpacity
-                  onPress={() => {
-                    item.navigationScreen
-                      ? navigation.navigate(item.navigationScreen, {
-                          initial: false,
-                        })
-                      : '';
-                  }}
-                  style={styles.infoBtnStyle}>
-                  <AText
-                    color={'#8A8A8A'}
-                    mediu
-                    ml={15}
-                    fonts={FontStyle.semiBold}>
-                    {item.name}
-                  </AText>
-                  <FIcon color={'#8A8A8A'} name="chevron-right" size={15} />
-                </TouchableOpacity>
-              ))}
-            </View>
-          </>
-        ) : (
-          <AText mt="60px" large center bold>
-            Please sign in
-          </AText>
-        )}
-        <UserSection>
-          {!isLoggin ? (
-            <>
-              <AButton
-                title="Sign In"
-                block
-                round
+    <MainLayout style={Styles.mainContainer}>
+      <Header navigation={navigation} title={'My Account'} />
+      {isLoggin ? (
+        <>
+          <View style={styles.headerInfoContainer}>
+            <Image source={require('../../assets/images/man.png')} />
+            <AText textStyle={styles.headerFontStyle} big>
+              {userDetails.firstName} {userDetails.lastName}
+            </AText>
+            <AText
+              textStyle={[
+                styles.subHeadingTextStyle,
+                {color: APP_PRIMARY_COLOR},
+              ]}>
+              {userDetails.email}
+            </AText>
+            <AText
+              textStyle={[
+                styles.subHeadingTextStyle,
+                {color: APP_PRIMARY_COLOR},
+              ]}>
+              {userDetails.phone}
+            </AText>
+          </View>
+          <View style={styles.headerContainer}>
+            {headerFieldArray.map(item => (
+              <TouchableOpacity
+                style={styles.boxContainerBtnStyle}
                 onPress={() =>
-                  navigation.navigate(NavigationConstants.LOGIN_SIGNUP_SCREEN, {
+                  navigation.navigate(item.navigationScreen, {
                     initial: false,
                   })
-                }
-              />
-            </>
-          ) : (
+                }>
+                <Image
+                  source={item.iconName}
+                  style={[styles.iconStyles, {tintColor: APP_PRIMARY_COLOR}]}
+                />
+                <AText textStyle={styles.containerTextStyle}>{item.name}</AText>
+              </TouchableOpacity>
+            ))}
+          </View>
+          <View style={styles.container}>
+            <AText
+              medium
+              textStyle={[styles.containerTextStyle, {color: '#000'}]}>
+              Important Information
+            </AText>
+            {impInfoFieldArray.map(item => (
+              <TouchableOpacity
+                onPress={() => {
+                  item.navigationScreen && !item.openLink
+                    ? navigation.navigate(item.navigationScreen, {
+                        initial: false,
+                      })
+                    : Linking.openURL(item.navigationScreen);
+                }}
+                style={styles.infoBtnStyle}>
+                <AText textStyle={styles.containerTextStyle}>{item.name}</AText>
+                <FIcon color={'#8A8A8A'} name="chevron-right" size={15} />
+              </TouchableOpacity>
+            ))}
+          </View>
+        </>
+      ) : (
+        <View style={styles.emptyContainer}>
+          <AText large>Please sign in</AText>
+        </View>
+      )}
+      <UserSection>
+        <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+          <AButton
+            width={!isLoggin ? '100%' : '45%'}
+            title={!isLoggin ? 'Sign In' : 'Sign Out'}
+            style={styles.signOutStyle}
+            onPress={() =>
+              !isLoggin
+                ? navigation.navigate(NavigationConstants.LOGIN_SIGNUP_SCREEN, {
+                    initial: false,
+                  })
+                : Logout()
+            }
+          />
+          {isLoggin ? (
             <AButton
-              round
-              title="Sign Out"
-              onPress={() => {
-                Logout();
-              }}
+              width={'45%'}
+              bgColor={'#ff3b3b'}
+              borderColor={'#ff3b3b'}
+              title={'Delete Account'}
+              style={styles.signOutStyle}
+              onPress={() => deleteUser()}
             />
-          )}
-          <AppFooter>
-            <AppInfo>
-              <AText large heavy color={GREYTEXT} mr="5px">
-                Ravendel
+          ) : null}
+        </View>
+        <AppFooter>
+          <AppInfo>
+            <AText medium color={GREYTEXT}>
+              {APP_NAME}{' '}
+              <AText small color={GREYTEXT}>
+                App Version: {VERSION}
               </AText>
-              <AText small color={GREYTEXT} ml="5px">
-                App Version: 1.0
-              </AText>
-            </AppInfo>
-          </AppFooter>
-        </UserSection>
-      </View>
-    </>
+            </AText>
+          </AppInfo>
+        </AppFooter>
+      </UserSection>
+    </MainLayout>
   );
 };
 
-const InnerContainer = styled.View`
-  padding: 10px;
-  margin-horizontal: 30px;
-  // flex: 1;
-  background-color: white;
-`;
-const ListView = styled.TouchableOpacity`
-  // flex: 1;
-  justify-content: flex-start;
-  align-items: center;
-  flex-direction: row;
-  padding: 10px 15px;
-  background-color: pink;
-  // background: #f7f7f7;
-  border-width: 0px;
-  border-bottom-width: 0.3px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  border-color: grey;
-`;
-const ListIcon = styled.View`
-  width: 40px;
-`;
-const ListTitleWrapper = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
-  width: 80%;
-  align-items: center;
-`;
 const UserSection = styled.View`
   position: absolute;
   bottom: 0;
@@ -245,18 +258,25 @@ const UserSection = styled.View`
 const AppFooter = styled.View`
   margin-top: 10px;
 `;
-const Diviver = styled.View`
-  padding: 0.5px;
-  background: #fff;
-  margin-top: 10px;
-  margin-bottom: 10px;
-`;
 const AppInfo = styled.View`
   justify-content: center;
   flex-direction: row;
   align-items: center;
 `;
 const styles = StyleSheet.create({
+  emptyContainer: {flex: 1, justifyContent: 'center', alignItems: 'center'},
+  headerInfoContainer: {alignItems: 'center', marginTop: 60, marginBottom: 10},
+  headerFontStyle: {
+    marginBottom: 5,
+    color: '#000',
+    textAlign: 'center',
+    fontFamily: FontStyle.semiBold,
+  },
+  subHeadingTextStyle: {
+    textAlign: 'center',
+    marginBottom: 5,
+    fontFamily: FontStyle.semiBold,
+  },
   headerContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -277,19 +297,22 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderWidth: 0.9,
   },
+  containerTextStyle: {
+    marginLeft: 15,
+    fontFamily: FontStyle.semiBold,
+    color: '#8A8A8A',
+  },
   iconStyles: {
     resizeMode: 'contain',
     width: 20,
     height: 20,
   },
   container: {
-    // borderRadius: 10,
-    // elevation: 1,
-    // padding: 10,
     paddingVertical: 16,
     marginHorizontal: 5,
     backgroundColor: 'white',
   },
+  signOutStyle: {borderRadius: 25},
   header: {
     flexDirection: 'row',
     position: 'absolute',

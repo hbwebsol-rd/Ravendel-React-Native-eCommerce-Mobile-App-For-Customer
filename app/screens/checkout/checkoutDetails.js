@@ -1,129 +1,229 @@
-import { View, Text, StyleSheet } from 'react-native';
-import React from 'react';
-import { AButton, AText, BackHeader } from '../../theme-components';
-import { FontStyle, GREYTEXT } from '../../utils/config';
+import React, { useEffect, useState } from 'react';
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+} from 'react-native';
+import {
+  AText,
+  AButton,
+  BackHeader,
+  AppLoader,
+  MainLayout,
+} from '../../theme-components';
+import { isEmpty } from '../../utils/helper';
+import { useDispatch, useSelector } from 'react-redux';
+import { FontStyle } from '../../utils/config';
+import { applyCouponAction, checkStorageAction, } from '../../store/action';
 import Colors from '../../constants/Colors';
-import moment from 'moment';
-import NavigationConstants from '../../navigation/NavigationConstants';
-import { Divider } from 'react-native-paper';
 import PropTypes from 'prop-types';
+import { checkoutDetailsAction, getShippingMethods } from '../../store/action/checkoutAction';
+import { COUPON_REMOVED } from '../../store/action/cartAction';
+import CartProductDisplayCard from '../../theme-components/cartProductDisplayCard';
+import CartPriceTags from '../components/cartPriceTags';
+import CouponSection from './component/couponSection';
+import ShippingOrPaymentSection from './component/ShippingOrPaymentSection';
 
-export default function CheckoutDetails({ navigation, route }) {
-  const checoutDetailsData = route.params.checoutDetailsData;
+const CheckoutDetails = ({ navigation }) => {
 
-  const OrderData = ({ title, value, color }) => {
-    return (
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          marginTop: 5,
-        }}>
-        <AText color={color ?? Colors.blackColor} fonts={FontStyle.semiBold}>
-          {title}
-        </AText>
-        <AText>{value}</AText>
-      </View>
-    );
+  const dispatch = useDispatch();
+
+  const { userDetails } = useSelector((state) => state.customer);
+  const cartItems = useSelector((state) => state.cart.products);
+  const { shippingMethodList, loading } = useSelector((state) => state.checkoutDetail);
+  const { paymentSetting } = useSelector((state) => state.settings);
+  const [paymentMethod, setPaymentMethod] = useState('CASH_ON_DELIVERY');
+  const [couponCode, setCouponCode] = useState('');
+
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [shippingMethod, setShippingMethod] = useState('');
+  const {
+    cartSummary,
+    couponDiscount,
+    cartId,
+    shippingAddress,
+    billingAddress,
+  } = useSelector((state) => state.cart);
+
+  const {
+    pincode: shipping_pincode,
+    state: shipping_state,
+    city: shipping_city,
+    addressLine1: shipping_addressLine1,
+    phone: shipping_phone,
+    lastName: shipping_lastName,
+    firstName: shipping_firstName,
+    country: shipping_country,
+  } = shippingAddress;
+
+  const {
+    pincode: biller_pincode,
+    state: biller_state,
+    city: biller_city,
+    addressLine1: biller_addressLine1,
+    phone: biller_phone,
+    lastName: biller_lastName,
+    firstName: biller_firstName,
+    country: biller_country,
+  } = billingAddress;
+
+  const { email: userEmail, _id } = userDetails;
+
+  const mrpArray = [
+    { id: 1, name: 'Total MRP', value: 'mrpTotal' },
+    { id: 2, name: 'Discount On MRP', value: 'discountTotal' },
+    { id: 3, name: 'Discount By Coupon', value: 'couponDiscount' },
+    { id: 4, name: 'Shipping Fee', value: 'totalShipping' },
+    { id: 5, name: 'Total Amount', value: 'grandTotal' },
+  ]
+  useEffect(() => {
+    dispatch(getShippingMethods());
+  }, []);
+
+  const removeCoupon = () => {
+    dispatch({
+      type: COUPON_REMOVED,
+    });
+    setCouponApplied(false);
+    setCouponCode('');
+    dispatch(checkStorageAction(userDetails._id));
   };
-  console.log(checoutDetailsData, ' checoutDetailsData');
+
+  const ApplyCoupon = () => {
+    if (isEmpty(couponCode)) {
+      alert('Coupon code is required');
+      return;
+    }
+    let cartpro = [];
+    cartItems.map((cart) => {
+      cartpro.push({
+        productId: cart.productId,
+        // total: cart.total,
+        qty: cart.qty,
+      });
+    });
+    const payload = {
+      couponCode: couponCode,
+      cartItems: cartpro,
+      userId: userDetails._id,
+    };
+    dispatch(applyCouponAction(payload, setCouponApplied));
+  };
+
+  const checkoutDetails = () => {
+    if (isEmpty(shippingMethod)) {
+      alert('Please select shipping Method');
+      return;
+    }
+    // if (checked === 'cod') {
+    const payload = {
+      userId: _id,
+      billing: {
+        lastname: biller_lastName,
+        firstname: biller_firstName,
+        address: biller_addressLine1,
+        city: biller_city,
+        zip: biller_pincode,
+        country: biller_country,
+        state: biller_state,
+        email: userEmail,
+        phone: biller_phone || '1234',
+        paymentMethod: paymentMethod
+          .replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '')
+          .toLowerCase(),
+      },
+      shipping: {
+        firstname: shipping_firstName,
+        lastname: shipping_lastName,
+        address: shipping_addressLine1,
+        city: shipping_city,
+        zip: shipping_pincode,
+        country: shipping_country,
+        state: shipping_state,
+        email: userEmail,
+        phone: shipping_phone || '1234',
+        notes: '',
+      },
+    };
+    const navParams = {
+      cartProducts: cartItems,
+      shippingMethod: shippingMethod,
+      paymentMethod: paymentMethod,
+    };
+    // return;
+    if (paymentMethod.toLowerCase() !== 'paypal') {
+      dispatch(
+        checkoutDetailsAction(
+          payload,
+          cartId,
+          navigation,
+          navParams,
+          paymentSetting,
+          cartSummary?.grandTotal,
+        ),
+      );
+    } else {
+      navigation.navigate('PaypalPayment', { orderData: payload });
+    }
+    // } else {
+    //   navigation.navigate('StripePayment');
+    // }
+  };
+
+  if (loading) {
+    return <AppLoader />;
+  }
+
   return (
-    <View style={styles.container}>
-      <BackHeader navigation={navigation} name="Order Status" />
-      <View style={{ marginHorizontal: 35, marginTop: 30 }}>
-        <AText big1 fonts={FontStyle.semiBold}>
-          Your order has been received
-        </AText>
-        <AText large mt={'20px'} mb={'10px'} fonts={FontStyle.semiBold}>
-          Order Information
-        </AText>
-        <OrderData title={'Order Number'} value={'055455'} />
-        <OrderData title={'Date'} value={moment().format('D-M-Y')} />
-        <OrderData title={'Subtotal'} value={checoutDetailsData.cartTotal} />
-        <OrderData
-          title={'Grand Total'}
-          value={checoutDetailsData.grandTotal}
+    <MainLayout hideScroll={true} style={styles.container}>
+      <BackHeader navigation={navigation} name="Checkout" />
+
+      <ScrollView
+        contentContainerStyle={styles.scrollContentContainerStyle}
+        style={styles.scrollStyle}>
+        <CouponSection
+          couponCode={couponCode}
+          setCouponCode={setCouponCode}
+          couponApplied={couponApplied}
+          removeCoupon={removeCoupon}
+          ApplyCoupon={ApplyCoupon}
         />
-        <OrderData
-          title={'Payment Method'}
-          value={checoutDetailsData.billing.paymentMethod}
+        <ShippingOrPaymentSection
+          title={'Shipping Method'}
+          data={shippingMethodList}
+          selected={shippingMethod}
+          setSelected={setShippingMethod}
         />
-        <AText large mt={'40px'} mb={'10px'} fonts={FontStyle.semiBold}>
-          Billing Address
-        </AText>
-        <View style={styles.addresscard}>
-          <View
-            style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <AText mr="8px" color="black" fonts={FontStyle.semiBold} large>
-              {checoutDetailsData.billing.firstname}
-            </AText>
-            <AText fonts={FontStyle.semiBold} color={Colors.blackColor}>
-              {checoutDetailsData.billing.phone}
-            </AText>
-          </View>
-          <AText color={GREYTEXT}>
-            {checoutDetailsData.billing.address},{' '}
-            {checoutDetailsData.billing.city}
+        <ShippingOrPaymentSection
+          title={'Payment Mode'}
+          data={Object.values(paymentSetting).filter((item => item.enable))}
+          selected={paymentMethod}
+          setSelected={(item) => { setPaymentMethod(item.__typename) }}
+        />
+        <View style={styles.containerStyles}>
+          <AText style={styles.orderTextStyle} large>
+            Order Summary
           </AText>
-          <AText mb="10px" color={GREYTEXT}>
-            {checoutDetailsData.billing.state},{' '}
-            {checoutDetailsData.billing.pincode}
-          </AText>
+          <CartProductDisplayCard
+            navigation={navigation}
+            cartProducts={cartItems}
+            ShowIncrementDecreement={false} />
         </View>
-        <AText large mt={'20px'} mb={'10px'} fonts={FontStyle.semiBold}>
-          Shipping Address
-        </AText>
-        <View style={styles.addresscard}>
-          <View
-            style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <AText mr="8px" color="black" fonts={FontStyle.semiBold} large>
-              {checoutDetailsData.shipping.firstname}
-            </AText>
-            <AText fonts={FontStyle.semiBold} color={Colors.blackColor}>
-              {checoutDetailsData.shipping.phone}
-            </AText>
-          </View>
-          <AText color={GREYTEXT}>
-            {checoutDetailsData.shipping.address},{' '}
-            {checoutDetailsData.shipping.city}
-          </AText>
-          <AText mb="10px" color={GREYTEXT}>
-            {checoutDetailsData.shipping.state},{' '}
-            {checoutDetailsData.shipping.pincode}
-          </AText>
+        <View style={{ width: '100%', marginBottom: 25, marginTop: 25 }}>
+          {mrpArray.map((item) => <CartPriceTags item={item} cartSummary={cartSummary} couponDiscount={couponDiscount} />)}
         </View>
-        <AText large mt={'20px'} mb={'10px'} fonts={FontStyle.semiBold}>
-          Order Details
-        </AText>
-        <OrderData title={'Order Total'} value={checoutDetailsData.cartTotal} />
-        <OrderData title={'Tax'} value={'$0.00'} />
-        <OrderData title={'Shipping'} value={'Free Shipping'} />
-        <OrderData color={Colors.green} title={'Coupon'} value={'-$400'} />
-        <Divider style={styles.divider} />
-        <OrderData title={'Total'} value={checoutDetailsData.grandTotal} />
-      </View>
-      <View
-        style={{
-          alignSelf: 'center',
-          width: '60%',
-          position: 'absolute',
-          bottom: 20,
-          zIndex: 5,
-        }}>
-        <AButton
-          title="Countinue Shopping"
-          round
-          onPress={() => {
-            navigation.reset({
-              index: 0,
-              routes: [{ name: NavigationConstants.HOME_SCREEN }],
-            });
-          }}
-        />
-      </View>
-    </View>
+      </ScrollView>
+
+
+      <AButton
+        disabled={paymentMethod === '' ? true : false}
+        title="PLACE ORDER"
+        style={styles.placeOrderBtn}
+        onPress={() => checkoutDetails()}
+      />
+    </MainLayout>
   );
-}
+};
 
 CheckoutDetails.propTypes = {
   navigation: PropTypes.object,
@@ -136,9 +236,26 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     backgroundColor: Colors.whiteColor,
   },
-  divider: {
-    height: 1,
-    marginTop: 8,
-    backgroundColor: Colors.blackColor,
+  containerStyles: { marginTop: 25 },
+  scrollContentContainerStyle: {
+    paddingBottom: 45,
+  },
+  orderTextStyle: {
+    color: '#000',
+    marginBottom: 5,
+    fontFamily: FontStyle.fontBold
+  },
+  scrollStyle: {
+    marginHorizontal: 15,
+    flex: 1,
+    marginTop: 45,
+  },
+  placeOrderBtn: {
+    borderRadius: 25,
+    position: 'absolute',
+    bottom: 0,
+    width: '50%',
+    alignSelf: 'center',
   },
 });
+export default CheckoutDetails;
