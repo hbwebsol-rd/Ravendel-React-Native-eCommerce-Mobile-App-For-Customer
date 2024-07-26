@@ -38,31 +38,6 @@ const ADD_CART = gql`
     }
   }
 `;
-
-const UPDATE_ORDER = gql`
-  mutation (
-    $id: ID!
-    $billing: customObject
-    $shipping: customObject
-    $status: String
-  ) {
-    updateOrder(
-      id: $id
-      billing: $billing
-      shipping: $shipping
-      status: $status
-    ) {
-      id
-      user_id
-      status
-      shipping
-      billing
-      products
-      date
-      updated
-    }
-  }
-`;
 const DELETE_CART_PRODUCT = gql`
   mutation DeleteCartProduct($userId: ID!, $productId: ID!) {
     deleteCartProduct(userId: $userId, productId: $productId) {
@@ -77,23 +52,6 @@ const DELETE_CART = gql`
     deleteCart(userId: $userId) {
       success
       message
-    }
-  }
-`;
-
-const GET_CART = gql`
-  query ($id: ID!) {
-    cartbyUser(userId: $id) {
-      id
-      userId
-      status
-      total
-      cartItem
-      availableItem
-      unavailableItem
-      date
-
-      updated
     }
   }
 `;
@@ -141,15 +99,6 @@ const CHANGE_QTY = gql`
     }
   }
 `;
-
-// const APPLY_COUPON = gql`
-//   query ($coupon_code: String, $cart: [cartProducts]) {
-//     calculateCoupon(coupon_code: $coupon_code, cart: $cart) {
-//       total_coupon
-//       message
-//     }
-//   }
-// `;
 
 const APPLY_COUPON_CODE = gql`
   query (
@@ -248,13 +197,36 @@ export const SHIPPING_METHODS = gql`
     }
   }
 `;
+
+const GET_ORDER = gql`
+  query ($id: ID!) {
+    order(id: $id) {
+      data {
+        id
+        orderNumber
+        userId
+        paymentStatus
+        shippingStatus
+        shipping
+        billing
+        products
+        totalSummary
+        couponCard
+        date
+        updated
+      }
+      message {
+        message
+        success
+      }
+    }
+  }
+`;
 export {
   ADD_TOCART,
   ADD_CART,
   DELETE_CART,
-  UPDATE_ORDER,
   DELETE_CART_PRODUCT,
-  GET_CART,
   UPDATE_CART,
   APPLY_COUPON_CODE,
   ORDER_HISTORY,
@@ -263,4 +235,5 @@ export {
   CALCULATE_CART_WITHOUT_LOGIN,
   CHANGE_QTY,
   CHECK_ZIPCODE,
+  GET_ORDER,
 };

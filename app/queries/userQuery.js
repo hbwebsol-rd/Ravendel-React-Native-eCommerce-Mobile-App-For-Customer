@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 
-const ADD_CUSTOMER = gql`
+export const ADD_CUSTOMER = gql`
   mutation (
     $firstName: String
     $lastName: String
@@ -22,7 +22,7 @@ const ADD_CUSTOMER = gql`
     }
   }
 `;
-const EDIT_CUSTOMER = gql`
+export const EDIT_CUSTOMER = gql`
   mutation (
     $id: ID!
     $first_name: String
@@ -44,7 +44,7 @@ const EDIT_CUSTOMER = gql`
     }
   }
 `;
-const CHANGE_PASSWORD = gql`
+export const CHANGE_PASSWORD = gql`
   mutation ($id: ID!, $oldPassword: String, $newPassword: String) {
     updateCustomerPassword(
       id: $id
@@ -56,5 +56,12 @@ const CHANGE_PASSWORD = gql`
     }
   }
 `;
+export const FORGOT_PASSWORD = gql`
+  mutation ($email: String) {
+    sendForgetPasswordEmail(email: $email) {
+      message
+      success
+    }
+  }
+`;
 
-export { ADD_CUSTOMER, EDIT_CUSTOMER, CHANGE_PASSWORD };

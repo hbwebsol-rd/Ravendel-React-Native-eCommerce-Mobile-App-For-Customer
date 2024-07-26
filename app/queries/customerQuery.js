@@ -16,36 +16,6 @@ const GET_CUSTOMER = gql`
   }
 `;
 
-const ADD_CUSTOMER = gql`
-  mutation (
-    $first_name: String
-    $last_name: String
-    $email: String
-    $company: String
-    $phone: String
-    $password: String
-  ) {
-    addCustomer(
-      first_name: $first_name
-      last_name: $last_name
-      email: $email
-      company: $company
-      phone: $phone
-      password: $password
-    ) {
-      id
-      first_name
-      last_name
-      email
-      company
-      phone
-      address_book
-      date
-      updated
-    }
-  }
-`;
-
 const ADD_ADDRESSBOOK = gql`
   mutation (
     $id: ID!
@@ -77,38 +47,6 @@ const ADD_ADDRESSBOOK = gql`
     ) {
       message
       success
-    }
-  }
-`;
-
-const UPDATE_CUSTOMER = gql`
-  mutation (
-    $id: ID!
-    $first_name: String
-    $last_name: String
-    $email: String
-    $company: String
-    $phone: String
-    $password: String
-  ) {
-    updateCustomer(
-      id: $id
-      first_name: $first_name
-      last_name: $last_name
-      email: $email
-      company: $company
-      phone: $phone
-      password: $password
-    ) {
-      id
-      first_name
-      last_name
-      email
-      company
-      phone
-      address_book
-      date
-      updated
     }
   }
 `;
@@ -150,22 +88,6 @@ const UPDATE_ADDRESSBOOK = gql`
   }
 `;
 
-const DELETE_CUSTOMER = gql`
-  mutation ($id: ID!) {
-    deleteCustomer(id: $id) {
-      id
-      first_name
-      last_name
-      email
-      company
-      phone
-      address_book
-      date
-      updated
-    }
-  }
-`;
-
 const DELETE_ADDRESSBOOK = gql`
   mutation ($id: ID!, $_id: ID!) {
     deleteAddressBook(id: $id, _id: $_id) {
@@ -175,12 +97,19 @@ const DELETE_ADDRESSBOOK = gql`
   }
 `;
 
+const DELETE_CUSTOMER = gql`
+  mutation DeleteUser($deleteCustomerId: ID!) {
+    deleteCustomer(id: $deleteCustomerId) {
+      message
+      success
+    }
+  }
+`;
+
 export {
   GET_CUSTOMER,
-  ADD_CUSTOMER,
-  UPDATE_CUSTOMER,
-  DELETE_CUSTOMER,
   ADD_ADDRESSBOOK,
   UPDATE_ADDRESSBOOK,
   DELETE_ADDRESSBOOK,
+  DELETE_CUSTOMER,
 };
