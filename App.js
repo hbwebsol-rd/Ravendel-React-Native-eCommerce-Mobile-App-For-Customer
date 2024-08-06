@@ -9,7 +9,7 @@ import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import { LogBox } from 'react-native';
 import { Splash } from './app/screens';
 import AlertError from './app/theme-components/alert';
-import { updatePrimaryColor } from './app/utils/config';
+import { APP_NAME_SMALL, updatePrimaryColor } from './app/utils/config';
 import Navigation from './app/navigation';
 import { getValue } from './app/utils/helper';
 
@@ -50,7 +50,7 @@ const App = () => {
   }, []);
 
   const linking = {
-    prefixes: ['ravendel://', 'https://ravendel'],
+    prefixes: [`${APP_NAME_SMALL}://`, `https://${APP_NAME_SMALL}`],
     config: {
       initialRouteName: 'Home',
       screens: {

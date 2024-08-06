@@ -12,7 +12,7 @@ import {
   DrawerItemList,
 } from '@react-navigation/drawer';
 import Feather from 'react-native-vector-icons/Feather';
-import { APP_PRIMARY_COLOR, FontStyle } from '../utils/config';
+import { APP_NAME_CAP, APP_PRIMARY_COLOR, FontStyle } from '../utils/config';
 import {
   AccountScreen,
   CartScreen,
@@ -57,7 +57,7 @@ const DrawerNavigator = () => {
           source={require('../assets/images/drawer.png')}
           style={styles.backgroundImage}>
           <View style={styles.drawerHeader}>
-            <Text style={styles.drawerHeaderText}>Ravendel</Text>
+            <Text style={styles.drawerHeaderText}>{APP_NAME_CAP}</Text>
           </View>
           <ScrollView style={{ marginTop: 80 }}>
             <DrawerItemList {...props} />
@@ -67,7 +67,7 @@ const DrawerNavigator = () => {
               mb="5px"
               color="#ABA7A7"
               fonts={FontStyle.fontBold}>
-              © 2024 copyright:Ravendel
+              © 2024 copyright:{APP_NAME_CAP}
             </AText>
           </ScrollView>
         </ImageBackground>

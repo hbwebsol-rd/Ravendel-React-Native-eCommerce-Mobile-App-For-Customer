@@ -30,6 +30,12 @@
             <data android:scheme="https" android:host="ravendel" />
             <data android:scheme="ravendel" android:host="" />
          </intent-filter>
+          <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="ravendel" android:host="OrdersDetail" />
+          </intent-filter>
       </activity>
       <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
     </application>

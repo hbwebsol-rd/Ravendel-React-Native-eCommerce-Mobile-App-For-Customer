@@ -9,12 +9,13 @@ import {
 } from '../../theme-components';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import {useDispatch, useSelector} from 'react-redux';
-import {LogOut} from '../../store/reducers/loginReducer';
+import { useDispatch, useSelector } from 'react-redux';
+import { LogOut } from '../../store/reducers/loginReducer';
 import {
   APP_NAME,
   APP_PRIMARY_COLOR,
   APP_SECONDARY_COLOR,
+  BASEURL,
   FontStyle,
   VERSION,
 } from '../../utils/config';
@@ -28,7 +29,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {GREYTEXT} from '../../utils/config';
+import { GREYTEXT } from '../../utils/config';
 import Colors from '../../constants/Colors';
 import Header from '../components/Header';
 import Styles from '../../Theme';
@@ -37,19 +38,19 @@ import editIcon from '../../assets/images/editIcon.png';
 import changePasswordIcon from '../../assets/images/changePasswordIcon.png';
 import locationIcon from '../../assets/images/locationIcon.png';
 import orderIcon from '../../assets/images/orderIcon.png';
-import {useMutation} from '@apollo/client';
-import {DELETE_CUSTOMER} from '../../queries/customerQuery';
+import { useMutation } from '@apollo/client';
+import { DELETE_CUSTOMER } from '../../queries/customerQuery';
 
-const AccountScreen = ({navigation}) => {
-  const {isLoggin, userDetails} = useSelector(state => state.customer);
+const AccountScreen = ({ navigation }) => {
+  const { isLoggin, userDetails } = useSelector((state) => state.customer);
   console.log(userDetails, 'udd');
   const dispatch = useDispatch();
-  const [deleteCustomer, {loadings, errors}] = useMutation(DELETE_CUSTOMER, {
-    onError: error => {
+  const [deleteCustomer, { loadings, errors }] = useMutation(DELETE_CUSTOMER, {
+    onError: (error) => {
       // Handle error as needed
       console.error('Error deleting attribute:', error);
     },
-    onCompleted: data => {
+    onCompleted: (data) => {
       // Handle completion as needed.
       // GraphqlSuccess('Deleted successfully');
       console.log('Customer deleted successfully:', data);
@@ -87,22 +88,19 @@ const AccountScreen = ({navigation}) => {
     {
       id: 1,
       name: 'Return and Refund Policy',
-      navigationScreen:
-        'https://demo1-ravendel.hbwebsol.com/abouts/privacypolicy',
+      navigationScreen: `${BASEURL}/abouts/privacypolicy`,
       openLink: true,
     },
     {
       id: 2,
       name: 'Terms and Condition',
-      navigationScreen:
-        'https://demo1-ravendel.hbwebsol.com/abouts/terms&condition',
+      navigationScreen: `${BASEURL}/abouts/terms&condition`,
       openLink: true,
     },
     {
       id: 3,
       name: 'Privacy Policy',
-      navigationScreen:
-        'https://demo1-ravendel.hbwebsol.com/abouts/privacypolicy',
+      navigationScreen: `${BASEURL}/abouts/privacypolicy`,
       openLink: true,
     },
     {
@@ -123,7 +121,7 @@ const AccountScreen = ({navigation}) => {
         text: 'OK',
         onPress: () =>
           deleteCustomer({
-            variables: {deleteCustomerId: userDetails._id},
+            variables: { deleteCustomerId: userDetails._id },
           }),
       },
     ]);
@@ -135,7 +133,7 @@ const AccountScreen = ({navigation}) => {
         text: 'Cancel',
         style: 'cancel',
       },
-      {text: 'OK', onPress: () => dispatch(LogOut(navigation))},
+      { text: 'OK', onPress: () => dispatch(LogOut(navigation)) },
     ]);
   };
   return (
@@ -151,20 +149,20 @@ const AccountScreen = ({navigation}) => {
             <AText
               textStyle={[
                 styles.subHeadingTextStyle,
-                {color: APP_PRIMARY_COLOR},
+                { color: APP_PRIMARY_COLOR },
               ]}>
               {userDetails.email}
             </AText>
             <AText
               textStyle={[
                 styles.subHeadingTextStyle,
-                {color: APP_PRIMARY_COLOR},
+                { color: APP_PRIMARY_COLOR },
               ]}>
               {userDetails.phone}
             </AText>
           </View>
           <View style={styles.headerContainer}>
-            {headerFieldArray.map(item => (
+            {headerFieldArray.map((item) => (
               <TouchableOpacity
                 style={styles.boxContainerBtnStyle}
                 onPress={() =>
@@ -174,7 +172,7 @@ const AccountScreen = ({navigation}) => {
                 }>
                 <Image
                   source={item.iconName}
-                  style={[styles.iconStyles, {tintColor: APP_PRIMARY_COLOR}]}
+                  style={[styles.iconStyles, { tintColor: APP_PRIMARY_COLOR }]}
                 />
                 <AText textStyle={styles.containerTextStyle}>{item.name}</AText>
               </TouchableOpacity>
@@ -183,10 +181,10 @@ const AccountScreen = ({navigation}) => {
           <View style={styles.container}>
             <AText
               medium
-              textStyle={[styles.containerTextStyle, {color: '#000'}]}>
+              textStyle={[styles.containerTextStyle, { color: '#000' }]}>
               Important Information
             </AText>
-            {impInfoFieldArray.map(item => (
+            {impInfoFieldArray.map((item) => (
               <TouchableOpacity
                 onPress={() => {
                   item.navigationScreen && !item.openLink
@@ -208,7 +206,7 @@ const AccountScreen = ({navigation}) => {
         </View>
       )}
       <UserSection>
-        <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
           <AButton
             width={!isLoggin ? '100%' : '45%'}
             title={!isLoggin ? 'Sign In' : 'Sign Out'}
@@ -264,8 +262,12 @@ const AppInfo = styled.View`
   align-items: center;
 `;
 const styles = StyleSheet.create({
-  emptyContainer: {flex: 1, justifyContent: 'center', alignItems: 'center'},
-  headerInfoContainer: {alignItems: 'center', marginTop: 60, marginBottom: 10},
+  emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  headerInfoContainer: {
+    alignItems: 'center',
+    marginTop: 60,
+    marginBottom: 10,
+  },
   headerFontStyle: {
     marginBottom: 5,
     color: '#000',
@@ -312,7 +314,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     backgroundColor: 'white',
   },
-  signOutStyle: {borderRadius: 25},
+  signOutStyle: { borderRadius: 25 },
   header: {
     flexDirection: 'row',
     position: 'absolute',
