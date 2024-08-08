@@ -3,16 +3,18 @@ import { Dimensions } from 'react-native';
 export const windowHeight = Dimensions.get('window').height;
 export const windowWidth = Dimensions.get('window').width;
 export let APP_PRIMARY_COLOR = '#088178';
-export const updatePrimaryColor = async (color) => {
+export let dummyImage =
+  'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png';
+export const updatePrimaryColor = async (color,image) => {
   APP_PRIMARY_COLOR = color ? color : APP_PRIMARY_COLOR;
+  dummyImage = color ? BASEURL+image : dummyImage;
 };
 export const APP_SECONDARY_COLOR = '#d8fefe';
 export const GREYTEXT = '#ABA7A7';
 export const LINE_COLOR = '#DCDCDC';
 
 export const VERSION = '1.0.0';
-export const dummyImage =
-  'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png';
+
 
 export const APP_NAME = 'RAVENDEL';
 export const APP_NAME_CAP = 'Ravendel';

@@ -41,8 +41,9 @@ const App = () => {
   });
 
   const updateColor = async () => {
-    const col = await getValue('PrimaryColor');
-    updatePrimaryColor(col);
+    const color = await getValue('PrimaryColor');
+    const image = await getValue('PlaceholderImage');
+    updatePrimaryColor(color,image);
   };
 
   useEffect(() => {

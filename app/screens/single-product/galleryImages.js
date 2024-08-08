@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import ImageView from 'react-native-image-viewing';
-import { BASEURL } from '../../utils/config';
+import { BASEURL, dummyImage } from '../../utils/config';
 import { isEmpty } from '../../utils/helper';
 
 const { width } = Dimensions.get('window');
@@ -68,7 +68,14 @@ const GalleryImagesSlider = ({ ProductDetails }) => {
               </TouchableOpacity>
             ))
           ) : (
-            <Text>Nothing</Text>
+            <FastImage
+            style={styles.slideImage}
+            source={{
+              uri: dummyImage,
+              priority: FastImage.priority.normal,
+            }}
+            resizeMode={FastImage.resizeMode.cover}
+          />
           )}
         </ScrollView>
       </View>

@@ -46,7 +46,7 @@ const ShippingOrPaymentSection = ({ title, data, selected, setSelected }) => (
                             size={18}
                             color={APP_PRIMARY_COLOR}
                         />
-                        <View style={{ width: '85%', justifyContent: 'center' }}>
+                        <View style={{ width: '80%', justifyContent: 'center' }}>
                             <AText style={styles.textStyle} medium>
                                 {item.title ?? item.name}
                             </AText>

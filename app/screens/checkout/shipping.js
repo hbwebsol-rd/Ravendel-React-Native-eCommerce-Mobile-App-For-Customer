@@ -43,7 +43,7 @@ const ShippingScreen = ({ navigation }) => {
   const [scrollenable, setScrollEnable] = useState(true);
   const { userDetails, loading } = useSelector((state) => state.customer);
   const [addressForm, setAddressForm] = useState(false);
-  const [sameShipingAdress, setSameShippingAdress] = useState(true);
+  const [sameShipingAdress, setSameShippingAdress] = useState(false);
   const [formSubmit, setFormSubmit] = useState(false);
   const [addressDefault, setaddressDefault] = useState(0);
   const [shippingAddress, setShippingAddress] = useState({});
@@ -59,7 +59,7 @@ const ShippingScreen = ({ navigation }) => {
     pincode: '',
     _id: '',
     defaultAddress: true,
-    addressType: '',
+    addressType: 'Home',
   });
 
   useEffect(() => {
@@ -172,8 +172,8 @@ const ShippingScreen = ({ navigation }) => {
         !sameShipingAdress && shipAddresspayload
           ? shipAddresspayload.pincode
           : !sameShipingAdress && shippingAddress
-            ? shippingAddress.pincode
-            : billAddress.pincode,
+          ? shippingAddress.pincode
+          : billAddress.pincode,
     };
     const navigationParams = {
       screen: 'CheckoutDetails',
@@ -181,8 +181,8 @@ const ShippingScreen = ({ navigation }) => {
         !sameShipingAdress && shipAddresspayload
           ? shipAddresspayload
           : !sameShipingAdress && shippingAddress
-            ? shippingAddress
-            : billAddress,
+          ? shippingAddress
+          : billAddress,
       billingAddress: billAddress,
     };
     dispatch(checkPincodeValid(payload, navigation, navigationParams));
@@ -192,7 +192,7 @@ const ShippingScreen = ({ navigation }) => {
     <MainLayout hideScroll style={styles.container}>
       {loading ? <AppLoader /> : null}
       {(isEmpty(userDetails) && isEmpty(userDetails.addressBook)) ||
-        addressForm ? (
+      addressForm ? (
         <AdressForm
           navigation={navigation}
           addForm={onSubmit}
@@ -219,8 +219,13 @@ const ShippingScreen = ({ navigation }) => {
                   addressDefault={addressDefault}
                   item={item}
                   editDefaultAdress={true}
-                  setaddressDefault={() => { setaddressDefault(item._id) }}
-                  editForm={() => { editFormValues(item) }} />
+                  setAddressDefault={() => {
+                    setaddressDefault(item._id);
+                  }}
+                  editForm={() => {
+                    editFormValues(item);
+                  }}
+                />
               ))}
             </AddressWrapper>
 
@@ -228,10 +233,13 @@ const ShippingScreen = ({ navigation }) => {
               activeOpacity={0.8}
               onPress={() => setAddressForm(true)}
               style={styles.addaddresscard}>
-              <AIcon style={styles.iconStyle} name="pluscircleo" size={25} color={'black'} />
-              <AText style={styles.textStyle} >
-                Add a new address
-              </AText>
+              <AIcon
+                style={styles.iconStyle}
+                name="pluscircleo"
+                size={25}
+                color={'black'}
+              />
+              <AText style={styles.textStyle}>Add a new address</AText>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -244,7 +252,7 @@ const ShippingScreen = ({ navigation }) => {
                 style={{ marginHorizontal: 5 }}
                 size={20}
               />
-              <Text>Same as Billing address</Text>
+              <Text>Ship to a different address</Text>
             </TouchableOpacity>
 
             <AddressWrapper>
@@ -262,10 +270,14 @@ const ShippingScreen = ({ navigation }) => {
             <AButton
               style={styles.nextBtnStyle}
               onPress={() => {
-                sameShipingAdress ? handleShipping() : setFormSubmit(true);
-                setTimeout(() => {
-                  setFormSubmit(false);
-                }, 700);
+                if(addressDefault){
+                  sameShipingAdress ? handleShipping() : setFormSubmit(true);
+                  setTimeout(() => {
+                    setFormSubmit(false);
+                  }, 700);
+                }else{
+                  setAddressForm(true)
+                }
               }}
               title="Next"
             />
@@ -288,7 +300,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.whiteColor,
   },
   textStyle: {
-    marginLeft: 20, color: "black", fontFamily: FontStyle.semiBold
+    marginLeft: 20,
+    color: 'black',
+    fontFamily: FontStyle.semiBold,
   },
   scrollStyle: { marginHorizontal: 20, marginTop: 10, flex: 1 },
   billingAddressBtnStyle: {
@@ -302,7 +316,12 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     backgroundColor: '#DCF0EF',
   },
-  nextBtnStyle: { width: '80%', alignItems: 'center', alignSelf: 'center', borderRadius: 25 },
+  nextBtnStyle: {
+    width: '80%',
+    alignItems: 'center',
+    alignSelf: 'center',
+    borderRadius: 25,
+  },
   addaddresscard: {
     marginHorizontal: 2,
     marginBottom: 30,

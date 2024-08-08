@@ -125,7 +125,7 @@ const SavedAddressScreen = ({ navigation, route }) => {
             addressDefault={false}
             item={item}
             editDefaultAdress={false}
-            setaddressDefault={() => { }}
+            setAddressDefault={() => { }}
             editForm={() => { editFormValues(item) }} />
           // <View style={styles.addressContentWrapper} key={index}>
           //   <RadioButtonWrapper onPress={() => editFormValues(item)}>

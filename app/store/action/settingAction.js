@@ -11,6 +11,7 @@ import { isEmpty, storeData } from '../../utils/helper';
 import { query } from '../../utils/service';
 import _ from 'lodash';
 import { CATS_SUCCESS } from './productAction';
+import { updatePrimaryColor } from '../../utils/config';
 
 export const AppSettingAction = () => async (dispatch) => {
   const response = await query(GET_APP_SETTING);
@@ -42,6 +43,19 @@ export const AppSettingAction = () => async (dispatch) => {
         'PrimaryColor',
         _.get(response, 'data.getSettings.appearance.theme.primary_color', ''),
       );
+      storeData(
+        'PlaceholderImage',
+        _.get(
+          response,
+          'data.getSettings.appearance.theme.placeholder_image',
+          '',
+        ),
+      );
+      updatePrimaryColor(_.get(response, 'data.getSettings.appearance.theme.primary_color', '#088178'),_.get(
+        response,
+        'data.getSettings.appearance.theme.placeholder_image',
+        '',
+      ));
 
       return dispatch({
         type: GET_THEME_VALUE,

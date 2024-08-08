@@ -12,7 +12,7 @@ const ProductsSlider = ({ dataItems, navigatetonext, title, productWidth }) => {
   const carouselRef = useRef(null);
   const _renderItem = ({ item, index }) => {
     return (
-      <View style={{ marginHorizontal: 5 }}>
+      <View style={{ marginHorizontal: 0 }}>
         <ProductCard
           category={item}
           displayImage={item.feature_image}
@@ -25,7 +25,7 @@ const ProductsSlider = ({ dataItems, navigatetonext, title, productWidth }) => {
 
   return (
     <View style={styles.container}>
-      <AText style={styles.titleStyle} large >
+      <AText style={styles.titleStyle} large>
         {title}
       </AText>
       <Carousel
@@ -52,11 +52,12 @@ ProductsSlider.propTypes = {
 const styles = StyleSheet.create({
   titleStyle: {
     marginBottom: 10,
-    fontFamily: FontStyle.fontBold
+    fontFamily: FontStyle.fontBold,
   },
   container: {
     flex: 1,
-    padding: 10,
+    paddingHorizontal: 5,
+    paddingVertical: 10,
     width: '100%',
     alignSelf: 'center',
   },

@@ -19,7 +19,7 @@ import ForgotPasswordScreen from './forgotPassword';
 
 const UserEntry = ({ navigation }) => {
   const loading = useSelector((state) => state.login.loading);
-  const [activetab, setActivetab] = useState('Login');
+  const [activetab, setActivetab] = useState('Signin');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const handleActiveTab = (tabname) => {
@@ -33,31 +33,46 @@ const UserEntry = ({ navigation }) => {
         <ImageBackground
           style={styles.backimage}
           resizeMode="stretch"
-          source={require('../../assets/images/loginscreen.png')}
-        >
+          source={require('../../assets/images/loginscreen.png')}>
           <AText textStyle={styles.appNameTextStyle} title>
             {APP_NAME}
           </AText>
           <View style={[styles.logincard, { shadowColor: APP_PRIMARY_COLOR }]}>
-            {showForgotPassword ?
+            {showForgotPassword ? (
               <>
-                <AText textStyle={[styles.forgotTextStyle, { color: APP_PRIMARY_COLOR, }]} big1>
+                <AText
+                  textStyle={[
+                    styles.forgotTextStyle,
+                    { color: APP_PRIMARY_COLOR },
+                  ]}
+                  big1>
                   Forgot Password
                 </AText>
-                <AText textStyle={[styles.forgotTextStyle, { color: '#c8c8c8 ', }]} small>
-                  Enter your email and we'll share a link to get back to your account.
+                <AText
+                  textStyle={[styles.forgotTextStyle, { color: '#c8c8c8 ' }]}
+                  small>
+                  Enter your email and we'll share a link to get back to your
+                  account.
                 </AText>
                 <View>
-                  <ForgotPasswordScreen showForgotPassword={() => { setShowForgotPassword(false) }} navigation={navigation} />
+                  <ForgotPasswordScreen
+                    showForgotPassword={() => {
+                      setShowForgotPassword(false);
+                    }}
+                    navigation={navigation}
+                  />
                 </View>
               </>
-              :
+            ) : (
               <>
-                <View style={[styles.singupheader, {
-                  borderColor: APP_SECONDARY_COLOR,
-
-                }]}>
-                  {['Login', 'Signup'].map((tab) => (
+                <View
+                  style={[
+                    styles.singupheader,
+                    {
+                      borderColor: APP_SECONDARY_COLOR,
+                    },
+                  ]}>
+                  {['Signin', 'Signup'].map((tab) => (
                     <TouchableOpacity
                       key={tab}
                       onPress={() => handleActiveTab(tab)}
@@ -67,29 +82,35 @@ const UserEntry = ({ navigation }) => {
                           backgroundColor:
                             activetab === tab ? APP_PRIMARY_COLOR : 'white',
                         },
-                      ]}
-                    >
+                      ]}>
                       <AText
                         color={activetab === tab ? 'white' : APP_PRIMARY_COLOR}
                         center
-                        fonts={FontStyle.fontBold}
-                      >
+                        fonts={FontStyle.fontBold}>
                         {tab}
                       </AText>
                     </TouchableOpacity>
                   ))}
                 </View>
-                {activetab === 'Login' ? (
-                  <LoginScreen showForgotPassword={() => { setShowForgotPassword(true) }} navigation={navigation} />
+                {activetab === 'Signin' ? (
+                  <LoginScreen
+                    showForgotPassword={() => {
+                      setShowForgotPassword(true);
+                    }}
+                    navigation={navigation}
+                  />
                 ) : (
-                  <SignupScreen handleActiveTab={handleActiveTab} navigation={navigation} />
+                  <SignupScreen
+                    handleActiveTab={handleActiveTab}
+                    navigation={navigation}
+                  />
                 )}
               </>
-            }
+            )}
           </View>
           <View style={styles.marginBottom} />
         </ImageBackground>
-      </MainLayout >
+      </MainLayout>
     </>
   );
 };
@@ -123,7 +144,7 @@ const styles = StyleSheet.create({
   },
   forgotTextStyle: {
     padding: 5,
-    fontFamily: FontStyle.fontBold
+    fontFamily: FontStyle.fontBold,
   },
   singupheader: {
     flexDirection: 'row',

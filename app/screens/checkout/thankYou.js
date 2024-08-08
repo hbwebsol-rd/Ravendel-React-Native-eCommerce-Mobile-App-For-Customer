@@ -9,6 +9,7 @@ import moment from 'moment';
 import { getOrder } from '../../store/action/checkoutAction';
 import CartProductDisplayCard from '../../theme-components/cartProductDisplayCard';
 import CartPriceTags from '../components/cartPriceTags';
+import { capitalizeFirstLetter } from '../../utils/helper';
 
 const ThankYou = ({ navigation, route }) => {
   const dispatch = useDispatch();
@@ -53,7 +54,7 @@ const ThankYou = ({ navigation, route }) => {
             </View>
             <View>
               <View style={styles.contentContainerStyle}>
-                <AText style={styles.textContentStyle} medium>
+                <AText style={{...styles.textContentStyle,marginBottom:3}} medium>
                   Order Information
                 </AText>
                 <View style={styles.container}>
@@ -98,7 +99,7 @@ const ThankYou = ({ navigation, route }) => {
                     {orderDetails?.shipping?.lastname}
                   </AText>
                   <AText color={GREYTEXT}>
-                    {orderDetails?.shipping?.address}, ,{' '}
+                    {orderDetails?.shipping?.address}, {' '}
                     {orderDetails?.shipping?.city} {orderDetails?.shipping?.state}
                     ,{orderDetails?.shipping?.zip}
                   </AText>
@@ -106,7 +107,7 @@ const ThankYou = ({ navigation, route }) => {
               </View>
               <View style={styles.contentContainerStyle}>
                 <AText color={GREYTEXT} style={styles.textContentStyle} medium>
-                  Payment Mode: {orderDetails?.billing?.paymentMethod}
+                  Payment Mode: {orderDetails?.billing?.paymentMethod==='cashondelivery'?'Cash On Delivery':capitalizeFirstLetter(orderDetails?.billing?.paymentMethod)}
                 </AText>
               </View>
 
@@ -126,7 +127,7 @@ const ThankYou = ({ navigation, route }) => {
 
           </ScrollView>
         ) : null}
-      <AButton style={styles.homeBtnStyle} onPress={() => navigation.navigate(NavigationConstants.HOME_SCREEN)} title="Home" />
+      <AButton style={styles.homeBtnStyle} onPress={() => navigation.navigate(NavigationConstants.HOME_SCREEN)} title="Continue Shopping" />
     </MainLayout>
   );
 };
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10
+    marginBottom: 0
   },
   textContentStyle: {
     color: '#000',

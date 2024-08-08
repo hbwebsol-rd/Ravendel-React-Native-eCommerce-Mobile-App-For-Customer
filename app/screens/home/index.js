@@ -46,6 +46,8 @@ const HomeScreen = ({ navigation }) => {
   );
 
   const settingLoading = useSelector(state => state.settings.loading);
+  const settingTheme = useSelector(state => state.settings.themeSettings);
+  console.log(JSON.stringify(settingTheme))
   const [allCategories, setAllCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const carouselRef = useRef(null);
@@ -242,12 +244,15 @@ const HomeScreen = ({ navigation }) => {
         {allSections && allSections.length > 0 &&
           allSections.map(item =>
             item.display_type === 'SLIDER' ? (
-              <SectionView>
-                <PopularPicksImage
+              <>
+              {/* {console.log(`${BASEURL}${item.section_img}`)} */}
+               <Image
                   source={{
                     uri: `${BASEURL}${item.section_img}`
                   }}
+                  style={styles.PopularPicksImage}
                 />
+              <SectionView>
                 <ProductsSlider
                   title={item.name}
                   dataItems={item.products}
@@ -262,13 +267,21 @@ const HomeScreen = ({ navigation }) => {
                   }}
                 />
               </SectionView>
+              </>
             ) : (
-              <SectionView>
-                <PopularPicksImage
+              <>
+               <Image
                   source={{
                     uri: `${BASEURL}${item.section_img}`
                   }}
+                  style={styles.PopularPicksImage}
                 />
+              <SectionView>
+                {/* <PopularPicksImage
+                  source={{
+                    uri: `${BASEURL}${item.section_img}`
+                  }}
+                /> */}
                 <GridCardContainer
                   title={item.name}
                   dataItems={item.products ? item.products : []}
@@ -283,6 +296,7 @@ const HomeScreen = ({ navigation }) => {
                   }}
                 />
               </SectionView>
+              </>
             ),
 
 
@@ -307,6 +321,15 @@ const PopularPicksImage = styled.Image`
 `;
 
 const styles = StyleSheet.create({
+  PopularPicksImage:{
+      aspectRatio:1,
+      height: 'auto',
+      width: '100%',
+      alignSelf:'center',
+      marginTop: 20,
+      marginBottom: 20,
+      resizeMode: 'stretch',
+  },
   container: { flex: 1, backgroundColor: 'white' },
   searchstyle: {
     flexWrap: 'wrap',

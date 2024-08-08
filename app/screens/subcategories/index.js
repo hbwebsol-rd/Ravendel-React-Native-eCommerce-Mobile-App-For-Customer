@@ -213,6 +213,7 @@ const SubCategoriesScreen = ({ navigation, route }) => {
     dispatch(catProductAction(filter, true));
     setFilterApply(true)
     setFilterModal(false);
+    setInpvalue('')
   };
 
 

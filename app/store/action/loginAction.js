@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 import APclient from '../../Client';
-import { ADD_CUSTOMER, FORGOT_PASSWORD } from '../../queries/userQuery';
+import { ADD_CUSTOMER, FORGOT_PASSWORD, SAVE_DEVICE_ID } from '../../queries/userQuery';
 import {
   checkUserLoginStorage,
   getValue,
@@ -17,34 +17,16 @@ import OneSignal from 'react-native-onesignal';
 
 
 const save_playerid = async player_id => {
-  var token = await getToken();
-  var myHeaders = new Headers();
-  myHeaders.append('Authorization', `Bearer ${token}`);
-  myHeaders.append('Content-Type', 'application/json');
-
-  var objects = {
-    deviceId: player_id,
-    deviceType: Platform.OS,
-    appVersion: versionCode,
-  };
-
-  var raw = JSON.stringify(objects);
-  console.log(JSON.stringify(objects));
-  var requestOptions = {
-    method: 'PUT',
-    headers: myHeaders,
-    body: raw,
-    redirect: 'follow',
-  };
-  fetch(`${BASE_URL}/api/user/updateDeviceId`, requestOptions)
-    .then(response => response.json())
-    .then(result => {
-      console.log(result, 'resss');
-      // storeData('playerid', player_id);
-    })
-    .catch(error => {
-      console.log(error, 'error');
-    });
+  const payload = {
+    "deviceInfo": {
+    "device_id": player_id,
+    "device_type": Platform.OS.toUpperCase(),
+    "app_version": "1.0"
+  }
+  }
+  const response = await mutation(SAVE_DEVICE_ID, payload);
+  const { data } = response;
+  console.log(data,' lololol')
 };
 
 const setDeviceId = async () => {

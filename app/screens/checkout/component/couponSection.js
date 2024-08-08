@@ -7,7 +7,8 @@ import Colors from '../../../constants/Colors';
 import PropTypes from 'prop-types';
 
 const CouponSection = ({ couponCode, setCouponCode, couponApplied, removeCoupon, ApplyCoupon }) => (
-    <View style={styles.couponContainerStyle}>
+    <View style={{...styles.couponContainerStyle,paddingVertical:!couponApplied?0:10, }}>
+        {!couponApplied?
         <TextInput
             type="text"
             style={styles.couponTextInputStyle}
@@ -15,6 +16,7 @@ const CouponSection = ({ couponCode, setCouponCode, couponApplied, removeCoupon,
             onChangeText={(text) => setCouponCode(text)}
             placeholder="Enter coupon code"
         />
+        :null}
         <View style={styles.couponBtn}>
             <AButton
                 style={[styles.applyBtnStyle, { backgroundColor: APP_PRIMARY_COLOR }]}

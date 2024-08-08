@@ -56,6 +56,16 @@ export const CHANGE_PASSWORD = gql`
     }
   }
 `;
+
+export const SAVE_DEVICE_ID = gql`
+ mutation UpdateCustomerDeviceInfo($deviceInfo: DEVICE_INFO_INPUT) {
+  updateCustomerDeviceInfo(device_info: $deviceInfo) {
+    message
+    success
+  }
+}
+`;
+
 export const FORGOT_PASSWORD = gql`
   mutation ($email: String) {
     sendForgetPasswordEmail(email: $email) {

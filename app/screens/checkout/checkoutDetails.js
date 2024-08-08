@@ -111,10 +111,10 @@ const CheckoutDetails = ({ navigation }) => {
   };
 
   const checkoutDetails = () => {
-    if (isEmpty(shippingMethod)) {
-      alert('Please select shipping Method');
-      return;
-    }
+    // if (isEmpty(shippingMethod)) {
+    //   alert('Please select shipping Method');
+    //   return;
+    // }
     // if (checked === 'cod') {
     const payload = {
       userId: _id,
@@ -188,12 +188,12 @@ const CheckoutDetails = ({ navigation }) => {
           removeCoupon={removeCoupon}
           ApplyCoupon={ApplyCoupon}
         />
-        <ShippingOrPaymentSection
+        {/* <ShippingOrPaymentSection
           title={'Shipping Method'}
           data={shippingMethodList}
           selected={shippingMethod}
           setSelected={setShippingMethod}
-        />
+        /> */}
         <ShippingOrPaymentSection
           title={'Payment Mode'}
           data={Object.values(paymentSetting).filter((item => item.enable))}

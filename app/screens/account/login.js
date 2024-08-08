@@ -34,7 +34,7 @@ const LoginScreen = ({ navigation, showForgotPassword }) => {
         <TextInput
           onchange={formik.handleChange('email')}
           onerror={false}
-          placeholder={'Enter Email'}
+          placeholder={'Email'}
           value={formik.values.email}
           placeholdercolor={'#ABA7A7'}
           StylesTextInput={styles.textInputStyle}
@@ -49,7 +49,7 @@ const LoginScreen = ({ navigation, showForgotPassword }) => {
       <ARow>
         <TextInput
           iconColor={'#9F9F9F'}
-          placeholder={'Enter Password'}
+          placeholder={'Password'}
           onerror={false}
           secureTextEntry={true}
           icon={'eye-off'}

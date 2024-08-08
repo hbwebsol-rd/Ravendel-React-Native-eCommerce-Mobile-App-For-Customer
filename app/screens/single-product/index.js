@@ -175,6 +175,8 @@ const SingleProductScreen = ({ navigation, route }) => {
           cartItems.map((item) => {
             if (item.productId === ProductIds) {
               setItemInCart(true);
+            }else{
+              setItemInCart(false);
             }
           });
         }
@@ -186,7 +188,7 @@ const SingleProductScreen = ({ navigation, route }) => {
       setItemInCart(false);
     }
     setSingleProductLoading(false);
-  }, [isFocused]);
+  }, [isFocused,ProductIds]);
 
   const cleanHTMLContent = (html) => {
     let cleanedHtml = html.trim();

@@ -13,6 +13,7 @@ const httpLink = createHttpLink({
 });
 const authMiddleware = new ApolloLink(async (operation, forward) => {
   const token = await getToken();
+  // console.log(token)
   operation.setContext(({ headers = {} }) => ({
     headers: {
       ...headers,

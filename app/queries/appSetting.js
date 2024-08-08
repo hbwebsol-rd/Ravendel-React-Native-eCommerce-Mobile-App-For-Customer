@@ -92,6 +92,7 @@ const GET_APP_SETTING = gql`
           playstore
           appstore
           logo
+          placeholder_image
         }
 
         mobile {

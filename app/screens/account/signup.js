@@ -97,7 +97,7 @@ const SignupScreen = ({ navigation, handleActiveTab }) => {
                   onchange={formik.handleChange('mobile')}
                   onerror={false}
                   StylesTextInput={styles.textInputStyle}
-                  placeholder={'Enter Phone No.'}
+                  placeholder={'Phone No.'}
                   value={formik.values.mobile}
                   placeholdercolor={'#ABA7A7'}
                   inputBgColor="transparent"
@@ -107,7 +107,7 @@ const SignupScreen = ({ navigation, handleActiveTab }) => {
               <TextInput
                 StylesTextInput={styles.textInputStyle}
                 secureTextEntry={secureTextEntry}
-                placeholder={`Enter ${name}`}
+                placeholder={`${name}`}
                 onchange={(val) => formik.setFieldValue(value, val)}
                 value={formik.values[value]}
                 placeholdercolor="#ABA7A7"
