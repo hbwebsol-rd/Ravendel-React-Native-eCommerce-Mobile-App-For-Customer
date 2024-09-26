@@ -1,24 +1,43 @@
-import React from 'react';
-import {
-  AText,
-  AContainer,
-  AHeader,
-  AButton,
-  AppLoader,
-  TextInput,
-  RadioButton,
-} from '../../theme-components';
+import React, { useRef, useState } from 'react';
+import { AText, AButton, TextInput } from '../../theme-components';
 import { useFormik } from 'formik';
 import { signupValidationSchema } from '../checkout/validationSchema';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { registerAction } from '../../store/action';
 import { Checkbox } from 'react-native-paper';
-import { Linking, Text, TouchableOpacity, View } from 'react-native';
+import { Linking, TouchableOpacity, View } from 'react-native';
+import Styles from '../../Theme';
+import PropTypes from 'prop-types';
+import { CountryPicker } from 'react-native-country-codes-picker';
 
-const SignupScreen = ({ navigation }) => {
-  // const loading = useSelector((state) => state.login.loading);
-
+const SignupScreen = ({ navigation, handleActiveTab }) => {
+  // States and Variables
   const dispatch = useDispatch();
+  const textInputRef = useRef(null);
+
+  const formik = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      mobile: '',
+      password: '',
+      company: '',
+      confirmPassword: '',
+      policy: '',
+    },
+    validationSchema: signupValidationSchema,
+    onSubmit: (values, { setSubmitting, resetForm }) => {
+      setSubmitting(false);
+      sendValues(values);
+      resetForm({ values: '' });
+    },
+  });
+  const [show, setShow] = useState(false);
+  const [countryCode, setCountryCode] = useState('');
+  console.log(countryCode, ' ccd');
+  // Custom Function
   const openLink = () => {
     const url = 'https://demo1-ravendel.hbwebsol.com/abouts/terms&condition';
 
@@ -30,53 +49,34 @@ const SignupScreen = ({ navigation }) => {
 
   const sendValues = (values) => {
     const registerValue = {
-      firstName: values.firstname,
-      lastName: values.lastname,
+      firstName: values.firstName,
+      lastName: values.lastName,
       email: values.email,
       password: values.password,
       phone: values.mobile,
       company: values.company,
-      // role: 'user',
     };
-    dispatch(registerAction(registerValue, navigation));
+    dispatch(registerAction(registerValue, navigation, handleActiveTab));
   };
-  const formik = useFormik({
-    enableReinitialize: true,
-    initialValues: {
-      firstname: '',
-      lastname: '',
-      email: '',
-      mobile: '',
-      password: '',
-      company: '',
-      confirm_password: '',
-      policy: '',
-    },
-    validationSchema: signupValidationSchema,
-    onSubmit: (values, { setSubmitting, resetForm }) => {
-      setSubmitting(false);
-      sendValues(values);
-      resetForm({ values: '' });
-    },
-  });
+
   return (
     <>
       <TextInput
         color={'#000'}
         mt={30}
         padding={0}
-        onchange={formik.handleChange('firstname')}
+        onchange={formik.handleChange('firstName')}
         bw={0}
         pb={10}
         onerror={false}
         placeholder={'Enter First name'}
-        value={formik.values.firstname}
+        value={formik.values.firstName}
         placeholdercolor={'#ABA7A7'}
         inputBgColor="transparent"
       />
-      {formik.touched.firstname && formik.errors.firstname && (
+      {formik.touched.firstName && formik.errors.firstName && (
         <AText color="red" xtrasmall>
-          {formik.errors.firstname}
+          {formik.errors.firstName}
         </AText>
       )}
 
@@ -84,18 +84,18 @@ const SignupScreen = ({ navigation }) => {
         color={'#000'}
         mt={10}
         padding={0}
-        onchange={formik.handleChange('lastname')}
+        onchange={formik.handleChange('lastName')}
         bw={0}
         pb={10}
         onerror={false}
         placeholder={'Enter Last name'}
-        value={formik.values.lastname}
+        value={formik.values.lastName}
         placeholdercolor={'#ABA7A7'}
         inputBgColor="transparent"
       />
-      {formik.touched.lastname && formik.errors.lastname && (
+      {formik.touched.lastName && formik.errors.lastName && (
         <AText color="red" xtrasmall>
-          {formik.errors.lastname}{' '}
+          {formik.errors.lastName}{' '}
         </AText>
       )}
 
@@ -117,21 +117,44 @@ const SignupScreen = ({ navigation }) => {
           {formik.errors.email}
         </AText>
       )}
+      <View style={{ flexDirection: 'row' }}>
+        <CountryPicker
+          show={show}
+          style={{ height: 500 }}
+          // when picker button press you will get the country object with dial code
+          pickerButtonOnPress={(item) => {
+            setCountryCode(item.dial_code);
+            formik.setFieldValue('mobile', item.dial_code);
+            setShow(false);
+            if (textInputRef.current) {
+              // Focus on the input field if editable state changes to true
+              setTimeout(() => {
+                textInputRef.current.focus();
+              }, 100);
+            }
+          }}
+          showOnly={['UA', 'EN', 'IN', 'US', 'UA']}
+        />
 
-      <TextInput
-        color={'#000'}
-        mt={10}
-        padding={0}
-        keyboardtype={'numeric'}
-        onchange={formik.handleChange('mobile')}
-        bw={0}
-        pb={10}
-        onerror={false}
-        placeholder={'Enter Phone No.'}
-        value={formik.values.mobile}
-        placeholdercolor={'#ABA7A7'}
-        inputBgColor="transparent"
-      />
+        <TextInput
+          textInputRef={textInputRef}
+          onfocus={() => {
+            setShow(true);
+          }}
+          color={'#000'}
+          mt={10}
+          padding={0}
+          keyboardtype={'numeric'}
+          onchange={formik.handleChange('mobile')}
+          bw={0}
+          pb={10}
+          onerror={false}
+          placeholder={'Enter Phone No.'}
+          value={formik.values.mobile}
+          placeholdercolor={'#ABA7A7'}
+          inputBgColor="transparent"
+        />
+      </View>
       {formik.touched.mobile && formik.errors.mobile && (
         <AText color="red" xtrasmall>
           {formik.errors.mobile}
@@ -155,7 +178,12 @@ const SignupScreen = ({ navigation }) => {
           {formik.errors.company}
         </AText>
       )}
+
       <TextInput
+        secureTextEntry={true}
+        hookuse
+        iconColor={'#9F9F9F'}
+        icon={'eye-off'}
         color={'#000'}
         mt={10}
         padding={0}
@@ -175,38 +203,31 @@ const SignupScreen = ({ navigation }) => {
       )}
 
       <TextInput
+        secureTextEntry={true}
+        hookuse
+        iconColor={'#9F9F9F'}
+        icon={'eye-off'}
         color={'#000'}
         mt={10}
         padding={0}
-        onchange={formik.handleChange('confirm_password')}
+        onchange={formik.handleChange('confirmPassword')}
         bw={0}
         pb={10}
         onerror={false}
         placeholder={'Confirm Password'}
-        value={formik.values.confirm_password}
+        value={formik.values.confirmPassword}
         placeholdercolor={'#ABA7A7'}
         inputBgColor="transparent"
       />
-      {formik.touched.confirm_password && formik.errors.confirm_password && (
+      {formik.touched.confirmPassword && formik.errors.confirmPassword && (
         <AText color="red" xtrasmall>
-          {formik.errors.confirm_password}
+          {formik.errors.confirmPassword}
         </AText>
       )}
+
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        {Platform.OS === 'ios' ? (
-          <View
-            style={{
-              borderColor: 'black',
-              borderWidth: 1,
-              width: 22,
-              height: 22,
-              backgroundColor: 'transparent',
-              position: 'absolute',
-              left: 7,
-            }}
-          />
-        ) : null}
-        {console.log(formik.values.policy, 'policy')}
+        {Platform.OS === 'ios' ? <View style={Styles.iosBox} /> : null}
+
         <Checkbox
           status={formik.values.policy ? 'checked' : 'unchecked'}
           onPress={() => formik.setFieldValue('policy', !formik.values.policy)}
@@ -217,13 +238,7 @@ const SignupScreen = ({ navigation }) => {
           </AText>
         </TouchableOpacity>
       </View>
-      {/* <RadioButton
-        ml={10}
-        mt={5}
-        data={[{ key: true, text: 'I agree to terms and Policy' }]}
-        fieldname="policy"
-        onchange={formik.setFieldValue}
-      /> */}
+
       {formik.touched.policy && formik.errors.policy && (
         <AText color="red" xtrasmall>
           {formik.errors.policy}
@@ -238,6 +253,10 @@ const SignupScreen = ({ navigation }) => {
       />
     </>
   );
+};
+
+SignupScreen.propTypes = {
+  handleActiveTab: PropTypes.func,
 };
 
 export default SignupScreen;

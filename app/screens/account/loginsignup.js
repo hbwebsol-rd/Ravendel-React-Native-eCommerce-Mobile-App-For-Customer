@@ -20,66 +20,78 @@ import { Splash } from '..';
 const Tab = createMaterialTopTabNavigator();
 
 const UserEntry = ({ navigation }) => {
-  const [activetab, setActivetab] = useState('Login');
+  // States and Variables
   const loading = useSelector((state) => state.login.loading);
-  const handleactivetab = (tabname) => {
+  const [activetab, setActivetab] = useState('Login');
+
+  // Custom Function
+  const handleActiveTab = (tabname) => {
     tabname === 'Login' ? setActivetab('Login') : setActivetab('Signup');
   };
+
   // if (loading) {
-  //   return <AppLoader />;
+  //   return <Splash />;
   // }
-  if (loading) {
-    return <Splash />;
-  }
   return (
-    <MainLayout>
-      <ImageBackground
-        style={styles.backimage}
-        resizeMode="stretch"
-        source={require('../../assets/images/loginscreen.png')}>
-        <AText center color="white" mb="50px" title fonts={FontStyle.fontBold}>
-          Ravendel
-        </AText>
-        <View style={styles.logincard}>
-          <View style={styles.singupheader}>
-            <TouchableOpacity
-              onPress={() => handleactivetab('Login')}
-              style={{
-                ...styles.login,
-                backgroundColor:
-                  activetab === 'Login' ? APP_PRIMARY_COLOR : 'white',
-              }}>
-              <AText
-                color={activetab === 'Login' ? 'white' : APP_PRIMARY_COLOR}
-                center
-                fonts={FontStyle.fontBold}>
-                Log in
-              </AText>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => handleactivetab('Signup')}
-              style={{
-                ...styles.signup,
-                backgroundColor:
-                  activetab === 'Signup' ? APP_PRIMARY_COLOR : 'white',
-              }}>
-              <AText
-                color={activetab === 'Signup' ? 'white' : APP_PRIMARY_COLOR}
-                center
-                fonts={FontStyle.fontBold}>
-                Sign up
-              </AText>
-            </TouchableOpacity>
+    <>
+      {loading ? <AppLoader /> : null}
+      <MainLayout>
+        <ImageBackground
+          style={styles.backimage}
+          resizeMode="stretch"
+          source={require('../../assets/images/loginscreen.png')}>
+          <AText
+            center
+            color="white"
+            mb="50px"
+            title
+            fonts={FontStyle.fontBold}>
+            Ravendel
+          </AText>
+          <View style={styles.logincard}>
+            <View style={styles.singupheader}>
+              <TouchableOpacity
+                onPress={() => handleActiveTab('Login')}
+                style={{
+                  ...styles.login,
+                  backgroundColor:
+                    activetab === 'Login' ? APP_PRIMARY_COLOR : 'white',
+                }}>
+                <AText
+                  color={activetab === 'Login' ? 'white' : APP_PRIMARY_COLOR}
+                  center
+                  fonts={FontStyle.fontBold}>
+                  Log in
+                </AText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => handleActiveTab('Signup')}
+                style={{
+                  ...styles.signup,
+                  backgroundColor:
+                    activetab === 'Signup' ? APP_PRIMARY_COLOR : 'white',
+                }}>
+                <AText
+                  color={activetab === 'Signup' ? 'white' : APP_PRIMARY_COLOR}
+                  center
+                  fonts={FontStyle.fontBold}>
+                  Sign up
+                </AText>
+              </TouchableOpacity>
+            </View>
+            {activetab === 'Login' ? (
+              <LoginScreen navigation={navigation} />
+            ) : (
+              <SignupScreen
+                handleActiveTab={handleActiveTab}
+                navigation={navigation}
+              />
+            )}
           </View>
-          {activetab === 'Login' ? (
-            <LoginScreen navigation={navigation} />
-          ) : (
-            <SignupScreen navigation={navigation} />
-          )}
-        </View>
-        <View style={{ marginBottom: 20 }}></View>
-      </ImageBackground>
-    </MainLayout>
+          <View style={{ marginBottom: 20 }}></View>
+        </ImageBackground>
+      </MainLayout>
+    </>
   );
 };
 const styles = StyleSheet.create({
@@ -92,7 +104,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     // marginTop: windowHeight > 750 ? 70 : 70,
     paddingTop: windowHeight > 850 ? 119 : windowHeight > 750 ? 80 : 60,
-    paddingHorizontal: 40,
+    paddingHorizontal: 20,
     marginHorizontal: 30,
     paddingBottom: windowHeight > 850 ? 120 : 30,
     borderRadius: 15,
@@ -107,7 +119,7 @@ const styles = StyleSheet.create({
   },
   singupheader: {
     flexDirection: 'row',
-    marginHorizontal: 30,
+    marginHorizontal: 50,
     justifyContent: 'center',
     borderWidth: 1,
     borderRadius: 18,

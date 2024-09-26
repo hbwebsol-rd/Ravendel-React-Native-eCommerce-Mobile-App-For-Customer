@@ -4,6 +4,8 @@ import Styles from '../../Theme';
 import { AText } from '../../theme-components';
 import { FontStyle } from '../../utils/config';
 import { Image } from 'react-native';
+import NavigationConstants from '../../navigation/NavigationConstants';
+import PropTypes from 'prop-types';
 
 const Header = ({ navigation, title, showProfileIcon }) => {
   function handlePress() {
@@ -15,11 +17,6 @@ const Header = ({ navigation, title, showProfileIcon }) => {
         ...styles.header,
         justifyContent: showProfileIcon ? 'space-between' : 'flex-start',
       }}>
-      {/* <AIcon
-            onPress={() => navigation.navigate('Home')}
-            name="arrowleft"
-            size={22}
-          /> */}
       <TouchableOpacity style={{ marginTop: 10 }} onPress={handlePress}>
         <View style={Styles.bar1}></View>
         <View style={Styles.bar2}></View>
@@ -31,7 +28,7 @@ const Header = ({ navigation, title, showProfileIcon }) => {
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={() =>
-            navigation.navigate('AccountWrapper', { screen: 'Accounts' })
+            navigation.navigate(NavigationConstants.ACCOUNT_SCREEN)
           }
           style={{ ...styles.profileimgstyle, elevation: 5 }}>
           <Image
@@ -42,6 +39,12 @@ const Header = ({ navigation, title, showProfileIcon }) => {
       ) : null}
     </View>
   );
+};
+
+Header.propTypes = {
+  navigation: PropTypes.object,
+  title: PropTypes.string,
+  showProfileIcon: PropTypes.bool,
 };
 
 const styles = StyleSheet.create({

@@ -7,7 +7,7 @@ import {
   AContainer,
   AHeader,
   AText,
-  ZHeader,
+  BackHeader,
 } from '../../theme-components';
 import { isEmpty } from '../../utils/helper';
 import male from '../../assets/images/man.png';
@@ -23,7 +23,6 @@ import Colors from '../../constants/Colors';
 const EditProfileScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const userData = useSelector((state) => state.customer.userDetails);
-  console.log(userData, 'udata');
   const [genderArr, setGenderArr] = useState([
     { id: 1, type: 'male' },
     { id: 2, type: 'female' },
@@ -56,7 +55,7 @@ const EditProfileScreen = ({ navigation }) => {
     onSubmit: (values, { setSubmitting, resetForm }) => {
       setSubmitting(false);
       profileUpdate(values);
-      resetForm({ values: '' });
+      // resetForm({ values: '' });
     },
   });
 
@@ -75,7 +74,7 @@ const EditProfileScreen = ({ navigation }) => {
   return (
     <>
       <View style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
-        <ZHeader name="My Account" navigation={navigation} />
+        <BackHeader name="My Account" navigation={navigation} />
         {/* <UpperCurve /> */}
 
         <View

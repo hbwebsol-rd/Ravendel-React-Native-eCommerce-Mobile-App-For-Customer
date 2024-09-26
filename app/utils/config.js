@@ -1,8 +1,12 @@
 import { Dimensions, PixelRatio } from 'react-native';
+import { getValue } from './helper';
 
 export const windowHeight = Dimensions.get('window').height;
 export const windowWidth = Dimensions.get('window').width;
-export const APP_PRIMARY_COLOR = '#088178';
+export let APP_PRIMARY_COLOR = '#088178';
+export const updatePrimaryColor = async (color) => {
+  APP_PRIMARY_COLOR = color ? color : APP_PRIMARY_COLOR;
+};
 export const APP_SECONDARY_COLOR = '#d8fefe';
 export const GREYTEXT = '#ABA7A7';
 export const LINE_COLOR = '#DCDCDC';
@@ -10,10 +14,12 @@ export const PENDING_CALL = '#8D8D8D';
 export const INPROGRESS_CALL = '#F8B027';
 export const COMPLETE_CALL = '#398E1F';
 
-export const DEVELOPMENT_URL = 'http://192.168.1.31:8000/api/';
+export const DEVELOPMENT_URL = 'http://192.168.1.32:8000/api/';
 export const PRODUCTION_URL = 'https://revendal-image.s3.amazonaws.com/';
 export const VERSION = '1.0.0';
 export const callngVriable = '__c';
+export const dummyImage =
+  'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png';
 // export const DATABASE_CONFIG = {
 //   location: 'default'
 // };

@@ -9,9 +9,12 @@ import {
   AppLoader,
 } from '../../theme-components';
 import { useSelector, useDispatch } from 'react-redux';
-import { categoriesAction } from '../../store/action';
 import URL from '../../utils/baseurl';
 import { isEmpty, unflatten } from '../../utils/helper';
+import NavigationConstants from '../../navigation/NavigationConstants';
+import Header from '../components/Header';
+import { View } from 'react-native';
+import Colors from '../../constants/Colors';
 
 const CategoriesScreen = ({ navigation }) => {
   const loading = useSelector((state) => state.products.loading);
@@ -20,30 +23,26 @@ const CategoriesScreen = ({ navigation }) => {
   //   state => state.products.allCategories,
   // );
   const allCategoriesWithChild = useSelector(
-    (state) => state.products.categories.data,
+    (state) => state.products.categories,
   );
   const [allCategoriesWithChildData, setAllCategoriesWithChildData] = useState(
     [],
   );
 
   useEffect(() => {
-    categories(categoriesAction());
-  }, [categories]);
-  useEffect(() => {
     if (allCategoriesWithChild) {
-      const data = unflatten(allCategoriesWithChild);
-      setAllCategoriesWithChildData(data);
+      setAllCategoriesWithChildData(allCategoriesWithChild);
     }
   }, [allCategoriesWithChild]);
 
   const navigateNextScreen = (category) => {
     var navigateTo = '';
     var nestedCategory = [];
-    if (category.children.length < 1) {
-      navigateTo = 'Category';
-    } else {
-      navigateTo = 'SubCategories';
-    }
+    // if (category.children.length < 1) {
+    //   navigateTo = 'Category';
+    // } else {
+    // navigateTo = 'SubcategoriesOption';
+    // }
 
     // var nestedCategory = allCategoriesWithChildData.filter(
     //   cat =>
@@ -55,18 +54,20 @@ const CategoriesScreen = ({ navigation }) => {
       nestedCategory = category.children;
     }
 
-    navigation.navigate(navigateTo, {
+    navigation.navigate(NavigationConstants.SUBCATEGORIES_OPTION_SCREEN, {
       singleCategory: category,
       withChildern: nestedCategory,
     });
   };
 
+  //List of categories
   const menuListing = (Categories) => {
     return Categories.map((category) => {
-      if (category.parentId === null) {
+      if (!category.parentId) {
         return (
-          <ACol col={2} key={category.id}>
+          <ACol mt={'60px'} col={2} key={category.id}>
             <CategoriesListingWrapper
+              activeOpacity={0.9}
               onPress={() => navigateNextScreen(category)}>
               <ARow height="100%" padding={0}>
                 <ACol col={1}>
@@ -96,22 +97,35 @@ const CategoriesScreen = ({ navigation }) => {
   return (
     <>
       {loading ? <AppLoader /> : null}
-      <AHeader title="Categories" />
-      <AContainer>
+      <View style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
+        <Header navigation={navigation} title="Categories" />
+        <View style={{ marginTop: 60 }} />
         {!isEmpty(allCategoriesWithChildData) &&
         allCategoriesWithChildData.length > 0 ? (
           <ARow row wrap>
             {menuListing(allCategoriesWithChildData)}
           </ARow>
-        ) : null}
-      </AContainer>
+        ) : (
+          <View>
+            <AText
+              style={{
+                fontSize: 16,
+                alignSelf: 'center',
+                color: 'grey',
+                marginTop: 20,
+              }}>
+              No Records Found
+            </AText>
+          </View>
+        )}
+      </View>
     </>
   );
 };
 
 const CategoriesListingWrapper = styled.TouchableOpacity`
   margin: 10px 0 20px 0;
-  height: 140px;
+  height: 120px;
   border-radius: 15px;
   background-color: #f7f7f7;
   elevation: 1;
