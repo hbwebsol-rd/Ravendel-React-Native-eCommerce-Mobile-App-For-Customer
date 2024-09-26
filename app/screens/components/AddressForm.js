@@ -1,19 +1,27 @@
 import React, { Fragment, useState } from 'react';
-import { AText, AButton, AHeader, ZHeader } from '../../theme-components';
+import { AText, AButton, AHeader, BackHeader } from '../../theme-components';
 import { Formik, useFormik } from 'formik';
 import styled from 'styled-components/native';
-import { Appbar, TextInput } from 'react-native-paper';
-import { Modal, StyleSheet, View } from 'react-native';
+import { Appbar, Checkbox, TextInput } from 'react-native-paper';
+import {
+  Modal,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { countryArray } from '../../utils/CountryData';
 import { validationSchema } from '../checkout/validationSchema';
 import { APP_SECONDARY_COLOR, FontStyle } from '../../utils/config';
 import Colors from '../../constants/Colors';
+import PropTypes from 'prop-types';
+
 const AdressForm = ({
   initialFormValues,
   addForm,
   cancelAddForm,
-  onStopScroll,
   navigation,
 }) => {
   const [openCountryModal, setOpenCountryModal] = useState(false);
@@ -26,7 +34,7 @@ const AdressForm = ({
     onSubmit: (values, { setSubmitting, resetForm }) => {
       onSubmit(values);
       setSubmitting(false);
-      resetForm({});
+      // resetForm({});
     },
   });
 
@@ -41,6 +49,7 @@ const AdressForm = ({
       country: values.country,
       state: values.state,
       pincode: values.pincode,
+      defaultAddress: values.defaultAddress,
     };
     addForm(FormValue);
   };
@@ -48,33 +57,17 @@ const AdressForm = ({
   return (
     <>
       <Modal
+        onRequestClose={cancelAddForm}
         animationType="slide"
         transparent={true}
         visible={true}
         animationInTiming={1500}>
         <View style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
-          <ZHeader navigation={navigation} name={'Add New Address'} />
-          <CheckouWrapper
+          <BackHeader navigation={navigation} name={'Add New Address'} />
+          <CheckoutWrapper
+            showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
             scrollEnabled={!openStateModal}>
-            {/* <Formik
-            initialValues={initialFormValues}
-            onSubmit={(values, { setSubmitting, resetForm }) => {
-              onSubmit(values);
-              setSubmitting(false);
-              resetForm({});
-            }}
-            validationSchema={validationSchema}>
-            {({
-              values,
-              handleChange,
-              errors,
-              setFieldTouched,
-              setFieldValue,
-              touched,
-              isValid,
-              handleSubmit,
-            }) => ( */}
             <Fragment>
               <TextInput
                 style={styles.textinputstyle}
@@ -209,7 +202,30 @@ const AdressForm = ({
                   {formik.errors.city}
                 </AText>
               )}
-
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                {console.log(formik.values.defaultAddress, ' def add')}
+                <Checkbox
+                  status={
+                    formik.values.defaultAddress ? 'checked' : 'unchecked'
+                  }
+                  onPress={() =>
+                    formik.setFieldValue(
+                      'defaultAddress',
+                      !formik.values.defaultAddress,
+                    )
+                  }
+                />
+                <TouchableOpacity
+                  activeOpacity={0.5}
+                  onPress={() =>
+                    formik.setFieldValue(
+                      'defaultAddress',
+                      !formik.values.defaultAddress,
+                    )
+                  }>
+                  <Text>Set Default Address</Text>
+                </TouchableOpacity>
+              </View>
               <BottomSpacer>
                 <AButton
                   width="40%"
@@ -229,11 +245,18 @@ const AdressForm = ({
                 />
               </BottomSpacer>
             </Fragment>
-          </CheckouWrapper>
+          </CheckoutWrapper>
         </View>
       </Modal>
     </>
   );
+};
+
+AdressForm.propTypes = {
+  initialFormValues: PropTypes.object,
+  addForm: PropTypes.func,
+  cancelAddForm: PropTypes.func,
+  navigation: PropTypes.object,
 };
 
 const styles = StyleSheet.create({
@@ -253,7 +276,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
 });
-const CheckouWrapper = styled.ScrollView`
+const CheckoutWrapper = styled.ScrollView`
   padding-horizontal: 30px;
   padding-top: 30px;
   // background: #fff;

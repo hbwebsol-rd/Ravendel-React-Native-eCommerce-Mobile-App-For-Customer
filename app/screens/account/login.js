@@ -1,23 +1,13 @@
 import React from 'react';
-import {
-  AText,
-  AButton,
-  AppLoader,
-  ARow,
-  TextInput,
-} from '../../theme-components';
+import { AText, AButton, ARow, TextInput } from '../../theme-components';
 import { useFormik } from 'formik';
 import { loginValidationSchema } from '../checkout/validationSchema';
 import { useDispatch, useSelector } from 'react-redux';
 import { LoginAction } from '../../store/action';
 import { TouchableOpacity, View } from 'react-native';
-import { APP_PRIMARY_COLOR } from '../../utils/config';
 const LoginScreen = ({ navigation }) => {
+  // States and Variables
   const dispatch = useDispatch();
-
-  const sendValues = (values) => {
-    dispatch(LoginAction(values.email, values.password, navigation));
-  };
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
@@ -31,6 +21,12 @@ const LoginScreen = ({ navigation }) => {
       // resetForm({ values: '' });
     },
   });
+
+  // Custom Function
+  const sendValues = (values) => {
+    dispatch(LoginAction(values.email, values.password, navigation));
+  };
+
   return (
     <>
       <ARow mb="10px" mt="30px">

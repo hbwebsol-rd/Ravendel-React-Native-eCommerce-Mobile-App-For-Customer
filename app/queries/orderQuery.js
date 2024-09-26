@@ -2,26 +2,28 @@ import gql from 'graphql-tag';
 
 const ADD_TOCART = gql`
   mutation (
-    $user_id: ID
+    $userId: ID!
+    $productId: String
+    $productTitle: String
+    $productPrice: String
+    $productImage: String
     $total: Float
-    $product_id: String
-    $product_title: String
-    $product_price: Float
-    $product_image: String
     $qty: Int
-    $tax_class: String
-    $shipping_class: String
+    $attributes: customArray
+    $variantId: String
+    $productQuantity: Int
   ) {
     addToCart(
-      user_id: $user_id
       total: $total
-      product_id: $product_id
-      product_title: $product_title
-      product_price: $product_price
-      product_image: $product_image
+      userId: $userId
+      productId: $productId
+      productTitle: $productTitle
+      productPrice: $productPrice
+      productImage: $productImage
       qty: $qty
-      tax_class: $tax_class
-      shipping_class: $shipping_class
+      attributes: $attributes
+      productQuantity: $productQuantity
+      variantId: $variantId
     ) {
       message
       success
@@ -29,8 +31,8 @@ const ADD_TOCART = gql`
   }
 `;
 const ADD_CART = gql`
-  mutation ($user_id: ID, $products: [cartProduct]) {
-    addCart(user_id: $user_id, products: $products) {
+  mutation ($userId: ID, $products: [cartProduct]) {
+    addCart(userId: $userId, products: $products) {
       message
       success
     }
@@ -106,10 +108,19 @@ const UPDATE_ORDER = gql`
   }
 `;
 const DELETE_CART_PRODUCT = gql`
-  mutation ($id: ID!, $product_id: ID!) {
-    deleteCartProduct(id: $id, product_id: $product_id) {
+  mutation DeleteCartProduct($userId: ID!, $productId: ID!) {
+    deleteCartProduct(userId: $userId, productId: $productId) {
       message
       success
+    }
+  }
+`;
+
+const DELETE_CART = gql`
+  mutation DeleteCart($userId: ID!) {
+    deleteCart(userId: $userId) {
+      success
+      message
     }
   }
 `;
@@ -130,6 +141,36 @@ const GET_CART = gql`
     }
   }
 `;
+
+const CALCULATE_CART = gql`
+  query ($id: ID!) {
+    calculateCart(userId: $id) {
+      id
+      userId
+      status
+      cartItems
+      date
+      totalSummary
+
+      updated
+    }
+  }
+`;
+
+const CALCULATE_CART_WITHOUT_LOGIN = gql`
+  query ($cartItems: [calculateCartProducts]) {
+    calculateCart(cartItems: $cartItems) {
+      id
+      userId
+      status
+      cartItems
+      date
+      totalSummary
+      updated
+    }
+  }
+`;
+
 const CART = gql`
   query ($id: ID!) {
     cart(id: $id) {
@@ -151,14 +192,50 @@ const UPDATE_CART = gql`
     }
   }
 `;
-const APPLY_COUPON = gql`
-  query ($coupon_code: String, $cart: [cartProducts]) {
-    calculateCoupon(coupon_code: $coupon_code, cart: $cart) {
-      total_coupon
+
+const CHANGE_QTY = gql`
+  mutation ChangeQty($userId: ID!, $productId: ID!, $qty: Int!) {
+    changeQty(userId: $userId, productId: $productId, qty: $qty) {
+      success
       message
     }
   }
 `;
+
+// const APPLY_COUPON = gql`
+//   query ($coupon_code: String, $cart: [cartProducts]) {
+//     calculateCoupon(coupon_code: $coupon_code, cart: $cart) {
+//       total_coupon
+//       message
+//     }
+//   }
+// `;
+
+const APPLY_COUPON_CODE = gql`
+  query (
+    $userId: ID
+    $cartItems: [calculateCartProducts]
+    $couponCode: String!
+  ) {
+    calculateCoupon(
+      couponCode: $couponCode
+      cartItems: $cartItems
+      userId: $userId
+    ) {
+      message
+      success
+      id
+      userId
+      status
+      cartItems
+      date
+      totalSummary
+      couponCard
+      updated
+    }
+  }
+`;
+
 const ADD_CHECKOUT = gql`
   mutation ($user_id: ID, $products: [checkoutProduct]) {
     addCheckout(user_id: $user_id, products: $products) {
@@ -174,24 +251,21 @@ const ADD_CHECKOUT = gql`
   }
 `;
 const ORDER_HISTORY = gql`
-  query ($user_id: ID!) {
-    orderbyUser(user_id: $user_id) {
+  query ($id: ID!) {
+    orderbyUser(userId: $id) {
       data {
         id
-        customer_id
-        payment_status
-        shipping_status
-        coupon_code
+        orderNumber
+        userId
+        paymentStatus
+        shippingStatus
         shipping
         billing
         products
+        couponCard
+        totalSummary
         date
-        subtotal
-        shipping_amount
-        tax_amount
-        discount_amount
-        grand_total
-        order_number
+        updated
       }
       message {
         message
@@ -200,31 +274,29 @@ const ORDER_HISTORY = gql`
     }
   }
 `;
+
+const CHECK_ZIPCODE = gql`
+  query ($zipcode: String!) {
+    checkZipcode(zipcode: $zipcode) {
+      message
+      success
+    }
+  }
+`;
+
 const ADD_ORDER = gql`
-  mutation (
-    $customer_id: ID
-    $billing: customObject
-    $shipping: customObject
-    $products: customArray
-    $subtotal: String
-    $shipping_amount: String
-    $tax_amount: String
-    $discount_amount: String
-    $grand_total: String
-    $coupon_code: String
-  ) {
-    addOrder(
-      customer_id: $customer_id
-      shipping: $shipping
-      billing: $billing
-      products: $products
-      subtotal: $subtotal
-      shipping_amount: $shipping_amount
-      tax_amount: $tax_amount
-      discount_amount: $discount_amount
-      grand_total: $grand_total
-      coupon_code: $coupon_code
-    ) {
+  mutation ($userId: ID, $billing: customObject, $shipping: customObject) {
+    addOrder(userId: $userId, shipping: $shipping, billing: $billing) {
+      message
+      success
+      redirectUrl
+    }
+  }
+`;
+
+export const UPDATE_PAYMENT_STATUS = gql`
+  mutation ($id: ID!, $paymentStatus: String!) {
+    updatePaymentStatus(id: $id, paymentStatus: $paymentStatus) {
       message
       success
     }
@@ -236,13 +308,18 @@ export {
   GET_ORDERS,
   GET_ORDER,
   DELETE_ORDER,
+  DELETE_CART,
   UPDATE_ORDER,
   DELETE_CART_PRODUCT,
   GET_CART,
   UPDATE_CART,
-  APPLY_COUPON,
+  APPLY_COUPON_CODE,
   ADD_CHECKOUT,
   ORDER_HISTORY,
   ADD_ORDER,
   CART,
+  CALCULATE_CART,
+  CALCULATE_CART_WITHOUT_LOGIN,
+  CHANGE_QTY,
+  CHECK_ZIPCODE,
 };

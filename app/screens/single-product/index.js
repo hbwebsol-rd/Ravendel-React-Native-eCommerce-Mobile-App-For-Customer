@@ -41,7 +41,7 @@ import {
 } from 'react-native';
 import StarRating from 'react-native-star-rating';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { isEmpty } from '../../utils/helper';
+import { formatCurrency, isEmpty } from '../../utils/helper';
 import { useIsFocused } from '@react-navigation/native';
 import { ProductPriceText } from '../components';
 import { DataTable } from 'react-native-paper';
@@ -60,6 +60,9 @@ import {
   BottomSheetModalProvider,
 } from '@gorhom/bottom-sheet';
 import { ScrollView, FlatList } from 'react-native-gesture-handler';
+import NavigationConstants from '../../navigation/NavigationConstants';
+import PropTypes from 'prop-types';
+
 var reviewObject = {
   title: '',
   email: '',
@@ -70,44 +73,12 @@ var reviewObject = {
   product_id: '',
 };
 
-const { height: windowHeight, width: windowWidth } = Dimensions.get('window');
-
 const SingleProductScreen = ({ navigation, route }) => {
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      headerTintColor: '#000',
-    });
-  }, [navigation]);
-  // ref
-  const bottomSheetModalRef = useRef(null);
-
-  // variables
-  const snapPoints = useMemo(() => ['26%', '42%', '100%'], []);
-
-  // callbacks
-  const handlePresentModalPress = useCallback(() => {
-    console.log('pressing', bottomSheetModalRef.current);
-    bottomSheetModalRef.current?.present();
-  }, []);
-  const handleSheetChanges = useCallback((index) => {
-    console.log('handleSheetChanges', index);
-  }, []);
-
-  useEffect(() => {
-    setTimeout(() => {
-      handlePresentModalPress();
-    }, 1000);
-  }, []);
-
-  const ProductId = route.params.productID;
-  const ProductUrl = route.params.productUrl;
-  const [ProductIds, setProductIds] = useState(ProductId);
-  const [ProductUrls, setProductUrls] = useState(ProductUrl);
-  const [review, setReview] = useState(reviewObject);
-  const SingleProduct = useSelector((state) => state.products.product);
-  const { user_token } = useSelector((state) => state.login);
+  // States and Variables
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
+  const SingleProduct = useSelector((state) => state.products.product);
+  const { user_token } = useSelector((state) => state.login);
   const { userDetails, isLoggin } = useSelector((state) => state.customer);
   const ReviewProduct = useSelector((state) => state.products.productReviews);
   const RelatedProducts = useSelector(
@@ -115,21 +86,122 @@ const SingleProductScreen = ({ navigation, route }) => {
   );
   const { manage_stock } = useSelector((state) => state.settings);
   const Loading = useSelector((state) => state.products.loading);
-  const [descriptionCollapse, setDescriptionCollapse] = useState(false);
+  const { currencyOptions, currencySymbol } = useSelector(
+    (state) => state.settings,
+  );
+  const ProductId = route.params.productID;
+  const ProductUrl = route.params.productUrl;
+  const [ProductIds, setProductIds] = useState(ProductId);
+  const [ProductUrls, setProductUrls] = useState(ProductUrl);
+  const [review, setReview] = useState(reviewObject);
   const [reviewcollapse, setReviewCollapse] = useState(false);
   const [writeReviewPop, setWriteReviewPop] = useState(false);
   const [sliderImages, setSliderImages] = useState([]);
   const cartItems = useSelector((state) => state.cart.products);
   const [itemInCart, setItemInCart] = useState(false);
-  const { cartId } = useSelector((state) => state.cart);
   const [singleProductLoading, setSingleProductLoading] = useState(true);
-  // const [scrollViewHeight, setScrollViewHeight] = useState('45%');
-  const [scrollY] = useState(new Animated.Value(0));
-  const [ScrollOffset, setScrollOffset] = useState(0);
-  // console.log(RelatedProducts, 'related Prod');
   const [cartQuantity, setCartQuantity] = useState(1);
+  const snapPoints = useMemo(() => ['26%', '42%', '100%'], []);
+
+  // ref
+  const bottomSheetModalRef = useRef(null);
+
+  // callbacks
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+
+  // Custom Function
+  const addReview = (val) => {
+    const reviews = {
+      title: val.title,
+      email: val.email,
+      review: val.review,
+      rating: val.rating,
+      status: val.status,
+      customer_id: val.customer_id,
+      product_id: val.product_id,
+    };
+    dispatch(productAddReviewAction(reviews));
+    setWriteReviewPop(!writeReviewPop);
+  };
+
+  const _storeData = async (product) => {
+    if (isLoggin) {
+      let variables = {
+        total:
+          parseFloat(SingleProduct.pricing.sellprice.toFixed(2)) * cartQuantity,
+        userId: userDetails._id,
+        productId: SingleProduct?._id,
+        qty: cartQuantity,
+        productTitle: SingleProduct?.url,
+        productImage: SingleProduct?.feature_image,
+        productPrice: parseFloat(
+          SingleProduct.pricing.sellprice.toFixed(2),
+        ).toString(),
+        variantId: '',
+        productQuantity: Number(SingleProduct.quantity),
+        attributes: SingleProduct.attribute,
+      };
+      dispatch(addToCartAction(variables));
+    } else {
+      try {
+        await AsyncStorage.setItem('cartproducts', JSON.stringify(product));
+        dispatch(checkStorageAction());
+      } catch (error) {
+        console.log('Something went Wrong!!!!');
+      }
+    }
+  };
+
+  const addToCart = async () => {
+    var hasCartProducts = [];
+    var products = [];
+    if (isLoggin) {
+      hasCartProducts = cartItems;
+    } else {
+      hasCartProducts = await AsyncStorage.getItem('cartproducts');
+      if (!isEmpty(hasCartProducts)) {
+        products = JSON.parse(hasCartProducts);
+      }
+    }
+
+    if (itemInCart) {
+      return true;
+    }
+    if (hasCartProducts !== null) {
+      setItemInCart(true);
+      products.push({
+        productId: SingleProduct._id,
+        qty: cartQuantity,
+        productTitle: SingleProduct.name,
+        productPrice: SingleProduct.pricing.sellprice,
+        attributes: SingleProduct.attribute,
+      });
+
+      _storeData(products);
+    } else {
+      setItemInCart(true);
+      _storeData([
+        {
+          productId: SingleProduct._id,
+          qty: cartQuantity,
+          productTitle: SingleProduct.name,
+          productPrice: SingleProduct.pricing.sellprice,
+          attributes: SingleProduct.attribute,
+        },
+      ]);
+    }
+  };
+
+  // Use Effect Call
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTintColor: '#000',
+    });
+  }, [navigation]);
+
   useEffect(() => {
-    // navigation.addListener('focus', () => {
     setReview({
       ...review,
       customer_id: userDetails._id,
@@ -137,12 +209,16 @@ const SingleProductScreen = ({ navigation, route }) => {
       email: userDetails.email,
     });
     setSingleProductLoading(true);
-    console.log(ProductUrl, 'pro id');
     dispatch(productAction(ProductUrls));
     dispatch(productReviewsAction(ProductIds));
     setSingleProductLoading(false);
-    // });
   }, [navigation, ProductIds]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      handlePresentModalPress();
+    }, 1000);
+  }, []);
 
   useEffect(() => {
     setSingleProductLoading(true);
@@ -171,12 +247,12 @@ const SingleProductScreen = ({ navigation, route }) => {
       setTimeout(() => {
         if (!isEmpty(cartItems) && cartItems.length > 0) {
           cartItems.map((item) => {
-            if (item.product_id === ProductIds) {
+            if (item.productId === ProductIds) {
               setItemInCart(true);
             }
           });
         }
-      }, 500);
+      }, 1000);
     } else {
       dispatch({
         type: PRODUCT_CLEAR,
@@ -185,104 +261,6 @@ const SingleProductScreen = ({ navigation, route }) => {
     }
     setSingleProductLoading(false);
   }, [isFocused]);
-
-  const addReview = (val) => {
-    const reviews = {
-      title: val.title,
-      email: val.email,
-      review: val.review,
-      rating: val.rating,
-      status: val.status,
-      customer_id: val.customer_id,
-      product_id: val.product_id,
-    };
-    dispatch(productAddReviewAction(reviews));
-    setWriteReviewPop(!writeReviewPop);
-  };
-
-  const _storeData = async (product) => {
-    if (isLoggin) {
-      if (isEmpty(cartId)) {
-        const cartData = {
-          user_id: userDetails._id,
-          products: [
-            {
-              product_id: SingleProduct._id,
-              qty: cartQuantity,
-              product_title: SingleProduct.name,
-              product_price: parseFloat(
-                SingleProduct.pricing.sellprice.toFixed(2),
-              ),
-              product_image: SingleProduct.feature_image,
-              tax_class: SingleProduct.tax_class,
-              shipping_class: SingleProduct.shipping.shipping_class,
-            },
-          ],
-        };
-        console.log(cartId);
-        return;
-        dispatch(addCartAction(cartData));
-      } else {
-        const cartData = {
-          user_id: userDetails._id,
-          product_id: SingleProduct._id,
-          qty: cartQuantity,
-          product_title: SingleProduct.name,
-          product_price: parseFloat(SingleProduct.pricing.sellprice.toFixed(2)),
-          product_image: SingleProduct.feature_image,
-          tax_class: SingleProduct.tax_class,
-          shipping_class: SingleProduct.shipping.shipping_class,
-        };
-        dispatch(addToCartAction(cartData));
-      }
-    } else {
-      try {
-        await AsyncStorage.setItem('cartproducts', JSON.stringify(product));
-      } catch (error) {
-        console.log('Something went Wrong!!!!');
-      }
-    }
-    // navigation.reset({
-    //   index: 0,
-    //   routes: [{ name: 'Cart' }],
-    // });
-  };
-
-  const addToCart = async () => {
-    var hasCartProducts = [];
-    var products = [];
-    if (isLoggin) {
-      hasCartProducts = cartItems;
-    } else {
-      hasCartProducts = await AsyncStorage.getItem('cartproducts');
-      if (!isEmpty(hasCartProducts)) {
-        products = JSON.parse(hasCartProducts);
-      }
-    }
-
-    if (itemInCart) {
-      return true;
-    }
-    if (hasCartProducts !== null) {
-      setItemInCart(true);
-      products.push({
-        product_id: SingleProduct._id,
-        qty: cartQuantity,
-        product_title: SingleProduct.name,
-      });
-
-      _storeData(products);
-    } else {
-      setItemInCart(true);
-      _storeData([
-        {
-          product_id: SingleProduct._id,
-          qty: cartQuantity,
-          product_title: SingleProduct.name,
-        },
-      ]);
-    }
-  };
 
   useEffect(() => {
     if (SingleProduct?._id) {
@@ -293,24 +271,8 @@ const SingleProductScreen = ({ navigation, route }) => {
       dispatch(catRecentProductAction(payload));
     }
   }, [SingleProduct]);
-  // const handleScroll = (event) => {
-  //   const offsetY = event.nativeEvent.contentOffset.y;
-  //   // Adjust the height based on the scroll offset
-  //   const newHeight = offsetY > 0 ? '85%' : '45%';
-  //   setScrollViewHeight(newHeight);
-  // };
 
-  const handleScroll = Animated.event(
-    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-    { useNativeDriver: false }, // Set to true if using reanimated
-  );
-
-  const scrollViewHeight = scrollY.interpolate({
-    inputRange: [0, windowHeight * 0.5],
-    outputRange: [windowHeight * 0.5, windowHeight],
-    extrapolate: 'clamp',
-  });
-
+  // Custom Components
   const Checkpoints = ({ title, image }) => {
     return (
       <View style={{ alignItems: 'center' }}>
@@ -319,7 +281,7 @@ const SingleProductScreen = ({ navigation, route }) => {
       </View>
     );
   };
-  // console.log(scrollViewHeight, 'ssc');
+
   function renderItem({ item }) {
     return (
       <TouchableOpacity
@@ -327,20 +289,8 @@ const SingleProductScreen = ({ navigation, route }) => {
           console.log('yes it ran', item._id);
           setProductIds(item._id);
           setProductUrls(item.url);
-          // navigation.navigate('CateGories', {
-          //   screen: 'SingleProduct',
-          //   initial: false,
-          //   params: { productID: item._id, productUrl: item.url },
-          // });
         }}
         style={styles.cardstyle}>
-        {/* <Icon
-          onPress={() => alert('Save it Wishlist')}
-          name="heart-o"
-          color={'red'}
-          size={15}
-          style={styles.heart}
-        /> */}
         <ImageBackground
           source={{
             uri: !isEmpty(item.feature_image)
@@ -365,12 +315,7 @@ const SingleProductScreen = ({ navigation, route }) => {
                 resizeMode: 'cover',
               }}></ImageBackground>
           </View>
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => {
-              // navigatetonext(item);
-            }}
-            style={styles.overlay}></TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.9} style={styles.overlay} />
           <View style={styles.textContainer}>
             <AText mb="5px" small fonts={FontStyle.fontBold}>
               {item.name.length > 14
@@ -398,6 +343,7 @@ const SingleProductScreen = ({ navigation, route }) => {
       </TouchableOpacity>
     );
   }
+
   return (
     <BottomSheetModalProvider>
       {singleProductLoading || Loading ? <AppLoader /> : null}
@@ -416,7 +362,6 @@ const SingleProductScreen = ({ navigation, route }) => {
                 name="arrowleft"
                 size={25}
               />
-              {/* <Icon name="heart-o" color={'red'} size={20} /> */}
             </View>
             {/* ===============Featured Images============= */}
             <GallerySliderWrapper>
@@ -428,10 +373,9 @@ const SingleProductScreen = ({ navigation, route }) => {
               ref={bottomSheetModalRef}
               index={1}
               snapPoints={snapPoints}
-              onChange={handleSheetChanges}
               style={{ flex: 1 }}>
               <ScrollView style={{ flex: 1 }}>
-                <ProductPriceText Pricing={SingleProduct.pricing} />
+                {/* <ProductPriceText Pricing={SingleProduct.pricing} /> */}
                 {/* ===============Product Name============= */}
                 <View
                   style={{
@@ -467,7 +411,11 @@ const SingleProductScreen = ({ navigation, route }) => {
                       big
                       fonts={FontStyle.semiBold}
                       color={'black'}>
-                      $ {SingleProduct.pricing.price + '.00'}
+                      {formatCurrency(
+                        SingleProduct.pricing.price,
+                        currencyOptions,
+                        currencySymbol,
+                      )}
                     </AText>
                   </ProductName>
                   <View style={{ width: '45%' }}>
@@ -484,9 +432,6 @@ const SingleProductScreen = ({ navigation, route }) => {
                       SingleProduct.quantity > 0) ||
                       !manage_stock) && (
                       <>
-                        {/* <AText fonts={FontStyle.semiBold} large>
-                        Quantity
-                      </AText> */}
                         <QtyWrapper>
                           <QtyButton
                             onPress={() => {
@@ -598,10 +543,9 @@ const SingleProductScreen = ({ navigation, route }) => {
                             onPress={() =>
                               isLoggin
                                 ? setWriteReviewPop(true)
-                                : navigation.navigate('AccountWrapper', {
-                                    screen: 'LoginSignUp',
-                                    initial: false,
-                                  })
+                                : navigation.navigate(
+                                    NavigationConstants.LOGIN_SIGNUP_SCREEN,
+                                  )
                             }
                             small
                             semi
@@ -845,6 +789,11 @@ const SingleProductScreen = ({ navigation, route }) => {
       </Modal>
     </BottomSheetModalProvider>
   );
+};
+
+SingleProductScreen.propTypes = {
+  navigation: PropTypes.object,
+  route: PropTypes.object,
 };
 
 //  ===============For Style=============

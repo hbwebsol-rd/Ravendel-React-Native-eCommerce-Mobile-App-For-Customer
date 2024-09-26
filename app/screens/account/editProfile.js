@@ -7,7 +7,7 @@ import {
   AContainer,
   AHeader,
   AText,
-  ZHeader,
+  BackHeader,
 } from '../../theme-components';
 import { isEmpty } from '../../utils/helper';
 import male from '../../assets/images/man.png';
@@ -75,7 +75,7 @@ const EditProfileScreen = ({ navigation }) => {
   return (
     <>
       <View style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
-        <ZHeader name="My Account" navigation={navigation} />
+        <BackHeader name="My Account" navigation={navigation} />
         {/* <UpperCurve /> */}
 
         <View

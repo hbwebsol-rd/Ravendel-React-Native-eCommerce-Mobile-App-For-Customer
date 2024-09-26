@@ -16,8 +16,24 @@ const Textinputs = ({
   onblur,
   mode,
   keyboardtype,
-  bgColor,
+  icon,
+  hookuse,
+  sideheading,
+  sideheadclick,
+  multi,
+  linenumbers,
+  afocus,
+  handleKeyboardSubmit,
+  autofillData,
+  max,
+  editable,
+  autoFillText,
+  // Single Style Props
+  StylesHeadingText,
   StylesTextInput,
+  StylesView,
+  //Style Props
+  bgColor,
   width,
   bc,
   bw,
@@ -26,43 +42,53 @@ const Textinputs = ({
   color,
   fw,
   bb,
-  icon,
   iconSize,
   iconColor,
-  hookuse,
   fs,
   height,
   inputBgColor,
-  sideheading,
-  sideheadclick,
   pl,
-  multi,
-  linenumbers,
   inputtextalign,
-  afocus,
-  hml,
   pb,
-  editable,
   placeholdercolor,
+  hmt,
+  mh,
   pe,
-  pt,
+  ViewStyle,
+  fullIcon,
+  hmb,
+  hc,
+  ac,
+  fonts,
   mt,
+  hfs,
+  top,
+  pr,
+  sc,
+  onSubmit,
+  pt,
 }) => {
   const { passwordVisibility, rightIcon, handlePasswordVisibility } =
     useTogglePasswordVisibility();
   return (
     <View
-      style={[styles.textViewInputStyle, { backgroundColor: bgColor ?? null }]}>
+      style={[
+        styles.textViewInputStyle,
+        { backgroundColor: bgColor ?? null, ...StylesView },
+      ]}>
       <ARow row justifyContent={'space-between'}>
         {!isEmpty(heading) && (
-          <AText
-            ml={hml ?? '0px'}
-            mb={'5.5px'}
-            fonts={FontStyle.fontRegular}
-            color={'#9F9F9F'}
-            xtrasmall>
+          <Text
+            style={{
+              color: hc ?? LINE_COLOR,
+              marginTop: hmt ?? 20,
+              marginBottom: hmb ?? 5,
+              fontFamily: FontStyle.fontRegular,
+              fontSize: hfs ?? 14,
+              ...StylesHeadingText,
+            }}>
             {heading}
-          </AText>
+          </Text>
         )}
         {!isEmpty(sideheading) && (
           <TouchableWithoutFeedback
@@ -83,6 +109,7 @@ const Textinputs = ({
       </ARow>
       <View style={styles.inputviewstyle}>
         <TextInput
+          onSubmitEditing={onSubmit}
           pointerEvents={pe ?? 'auto'}
           editable={editable ?? true}
           autoFocus={afocus ?? false}

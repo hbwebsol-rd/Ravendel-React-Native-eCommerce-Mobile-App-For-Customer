@@ -27,8 +27,8 @@ export const validationSchema = yup.object().shape({
   state: yup.string().label('State').required(),
 });
 export const signupValidationSchema = yup.object().shape({
-  firstname: yup.string().label('First Name').min(4).required(),
-  lastname: yup.string().label('Last Name').min(2).required(),
+  firstName: yup.string().label('First Name').min(4).required(),
+  lastName: yup.string().label('Last Name').min(2).required(),
   email: yup.string().label('Email').email().required(),
   password: yup
     .string()
@@ -36,7 +36,7 @@ export const signupValidationSchema = yup.object().shape({
     .required()
     .min(2, 'Seems a bit short...')
     .max(10, 'We prefer insecure system, try a shorter password.'),
-  confirm_password: yup
+  confirmPassword: yup
     .string()
     .required()
     .label('Confirm password')

@@ -20,14 +20,15 @@ import { Splash } from '..';
 const Tab = createMaterialTopTabNavigator();
 
 const UserEntry = ({ navigation }) => {
-  const [activetab, setActivetab] = useState('Login');
+  // States and Variables
   const loading = useSelector((state) => state.login.loading);
-  const handleactivetab = (tabname) => {
+  const [activetab, setActivetab] = useState('Login');
+
+  // Custom Function
+  const handleActiveTab = (tabname) => {
     tabname === 'Login' ? setActivetab('Login') : setActivetab('Signup');
   };
-  // if (loading) {
-  //   return <AppLoader />;
-  // }
+
   if (loading) {
     return <Splash />;
   }
@@ -43,7 +44,7 @@ const UserEntry = ({ navigation }) => {
         <View style={styles.logincard}>
           <View style={styles.singupheader}>
             <TouchableOpacity
-              onPress={() => handleactivetab('Login')}
+              onPress={() => handleActiveTab('Login')}
               style={{
                 ...styles.login,
                 backgroundColor:
@@ -57,7 +58,7 @@ const UserEntry = ({ navigation }) => {
               </AText>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => handleactivetab('Signup')}
+              onPress={() => handleActiveTab('Signup')}
               style={{
                 ...styles.signup,
                 backgroundColor:
@@ -74,7 +75,10 @@ const UserEntry = ({ navigation }) => {
           {activetab === 'Login' ? (
             <LoginScreen navigation={navigation} />
           ) : (
-            <SignupScreen navigation={navigation} />
+            <SignupScreen
+              handleActiveTab={handleActiveTab}
+              navigation={navigation}
+            />
           )}
         </View>
         <View style={{ marginBottom: 20 }}></View>

@@ -28,6 +28,7 @@ const AText = styled.Text`
     minor,
     semiminor,
     big,
+    big1,
   }) => {
     switch (true) {
       case jumbo:
@@ -42,6 +43,8 @@ const AText = styled.Text`
         return `font-size: 27px`;
       case big:
         return `font-size: 24px`;
+      case big1:
+        return `font-size: 22px`;
       case large:
         return `font-size: 18px`;
       case medium:
@@ -79,7 +82,11 @@ const AText = styled.Text`
 `;
 
 const TextStyle = ({ ...props }) => {
-  return <AText {...props}>{props.children}</AText>;
+  return (
+    <AText numberOfLines={props.nol ?? null} {...props}>
+      {props.children}
+    </AText>
+  );
 };
 
 export default TextStyle;

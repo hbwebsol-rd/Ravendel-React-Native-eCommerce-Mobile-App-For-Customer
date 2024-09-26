@@ -18,12 +18,16 @@ import ForgotPasswordScreen from './account/forgotPassword';
 import ShippingScreen from './checkout/shipping';
 import PaymentMethodScreen from './checkout/paymentMethods';
 import CheckoutScreen from './checkout/checkout';
+import CheckoutDetails from './checkout/checkoutDetails';
+import StripePayment from './checkout/stripePayment';
 import OrderDetailScreen from './account/orderHistoryDetail';
 import EditProfileScreen from './account/editProfile';
 import ChangePasswordScreen from './account/changePassword';
 import UserEntry from './account/loginsignup';
 import Splash from './splash';
 import Shop from './shop';
+import ThankYou from './checkout/thankYou';
+import { ContactUs } from './mics';
 export {
   HomeScreen,
   CartScreen,
@@ -51,4 +55,8 @@ export {
   Splash,
   Shop,
   SubcategoriesOption,
+  CheckoutDetails,
+  StripePayment,
+  ThankYou,
+  ContactUs,
 };

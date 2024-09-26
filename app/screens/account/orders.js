@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  AText,
-  AContainer,
-  AHeader,
-  AppLoader,
-  AButton,
-  ARow,
-  ZHeader,
-} from '../../theme-components';
+import { AText, AppLoader, AButton } from '../../theme-components';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   productsAction,
@@ -16,24 +8,21 @@ import {
 } from '../../store/action';
 import { formatCurrency, isEmpty } from '../../utils/helper';
 import styled from 'styled-components/native';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import URL from '../../utils/baseurl';
 import { useIsFocused } from '@react-navigation/native';
-import { Modal, StyleSheet, View } from 'react-native';
+import { Modal, StyleSheet, TouchableOpacity, View } from 'react-native';
 import moment from 'moment';
-import { APP_PRIMARY_COLOR, APP_SECONDARY_COLOR } from '../../utils/config';
+import { FontStyle } from '../../utils/config';
 import { ScrollView } from 'react-native-gesture-handler';
 import Colors from '../../constants/Colors';
 import Header from '../components/Header';
+import NavigationConstants from '../../navigation/NavigationConstants';
 
 const OrderScreen = ({ navigation }) => {
   const { userDetails, isLoggin } = useSelector((state) => state.customer);
   const { orderList, loading } = useSelector((state) => state.orders);
   const { Loading, products } = useSelector((state) => state.products);
   const loadingproduct = useSelector((state) => state.products.loading);
-  const { currencyOptions, currencySymbol } = useSelector(
-    (state) => state.settings,
-  );
+
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const [cartProducts, setCartProduct] = useState([]);
@@ -41,7 +30,7 @@ const OrderScreen = ({ navigation }) => {
   useEffect(() => {
     if (!isEmpty(userDetails)) {
       const payload = {
-        user_id: userDetails._id,
+        id: userDetails._id,
       };
       dispatch(orderHistoryAction(payload));
     }
@@ -59,7 +48,7 @@ const OrderScreen = ({ navigation }) => {
       {loadingproduct || loading ? <AppLoader /> : null}
       <View style={styles.container}>
         <Header navigation={navigation} title="Orders" />
-        <ScrollView>
+        <ScrollView style={{ marginTop: 50 }}>
           <>
             {cartProducts && cartProducts.length ? (
               <>
@@ -67,108 +56,54 @@ const OrderScreen = ({ navigation }) => {
                   <OrderWrapper key={index}>
                     <AttributedWrapper>
                       <ProfileDetailWrapper>
-                        <AText bold>Order ID:</AText>
-                        <AText ml={'33px'} color={'#6E6E6E'}>
-                          {' '}
+                        <AText
+                          fonts={FontStyle.semiBold}
+                          color={Colors.blackColor}>
+                          Order Number:{' '}
+                        </AText>
+                        <AText color={Colors.gray}>
+                          {'000026 '}
                           {prod.order_number}{' '}
                         </AText>
                       </ProfileDetailWrapper>
                       <ProfileDetailWrapper>
-                        <AText bold>Order Date:</AText>
-                        <AText ml={'14px'} color={'#6E6E6E'}>
+                        <AText
+                          fonts={FontStyle.semiBold}
+                          color={Colors.grayColor}>
+                          Date:
+                        </AText>
+                        <AText color={Colors.gray}>
                           {' '}
                           {moment(prod.date).format('LL')}
                         </AText>
                       </ProfileDetailWrapper>
-                      <ProfileDetailWrapper>
-                        <AText bold>Total Price:</AText>
-                        <AText ml={'19px'} color={'#6E6E6E'}>
-                          {currencySymbol + prod.grand_total}
-                          {formatCurrency(
-                            prod.grand_total,
-                            currencyOptions,
-                            currencySymbol,
-                          )}{' '}
-                        </AText>
-                      </ProfileDetailWrapper>
+                      <View style={styles.shipingstyle}>
+                        <View style={{ flexDirection: 'row' }}>
+                          <AText bold>Shipping Status: </AText>
+                          <AText
+                            fonts={FontStyle.semiBold}
+                            color={Colors.redColor}>
+                            {prod.shippingStatus === 'inprogress'
+                              ? 'In-Progress'
+                              : prod.shippingStatus}
+                          </AText>
+                        </View>
+                        <TouchableOpacity
+                          style={{
+                            padding: 6,
+                            backgroundColor: Colors.transparentColor,
+                            borderColor: Colors.primaryTextColor,
+                            borderRadius: 5,
+                            borderWidth: 1,
+                          }}>
+                          <AText
+                            fonts={FontStyle.semiBold}
+                            color={Colors.primaryTextColor}>
+                            Track order
+                          </AText>
+                        </TouchableOpacity>
+                      </View>
                     </AttributedWrapper>
-                    <ItemWrapper>
-                      <AttributedWrapper>
-                        <ProfileDetailWrapper>
-                          <OrderStatusColumnWrapper>
-                            <AText bold>Payment Status: </AText>
-                            <OrderStatusWrapper
-                              mr={'10px 7px 0px 0px'}
-                              color={
-                                prod.payment_status == 'confirmed'
-                                  ? '#AADFA0'
-                                  : prod.payment_status == 'pending'
-                                  ? '#FFE4E7'
-                                  : '#FFE4E7'
-                              }>
-                              <AText
-                                center
-                                color={
-                                  prod.payment_status == 'confirmed'
-                                    ? '#377F19'
-                                    : prod.payment_status == 'pending'
-                                    ? '#F90006'
-                                    : '#F90006'
-                                }
-                                uppercase
-                                bold>
-                                {prod.payment_status}
-                              </AText>
-                            </OrderStatusWrapper>
-                          </OrderStatusColumnWrapper>
-
-                          <OrderStatusColumnWrapper>
-                            <AText bold>Shipping Status: </AText>
-                            <OrderStatusWrapper
-                              mr={'10px 0px 0px 5px'}
-                              color={
-                                prod.shipping_status == 'inprogress'
-                                  ? '#E3FCFF'
-                                  : prod.shipping_status == 'shipped'
-                                  ? '#B3E8E5'
-                                  : prod.shipping_status == 'delivered'
-                                  ? '#AADFA0'
-                                  : '#F2EBE9'
-                              }>
-                              <AText
-                                center
-                                color={
-                                  prod.shipping_status == 'inprogress'
-                                    ? '#037081'
-                                    : prod.shipping_status == 'shipped'
-                                    ? '#308F9D'
-                                    : prod.shipping_status == 'delivered'
-                                    ? '#377F19'
-                                    : '#7D3F67'
-                                }
-                                uppercase
-                                bold>
-                                {prod.shipping_status == 'outfordelivery'
-                                  ? 'Out for delivery'
-                                  : prod.shipping_status}
-                              </AText>
-                            </OrderStatusWrapper>
-                          </OrderStatusColumnWrapper>
-                        </ProfileDetailWrapper>
-                      </AttributedWrapper>
-                      <AttributedWrapper></AttributedWrapper>
-                    </ItemWrapper>
-                    <AButton
-                      round
-                      bgColor={APP_PRIMARY_COLOR}
-                      onPress={() =>
-                        navigation.navigate('OrderDetail', {
-                          orderDetails: prod,
-                          productIndex: 0,
-                        })
-                      }
-                      title="View order"
-                    />
                   </OrderWrapper>
                 ))}
               </>
@@ -179,7 +114,9 @@ const OrderScreen = ({ navigation }) => {
                 </AText>
                 <AButton
                   title="Shop Now"
-                  onPress={() => navigation.navigate('CateGories')}
+                  onPress={() =>
+                    navigation.navigate(NavigationConstants.SHOP_SCREEN)
+                  }
                 />
               </EmptyWrapper>
             )}
@@ -206,37 +143,14 @@ const OrderWrapper = styled.View`
   shadow-radius: 3.84px;
   elevation: 5px;
 `;
-//
-const OrderStatusWrapper = styled.View`
-  background: ${(props) => props.color ?? '#f7f7f7'};
-  position: relative;
-  border-radius: 8px;
-  padding: 7px 7px;
-  width: 95%;
-  align-self: center;
-  align-items: center;
-  justify-content: space-between;
-  flex-direction: column;
-  margin: ${(props) => props.mr ?? '10px 7px'};
-`;
-const OrderStatusColumnWrapper = styled.View`
-  // background: #f7f7f7;
-  width: 50%;
-  align-items: flex-start;
-  justify-content: space-between;
-  flex-direction: column;
-`;
+
 const EmptyWrapper = styled.View`
   flex: 1;
   justify-content: center;
   align-items: center;
   height: 300px;
 `;
-const ItemWrapper = styled.TouchableOpacity`
-  flex-direction: row;
-  justify-content: space-between;
-  overflow: hidden;
-`;
+
 const ProfileDetailWrapper = styled.View`
   flex-direction: row;
   width: 100%;
@@ -256,6 +170,14 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     backgroundColor: Colors.whiteColor,
     // paddingHorizontal: 30,
+  },
+  shipingstyle: {
+    flexDirection: 'row',
+    width: '100%',
+    alignSelf: 'center',
+    alignItems: 'center',
+    padding: 5,
+    justifyContent: 'space-between',
   },
 });
 export default OrderScreen;

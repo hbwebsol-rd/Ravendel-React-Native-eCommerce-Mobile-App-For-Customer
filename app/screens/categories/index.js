@@ -12,6 +12,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { categoriesAction } from '../../store/action';
 import URL from '../../utils/baseurl';
 import { isEmpty, unflatten } from '../../utils/helper';
+import NavigationConstants from '../../navigation/NavigationConstants';
+import Header from '../components/Header';
+import { View } from 'react-native';
+import Colors from '../../constants/Colors';
 
 const CategoriesScreen = ({ navigation }) => {
   const loading = useSelector((state) => state.products.loading);
@@ -39,11 +43,11 @@ const CategoriesScreen = ({ navigation }) => {
   const navigateNextScreen = (category) => {
     var navigateTo = '';
     var nestedCategory = [];
-    if (category.children.length < 1) {
-      navigateTo = 'Category';
-    } else {
-      navigateTo = 'SubCategories';
-    }
+    // if (category.children.length < 1) {
+    //   navigateTo = 'Category';
+    // } else {
+    // navigateTo = 'SubcategoriesOption';
+    // }
 
     // var nestedCategory = allCategoriesWithChildData.filter(
     //   cat =>
@@ -55,7 +59,7 @@ const CategoriesScreen = ({ navigation }) => {
       nestedCategory = category.children;
     }
 
-    navigation.navigate(navigateTo, {
+    navigation.navigate(NavigationConstants.SUBCATEGORIES_OPTION_SCREEN, {
       singleCategory: category,
       withChildern: nestedCategory,
     });
@@ -65,7 +69,7 @@ const CategoriesScreen = ({ navigation }) => {
     return Categories.map((category) => {
       if (category.parentId === null) {
         return (
-          <ACol col={2} key={category.id}>
+          <ACol mt={'60px'} col={2} key={category.id}>
             <CategoriesListingWrapper
               onPress={() => navigateNextScreen(category)}>
               <ARow height="100%" padding={0}>
@@ -96,15 +100,16 @@ const CategoriesScreen = ({ navigation }) => {
   return (
     <>
       {loading ? <AppLoader /> : null}
-      <AHeader title="Categories" />
-      <AContainer>
+      <View style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
+        <Header navigation={navigation} title="Categories" />
+        <View style={{ marginTop: 60 }} />
         {!isEmpty(allCategoriesWithChildData) &&
         allCategoriesWithChildData.length > 0 ? (
           <ARow row wrap>
             {menuListing(allCategoriesWithChildData)}
           </ARow>
         ) : null}
-      </AContainer>
+      </View>
     </>
   );
 };

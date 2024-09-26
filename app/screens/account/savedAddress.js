@@ -4,7 +4,7 @@ import {
   AButton,
   AppLoader,
   AHeader,
-  ZHeader,
+  BackHeader,
 } from '../../theme-components';
 import { Formik } from 'formik';
 import { validationSchema } from '../checkout/validationSchema';
@@ -179,7 +179,7 @@ const SavedAddressScreen = ({ navigation, route }) => {
         <>
           {/* <AHeader navigation={navigation} title="Saved Addresses" back /> */}
           <View style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
-            <ZHeader navigation={navigation} name={'My Account'} />
+            <BackHeader navigation={navigation} name={'My Account'} />
 
             <ScrollView
               contentContainerStyle={{

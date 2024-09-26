@@ -24,7 +24,7 @@ const AppLoader = () => {
         position: 'absolute',
         top: 0,
         bottom: 0,
-        zIndex: 5,
+        zIndex: 11,
         justifyContent: 'center',
         alignItems: 'center',
       }}>

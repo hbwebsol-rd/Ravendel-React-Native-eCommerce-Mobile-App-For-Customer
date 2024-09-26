@@ -4,19 +4,18 @@ import {
   AContainer,
   ARow,
   ACol,
-  AHeader,
   AppLoader,
   TextInput,
 } from '../../theme-components';
 import styled from 'styled-components/native';
 import { useSelector, useDispatch } from 'react-redux';
-import URL from '../../utils/baseurl';
 import {
   downloadImageFromS3,
   getToken,
   getValue,
   isEmpty,
   unflatten,
+  wait,
 } from '../../utils/helper';
 import { useIsFocused } from '@react-navigation/native';
 import { useState } from 'react';
@@ -29,6 +28,7 @@ import {
   categoriesAction,
   addCartAction,
   updateCartAction,
+  catProductAction,
 } from '../../store/action';
 import HomeCategoryShowViews from './Components.js/CategoryShow';
 import HomeComponentShowViews from './Components.js/HomeComponentShowViews';
@@ -44,8 +44,11 @@ import {
 } from 'react-native';
 import { brandAction } from '../../store/action/settingAction';
 import HomeBrandViews from './Components.js/BrandShow';
-import { APP_PRIMARY_COLOR, APP_SECONDARY_COLOR } from '../../utils/config';
-import { useNavigation } from '@react-navigation/native';
+import {
+  APP_PRIMARY_COLOR,
+  APP_SECONDARY_COLOR,
+  FontStyle,
+} from '../../utils/config';
 import Icon from 'react-native-vector-icons/Feather';
 import Categories from './Components.js/CategoriesList';
 import ImageSlider from './Components.js/CustomSlider';
@@ -55,14 +58,13 @@ import { USER_ALREADY_HAS_LOGIN } from '../../store/action/customerAction';
 import Colors from '../../constants/Colors';
 import Header from '../components/Header';
 import Styles from '../../Theme';
+import NavigationConstants from '../../navigation/NavigationConstants';
+import URL from '../../utils/baseurl';
 
 const HomeScreen = ({ navigation }) => {
-  const isFocused = useIsFocused();
+  // States and Variables
   const dispatch = useDispatch();
-  // var allCategories = useSelector(state => state.products.allCategories);
-  function handlePress() {
-    navigation.openDrawer();
-  }
+  const isFocused = useIsFocused();
   const allCategoriesWithChild = useSelector(
     (state) => state.products.categories.data,
   );
@@ -71,9 +73,8 @@ const HomeScreen = ({ navigation }) => {
   const userDetails = useSelector((state) => state.customer.userDetails);
   const catLoading = useSelector((state) => state.products.loading);
   const loginState = useSelector((state) => state.login);
+  const [refreshing, setRefreshing] = useState(false);
   const {
-    currencyOptions,
-    homeslider,
     homeData,
     featureData,
     recentAddedProduct,
@@ -82,21 +83,18 @@ const HomeScreen = ({ navigation }) => {
     brands,
     appTitle,
   } = useSelector((state) => state.settings);
-  // console.log('prod', recentAddedProduct, 'hooo');
   const primaryColor = '#000';
   const settingLoading = useSelector((state) => state.settings.loading);
-
   const [allCategories, setAllCategories] = useState([]);
-  const [inpvalue, setInpvalue] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  //Custom Functions
   const checkUserLoggedIn = async () => {
     try {
       const token = await getToken();
       const userdata = await getValue('userDetails');
-      // console.log(token, userdata, 'ttk');
-      // const role = await AsyncStorage.getItem('role');
 
       if (token !== null) {
-        // console.log('yes logged in on master screen');
         var loginDetails = {
           user_token: token,
         };
@@ -111,20 +109,100 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
-  //Custom Functions
   const handleinpiut = (e) => {
-    setInpvalue(e);
+    setSearchTerm(e);
   };
+
+  const UpdateCart = async () => {
+    var cartProduct = await getValue('cartproducts');
+    if (!isEmpty(cartProduct)) {
+      var filteredProducts = [];
+      cartProduct = JSON.parse(cartProduct);
+      var mergedArr = [...cartProduct, ...cartItems];
+      var filteredProducts = [];
+      mergedArr.filter((val) => {
+        let exist = mergedArr.find(
+          (n) => n.productId === val.productId && n.qty > val.qty,
+        );
+        if (!filteredProducts.find((n) => n.productId === val.productId)) {
+          if (isEmpty(exist)) {
+            filteredProducts.push({
+              productId: val.productId,
+              productTitle: val.productTitle,
+              qty: val.qty,
+              productPrice: val.productPrice.toString(),
+              attributes: val.attributes,
+            });
+          } else {
+            filteredProducts.push({
+              productId: val.productId,
+              productTitle: val.productTitle,
+              qty: exist.qty,
+              productPrice: val.productPrice.toString(),
+              attributes: val.attributes,
+            });
+          }
+        }
+      });
+      if (!isEmpty(filteredProducts)) {
+        const cartData = {
+          userId: userDetails._id,
+          products: filteredProducts,
+        };
+        dispatch(addCartAction(cartData));
+      }
+    }
+  };
+
+  const navigateNextScreen = (category) => {
+    var nestedCategory = [];
+    if (!isEmpty(category.children)) {
+      nestedCategory = category.children;
+    }
+    navigation.navigate(NavigationConstants.SUBCATEGORIES_OPTION_SCREEN, {
+      singleCategory: category,
+      withChildern: nestedCategory,
+    });
+  };
+
+  const handleSearchProduct = () => {
+    navigation.navigate('Shop', { searchTerm: searchTerm });
+  };
+
+  const getCategoryImage = (name) => {
+    const cat =
+      URL +
+      homeData
+        .filter((item) => {
+          if (item.label === name) {
+            return true;
+          }
+        })
+        .map((item) => {
+          return item.section_img;
+        })[0];
+    return cat;
+  };
+
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    dispatch(AppSettingAction());
+    dispatch(categoriesAction());
+    wait(2000).then(() => setRefreshing(false));
+  }, []);
+  // Use Effect Call
+
+  useEffect(() => {
+    console.log(homeData);
+  }, []);
 
   useEffect(() => {
     dispatch(AppSettingAction());
-    // dispatch(AllCategoriesAction(null));
     dispatch(categoriesAction());
   }, [isFocused]);
 
   useEffect(() => {
     dispatch(brandAction());
-    // console.log(homeData, 'homedaata');
     if (!isEmpty(homeData)) {
       const featuredProduct = homeData.filter(
         (section) => section.label === 'Featured Product',
@@ -141,12 +219,9 @@ const HomeScreen = ({ navigation }) => {
       const productFromSpecific = homeData.filter(
         (section) => section.label === 'Product from Specific Categories',
       )[0];
-      // console.log('fproduc', featuredProduct);
       if (featuredProduct.visible) {
         dispatch(featureDataAction());
       }
-      // if (featuredProduct.visible) {
-      // }
       if (recentProduct.visible) {
         dispatch(recentaddedproductAction());
       }
@@ -166,6 +241,7 @@ const HomeScreen = ({ navigation }) => {
       }
     }
   }, [homeData]);
+
   useEffect(() => {
     if (allCategoriesWithChild) {
       const data = unflatten(allCategoriesWithChild);
@@ -179,102 +255,20 @@ const HomeScreen = ({ navigation }) => {
     }
   }, [loginState]);
 
-  // useEffect(() => {
-  //   if (isFocused) {
-  //     if (cartChecked) {
-  //       if (!isEmpty(userDetails)) {
-  //         UpdateCart();
-  //       }
-  //     }
-  //   }
-  // }, [cartId,cartChecked])
-
-  const UpdateCart = async () => {
-    var cartProduct = await getValue('cartproducts');
-    if (!isEmpty(cartProduct)) {
-      var filteredProducts = [];
-      cartProduct = JSON.parse(cartProduct);
-      var mergedArr = [...cartProduct, ...cartItems];
-      var filteredProducts = [];
-      mergedArr.filter((val) => {
-        let exist = mergedArr.find(
-          (n) => n.product_id === val.product_id && n.qty > val.qty,
-        );
-        if (!filteredProducts.find((n) => n.product_id === val.product_id)) {
-          if (isEmpty(exist)) {
-            filteredProducts.push({
-              product_id: val.product_id,
-              product_title: val.product_title,
-              qty: val.qty,
-            });
-          } else {
-            filteredProducts.push({
-              product_id: val.product_id,
-              product_title: val.product_title,
-              qty: exist.qty,
-            });
-          }
-        }
-      });
-      if (!isEmpty(filteredProducts)) {
-        if (isEmpty(cartId)) {
-          const cartData = {
-            user_id: userDetails._id,
-            products: filteredProducts,
-          };
-          dispatch(addCartAction(cartData));
-        } else {
-          const cartData = {
-            id: cartId,
-            products: filteredProducts,
-          };
-          dispatch(updateCartAction(cartData, userDetails._id));
-        }
+  useEffect(() => {
+    if (cartChecked) {
+      if (!isEmpty(userDetails)) {
+        UpdateCart();
       }
     }
-  };
+  }, [cartId, cartChecked]);
 
-  const navigateNextScreen = (category) => {
-    var navigateTo = '';
-    // if (category.children.length < 1) {
-    //   navigateTo = 'Category';
-    // } else {
-    navigateTo = 'SubcategoriesOption';
-    // }
-
-    var nestedCategory = [];
-    if (!isEmpty(category.children)) {
-      nestedCategory = category.children;
-    }
-    // console.log(JSON.stringify(category), 'this category going in subcategory');
-    navigation.navigate('CateGories', {
-      screen: navigateTo,
-      initial: false,
-      params: { singleCategory: category, withChildern: nestedCategory },
-    });
-  };
-  console.log(settingLoading, ' ---- ', catLoading);
   return (
     <View style={Styles.mainContainer}>
       {settingLoading && catLoading ? <AppLoader /> : null}
       <StatusBar backgroundColor={APP_PRIMARY_COLOR} />
       <Header showProfileIcon navigation={navigation} title={''} />
       <View style={styles.searchstyle}>
-        {/* <TouchableOpacity style={{ marginTop: 10 }} onPress={handlePress}>
-          <View style={{ ...styles.barstyle, width: 35 }}></View>
-          <View style={{ ...styles.barstyle, width: 25 }}></View>
-        </TouchableOpacity>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() =>
-            navigation.navigate('AccountWrapper', { screen: 'Accounts' })
-          }
-          style={{ ...styles.profileimgstyle, elevation: 5 }}>
-          <Image
-            style={styles.profileimgstyle}
-            source={require('../../assets/images/man.png')}
-          />
-        </TouchableOpacity> */}
         <ARow mt={'10px'} row alignItems="center" position="relative">
           <Icon
             style={styles.iconstyle}
@@ -285,7 +279,8 @@ const HomeScreen = ({ navigation }) => {
           <TextInput
             height={30}
             bc={'#E0E0E0'}
-            value={inpvalue}
+            onSubmit={() => handleSearchProduct()}
+            value={searchTerm}
             onchange={handleinpiut}
             padding={0}
             pl={35}
@@ -298,7 +293,11 @@ const HomeScreen = ({ navigation }) => {
         </ARow>
       </View>
       <View style={{ padding: 10, backgroundColor: Colors.whiteColor }}></View>
-      <AContainer withoutPadding nestedScrollEnabled={true}>
+      <AContainer
+        onRefresh={onRefresh}
+        refreshing={refreshing}
+        withoutPadding
+        nestedScrollEnabled={true}>
         <Categories
           navigation
           navigateNextScreen={(item) => {
@@ -306,42 +305,43 @@ const HomeScreen = ({ navigation }) => {
           }}
           allCategories={allCategories}
         />
-        <ARow mb="20px" wrap row>
-          <ACol col={1}>
-            <PopularPicksWrapper>
-              <PopularPicksImage
-                source={require('../../assets/images/section.jpg')}
-              />
-            </PopularPicksWrapper>
-          </ACol>
-        </ARow>
+
         {!isEmpty(recentAddedProduct) && (
-          <ImageSlider
-            dataItems={recentAddedProduct}
-            navigatetonext={(item) => {
-              navigation.navigate('CateGories', {
-                screen: 'SingleProduct',
-                initial: false,
-                params: { productID: item._id, productUrl: item.url },
-              });
-            }}
-          />
+          <>
+            <ARow mb="20px" wrap row>
+              <ACol col={1}>
+                <PopularPicksWrapper>
+                  <PopularPicksImage
+                    source={{
+                      uri: getCategoryImage('Recently Added Products'),
+                    }}
+                  />
+                </PopularPicksWrapper>
+              </ACol>
+            </ARow>
+            <ImageSlider
+              title={'New Arrival'}
+              dataItems={recentAddedProduct}
+              navigatetonext={(item) => {
+                navigation.navigate(NavigationConstants.SINGLE_PRODUCT_SCREEN, {
+                  productID: item._id,
+                  productUrl: item.url,
+                });
+              }}
+            />
+          </>
         )}
         <ARow wrap row></ARow>
 
-        <ARow mb="20px" wrap row>
-          <ACol col={1}>
-            <PopularPicksWrapper>
-              <PopularPicksImage
-                source={require('../../assets/images/section.jpg')}
-              />
-            </PopularPicksWrapper>
-          </ACol>
-        </ARow>
         {!isEmpty(brands) && (
           <SectionView>
-            <AText uppercase heavy mb={'20px'} center color={primaryColor}>
-              Fatured Brands
+            <AText
+              ml="30px"
+              mb={'10px'}
+              mt={'15px'}
+              large
+              fonts={FontStyle.fontBold}>
+              Featured Brands
             </AText>
             <HomeBrandViews
               allbrands={brands}
@@ -354,18 +354,29 @@ const HomeScreen = ({ navigation }) => {
         )}
         {!isEmpty(featureData) && (
           <>
+            <ARow mb="20px" wrap row>
+              <ACol col={1}>
+                <PopularPicksWrapper>
+                  <PopularPicksImage
+                    source={{
+                      uri: getCategoryImage('Featured Product'),
+                    }}
+                  />
+                </PopularPicksWrapper>
+              </ACol>
+            </ARow>
             <SectionView>
-              <AText uppercase heavy center color={primaryColor}>
-                FEATURED COLLECTIONS
-              </AText>
-              <HomeComponentShowViews
+              <ImageSlider
+                title={'Featured Collection'}
                 dataItems={featureData}
                 navigatetonext={(item) => {
-                  navigation.navigate('CateGories', {
-                    screen: 'SingleProduct',
-                    initial: false,
-                    params: { productID: item._id },
-                  });
+                  navigation.navigate(
+                    NavigationConstants.SINGLE_PRODUCT_SCREEN,
+                    {
+                      productID: item._id,
+                      productUrl: item.url,
+                    },
+                  );
                 }}
               />
             </SectionView>
@@ -374,60 +385,68 @@ const HomeScreen = ({ navigation }) => {
 
         {!isEmpty(recentAddedProduct) && (
           <>
+            <ARow mb="20px" wrap row>
+              <ACol col={1}>
+                <PopularPicksWrapper>
+                  <PopularPicksImage
+                    source={{
+                      uri: getCategoryImage('Products On Sales'),
+                    }}
+                  />
+                </PopularPicksWrapper>
+              </ACol>
+            </ARow>
             <SectionView>
-              <AText uppercase heavy center color={primaryColor}>
-                Latest collection
-              </AText>
-              <HomeComponentShowViews
+              <ImageSlider
+                title={'Latest Collection'}
                 dataItems={recentAddedProduct}
                 navigatetonext={(item) => {
-                  navigation.navigate('CateGories', {
-                    screen: 'SingleProduct',
-                    initial: false,
-                    params: { productID: item._id },
-                  });
+                  navigation.navigate(
+                    NavigationConstants.SINGLE_PRODUCT_SCREEN,
+                    {
+                      productID: item._id,
+                      productUrl: item.url,
+                    },
+                  );
                 }}
               />
             </SectionView>
           </>
         )}
 
-        <SectionView>
-          <AText uppercase heavy center color={primaryColor}>
-            POPULAR PICKS
-          </AText>
-          <ARow>
-            <ACol col={1}>
-              <PopularPicksWrapper>
-                <PopularPicksImage
-                  source={require('../../assets/images/summer_sale_60.webp')}
-                />
-              </PopularPicksWrapper>
-            </ACol>
-          </ARow>
-        </SectionView>
-
         {!isEmpty(saleProduct) && (
           <>
+            <ARow mb="20px" wrap row>
+              <ACol col={1}>
+                <PopularPicksWrapper>
+                  <PopularPicksImage
+                    source={{
+                      uri: getCategoryImage('Product from Specific Categories'),
+                    }}
+                  />
+                </PopularPicksWrapper>
+              </ACol>
+            </ARow>
             <SectionView>
               <CardContainer
                 dataItems={saleProduct}
                 navigatetonext={(item) => {
-                  navigation.navigate('CateGories', {
-                    screen: 'SingleProduct',
-                    initial: false,
-                    params: { productID: item._id },
-                  });
+                  navigation.navigate(
+                    NavigationConstants.SINGLE_PRODUCT_SCREEN,
+                    {
+                      productID: item._id,
+                      productUrl: item.url,
+                    },
+                  );
                 }}
               />
 
               {/* <HomeComponentShowViews
                 dataItems={saleProduct}
                 navigatetonext={(item) => {
-                  navigation.navigate('CateGories', {
-                    screen: 'SingleProduct',
-                    initial: false,
-                    params: { productID: item._id },
+                   navigation.navigate(NavigationConstants.SINGLE_PRODUCT_SCREEN, {
+                    productID: item._id,
+                    productUrl: item.url,
                   });
                 }}
               /> */}
@@ -438,27 +457,17 @@ const HomeScreen = ({ navigation }) => {
         {!isEmpty(ProductByCategory) && (
           <>
             <SectionView>
-              <ARow>
-                <ACol col={1}>
-                  <PopularPicksWrapper>
-                    <PopularPicksImage
-                      source={require('../../assets/images/section2.jpg')}
-                    />
-                  </PopularPicksWrapper>
-                </ACol>
-              </ARow>
-            </SectionView>
-
-            <SectionView>
               {/* <AText uppercase heavy mb={'10px'} center color={primaryColor}></AText> */}
               <HomeComponentShowViews
                 dataItems={ProductByCategory}
                 navigatetonext={(item) => {
-                  navigation.navigate('CateGories', {
-                    screen: 'SingleProduct',
-                    initial: false,
-                    params: { productID: item._id },
-                  });
+                  navigation.navigate(
+                    NavigationConstants.SINGLE_PRODUCT_SCREEN,
+                    {
+                      productID: item._id,
+                      productUrl: item.url,
+                    },
+                  );
                 }}
               />
             </SectionView>
@@ -468,11 +477,6 @@ const HomeScreen = ({ navigation }) => {
     </View>
   );
 };
-
-const FeaturedImage = styled.Image`
-  width: 100%;
-  height: 175px;
-`;
 
 const SectionView = styled.View`
   padding: 10px 0;
@@ -490,50 +494,25 @@ const PopularPicksImage = styled.Image`
   height: 100%;
   resize-mode: stretch;
 `;
-const HeaderLogo = styled.Image`
-  resize-mode: contain;
-  width: 90%;
-  height: 60%;
-`;
-const HeaderLogoWrapper = styled.View`
-  width: 100%;
-  height: 80px;
-  justify-content: center;
-  align-items: center;
-  align-self: center;
-  background: #fff;
-`;
-
-const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: 'white' },
-  child: { width, justifyContent: 'center' },
-  image: { width: Dimensions.width, height: 300, resizeMode: 'contain' },
-  text: { fontSize: width * 0.5, textAlign: 'center' },
   searchstyle: {
     flexWrap: 'wrap',
     flexDirection: 'row',
     backgroundColor: Colors.whiteColor,
-    height: 90,
+    height: 60,
     marginTop: 30,
     paddingHorizontal: 30,
     paddingTop: 20,
-    // justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
-  barstyle: {
-    height: 4,
-    backgroundColor: 'black',
-    marginBottom: 5,
-    borderRadius: 5,
-  },
+
   iconstyle: {
     marginRight: 5,
     position: 'absolute',
     left: 10,
     zIndex: 2,
   },
-  profileimgstyle: { height: 30, width: 35, borderRadius: 35 },
 });
 export default HomeScreen;

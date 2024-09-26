@@ -4,7 +4,7 @@ import {
   AContainer,
   AHeader,
   AButton,
-  ZHeader,
+  BackHeader,
 } from '../../theme-components';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -22,9 +22,10 @@ import { GREYTEXT } from '../../utils/config';
 import Colors from '../../constants/Colors';
 import Header from '../components/Header';
 import Styles from '../../Theme';
+import NavigationConstants from '../../navigation/NavigationConstants';
 
 const AccountScreen = ({ navigation }) => {
-  const isLoggin = useSelector((state) => state.customer.isLoggin);
+  const { isLoggin, userDetails } = useSelector((state) => state.customer);
   const dispatch = useDispatch();
 
   const Logout = () => {
@@ -45,27 +46,27 @@ const AccountScreen = ({ navigation }) => {
                 center
                 fonts={FontStyle.semiBold}
                 color="black">
-                Candice King
+                {userDetails.firstName} {userDetails.lastName}
               </AText>
               <AText
                 mb="5px"
                 center
                 fonts={FontStyle.semiBold}
                 color={APP_PRIMARY_COLOR}>
-                Custom@ravendel.com
+                {userDetails.email}
               </AText>
               <AText
                 center
                 fonts={FontStyle.semiBold}
                 color={APP_PRIMARY_COLOR}>
-                5452545545
+                {userDetails.phone}
               </AText>
             </View>
             <View style={styles.container}>
               <TouchableOpacity
                 style={styles.optionstyle}
                 onPress={() =>
-                  navigation.navigate('EditProfile', {
+                  navigation.navigate(NavigationConstants.EDIT_PROFILE_SCREEN, {
                     initial: false,
                   })
                 }>
@@ -87,9 +88,12 @@ const AccountScreen = ({ navigation }) => {
               <TouchableOpacity
                 style={styles.optionstyle}
                 onPress={() =>
-                  navigation.navigate('SavedAddress', {
-                    initial: false,
-                  })
+                  navigation.navigate(
+                    NavigationConstants.SAVED_ADDRESS_SCREEN,
+                    {
+                      initial: false,
+                    },
+                  )
                 }>
                 <ListIcon>
                   <Icon name="map-marker" color={GREYTEXT} size={18} />
@@ -109,9 +113,12 @@ const AccountScreen = ({ navigation }) => {
               <TouchableOpacity
                 style={styles.optionstyle}
                 onPress={() =>
-                  navigation.navigate('ChangePassword', {
-                    initial: false,
-                  })
+                  navigation.navigate(
+                    NavigationConstants.CHANGE_PASSWORD_SCREEN,
+                    {
+                      initial: false,
+                    },
+                  )
                 }>
                 <ListIcon>
                   <Icon name="heart-o" color={GREYTEXT} size={18} />
@@ -131,7 +138,7 @@ const AccountScreen = ({ navigation }) => {
               <TouchableOpacity
                 style={styles.optionstyle}
                 onPress={() =>
-                  navigation.navigate('Orders', {
+                  navigation.navigate(NavigationConstants.ORDERS_SCREEN, {
                     initial: false,
                   })
                 }>
@@ -152,9 +159,12 @@ const AccountScreen = ({ navigation }) => {
               <TouchableOpacity
                 style={styles.optionstyle}
                 onPress={() =>
-                  navigation.navigate('SavedAddress', {
-                    initial: false,
-                  })
+                  navigation.navigate(
+                    NavigationConstants.SAVED_ADDRESS_SCREEN,
+                    {
+                      initial: false,
+                    },
+                  )
                 }>
                 <ListIcon>
                   <Icon name="bell-o" color={GREYTEXT} size={18} />
@@ -185,7 +195,7 @@ const AccountScreen = ({ navigation }) => {
                 block
                 round
                 onPress={() =>
-                  navigation.navigate('LoginSignUp', {
+                  navigation.navigate(NavigationConstants.LOGIN_SIGNUP_SCREEN, {
                     initial: false,
                   })
                 }

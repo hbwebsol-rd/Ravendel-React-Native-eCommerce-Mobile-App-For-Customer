@@ -3,6 +3,7 @@ import { AText, ARow, ACol } from '../../../theme-components';
 import styled from 'styled-components/native';
 import URL from '../../../utils/baseurl';
 import { isEmpty } from '../../../utils/helper';
+import PropTypes from 'prop-types';
 
 const HomeBrandViews = ({ allbrands, navigateNextScreen, navigation }) => {
   const CategoryShowView = React.memo(() => {
@@ -38,6 +39,11 @@ const HomeBrandViews = ({ allbrands, navigateNextScreen, navigation }) => {
       <CategoryShowView />
     </>
   );
+};
+
+HomeBrandViews.propTypes = {
+  allbrands: PropTypes.array,
+  navigateNextScreen: PropTypes.func,
 };
 
 const CategoriesListingWrapper = styled.TouchableOpacity`

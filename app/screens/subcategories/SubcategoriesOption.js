@@ -14,21 +14,22 @@ import AIcon from 'react-native-vector-icons/AntDesign';
 import { capitalizeFirstLetter, isEmpty } from '../../utils/helper';
 import FastImage from 'react-native-fast-image';
 import URL from '../../utils/baseurl';
+import NavigationConstants from '../../navigation/NavigationConstants';
+import PropTypes from 'prop-types';
 
 const SubcategoryOption = ({ navigation, route }) => {
   const singleCat = route?.params?.singleCategory;
   const singleCatChildern = route?.params?.withChildern;
-  console.log(singleCat, '---', singleCatChildern);
   return (
     <ScrollView style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
       <View style={styles.header}>
         <AIcon
-          onPress={() => navigation.navigate('Home')}
+          onPress={() => navigation.navigate(NavigationConstants.SHOP_SCREEN)}
           name="arrowleft"
           size={22}
         />
         <AText fonts={FontStyle.semiBold} ml="20px">
-          {capitalizeFirstLetter(singleCat.url)}
+          {capitalizeFirstLetter(singleCat?.url)}
         </AText>
       </View>
       <View style={styles.catcontainer}>
@@ -44,17 +45,12 @@ const SubcategoryOption = ({ navigation, route }) => {
                 borderRadius: 12,
               }}
               onPress={() => {
-                navigation.navigate('CateGories', {
-                  screen: 'SubCategories',
-                  initial: false,
-                  params: {
-                    singleCategory: item,
-                    withChildern: item.children,
-                  },
+                navigation.navigate(NavigationConstants.SUBCATEGORIES_SCREEN, {
+                  singleCategory: item,
+                  withChildern: item.children,
                 });
                 // setSelectedId(item._id);
               }}>
-              {console.log(URL + item.image, 'urlll')}
               <ImageBackground
                 source={{
                   uri: !isEmpty(item.image)
@@ -128,6 +124,11 @@ const SubcategoryOption = ({ navigation, route }) => {
       </View>
     </ScrollView>
   );
+};
+
+SubcategoryOption.propTypes = {
+  navigation: PropTypes.object,
+  route: PropTypes.object,
 };
 
 const styles = StyleSheet.create({
