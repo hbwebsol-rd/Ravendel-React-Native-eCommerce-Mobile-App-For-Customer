@@ -108,7 +108,7 @@ const SubcategoryOption = ({ navigation, route }) => {
     return Categories.map((category) => {
       // if (category.parentId === null) {
       return (
-        <ACol style={{ marginTop: 60 }} col={2} key={category.id}>
+        <ACol style={{ marginTop: 15 }} col={2} key={category.id}>
           <CategoriesListingWrapper
             activeOpacity={0.9}
             onPress={() => {
@@ -119,7 +119,7 @@ const SubcategoryOption = ({ navigation, route }) => {
                 <CategoryImageWrapper>
                   <CategoryImage
                     source={{
-                      uri: uriImage(category.image)
+                      uri: uriImage(category.thumbnail_image)
                     }}
                   />
                 </CategoryImageWrapper>
@@ -148,7 +148,7 @@ const SubcategoryOption = ({ navigation, route }) => {
           {capitalizeFirstLetter(singleCat?.url)}
         </AText>
       </View>
-      <ScrollView style={{ backgroundColor: Colors.whiteColor, marginTop: 15 }}>
+      <ScrollView style={{ backgroundColor: Colors.whiteColor, marginTop: 45 }}>
         <View style={{ marginTop: 5 }} />
         {!isEmpty(subcategoriesData) && subcategoriesData.length > 0 ? (
           <ARow row wrap>
@@ -178,7 +178,7 @@ SubcategoryOption.propTypes = {
 };
 
 const CategoriesListingWrapper = styled.TouchableOpacity`
-  margin: 10px 0 20px 0;
+  margin: 0px 0 20px 0;
   height: 120px;
   border-radius: 15px;
   background-color: #f7f7f7;

@@ -9,7 +9,7 @@ import Styles from '../../Theme';
 import { AText, AButton, TextInput } from '../../theme-components';
 import { signupValidationSchema } from '../checkout/validationSchema';
 import { registerAction } from '../../store/action';
-import { BASEURL } from '../../utils/config';
+import { APP_PRIMARY_COLOR, BASEURL } from '../../utils/config';
 import { create } from 'lodash';
 import { StyleSheet } from 'react-native';
 
@@ -41,7 +41,7 @@ const SignupScreen = ({ navigation, handleActiveTab }) => {
     onSubmit: (values, { setSubmitting, resetForm }) => {
       setSubmitting(false);
       sendValues(values);
-      resetForm();
+      // resetForm();
     },
   });
 
@@ -101,6 +101,7 @@ const SignupScreen = ({ navigation, handleActiveTab }) => {
                   value={formik.values.mobile}
                   placeholdercolor={'#ABA7A7'}
                   inputBgColor="transparent"
+                  bc={APP_PRIMARY_COLOR+'20'}
                 />
               </>
               :
@@ -111,12 +112,16 @@ const SignupScreen = ({ navigation, handleActiveTab }) => {
                 onchange={(val) => formik.setFieldValue(value, val)}
                 value={formik.values[value]}
                 placeholdercolor="#ABA7A7"
+                iconColor={secureTextEntry?'#9F9F9F':null}
+                icon={secureTextEntry?'eye-off':null}
+                hookuse={secureTextEntry}
+                bc={APP_PRIMARY_COLOR+'20'}
               />
             }
           </View>
           {
             formik.touched[value] && formik.errors[value] && (
-              <AText color="red" xtrasmall>
+              <AText color="red" style={{marginLeft:5}} xtrasmall>
                 {formik.errors[value]}
               </AText>
             )
@@ -145,7 +150,7 @@ const SignupScreen = ({ navigation, handleActiveTab }) => {
       <AButton
         buttonStyle={styles.singupBtnStyle}
         onPress={formik.handleSubmit}
-        title="Sign up"
+        title="Signup"
       />
     </>
   );

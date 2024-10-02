@@ -2,9 +2,10 @@ import AIcon from 'react-native-vector-icons/AntDesign';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { AText } from '.';
 import { FontStyle } from '../utils/config';
+import Colors from '../constants/Colors';
 const Header = ({ name, navigation }) => (
   <View style={styles.header}>
-    <AIcon name="arrowleft" onPress={() => navigation.goBack()} size={22} />
+    <AIcon name="arrowleft" color={Colors.blackColor} onPress={() => navigation.goBack()} size={22} />
     <AText style={styles.textStyle} large>
       {name}
     </AText>

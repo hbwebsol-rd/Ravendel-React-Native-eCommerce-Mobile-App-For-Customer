@@ -1,9 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import {
-  StyleSheet,
-  View,
-  ScrollView,
-} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {StyleSheet, View, ScrollView} from 'react-native';
 import {
   AText,
   AButton,
@@ -11,39 +7,41 @@ import {
   AppLoader,
   MainLayout,
 } from '../../theme-components';
-import { isEmpty } from '../../utils/helper';
-import { useDispatch, useSelector } from 'react-redux';
-import { FontStyle } from '../../utils/config';
-import { applyCouponAction, checkStorageAction, } from '../../store/action';
+import {isEmpty} from '../../utils/helper';
+import {useDispatch, useSelector} from 'react-redux';
+import {APP_PRIMARY_COLOR, FontStyle} from '../../utils/config';
+import {applyCouponAction, checkStorageAction} from '../../store/action';
 import Colors from '../../constants/Colors';
 import PropTypes from 'prop-types';
-import { checkoutDetailsAction, getShippingMethods } from '../../store/action/checkoutAction';
-import { COUPON_REMOVED } from '../../store/action/cartAction';
+import {
+  checkoutDetailsAction,
+  getShippingMethods,
+} from '../../store/action/checkoutAction';
+import {COUPON_REMOVED} from '../../store/action/cartAction';
 import CartProductDisplayCard from '../../theme-components/cartProductDisplayCard';
 import CartPriceTags from '../components/cartPriceTags';
 import CouponSection from './component/couponSection';
 import ShippingOrPaymentSection from './component/ShippingOrPaymentSection';
+import {mutation} from '../../utils/service';
+import {UPDATE_PAYMENT_STATUS} from '../../queries/orderQuery';
 
-const CheckoutDetails = ({ navigation }) => {
-
+const CheckoutDetails = ({navigation}) => {
   const dispatch = useDispatch();
 
-  const { userDetails } = useSelector((state) => state.customer);
-  const cartItems = useSelector((state) => state.cart.products);
-  const { shippingMethodList, loading } = useSelector((state) => state.checkoutDetail);
-  const { paymentSetting } = useSelector((state) => state.settings);
-  const [paymentMethod, setPaymentMethod] = useState('CASH_ON_DELIVERY');
+  const {userDetails} = useSelector(state => state.customer);
+  const cartItems = useSelector(state => state.cart.products);
+  const {shippingMethodList, loading} = useSelector(
+    state => state.checkoutDetail,
+  );
+  const {paymentSetting} = useSelector(state => state.settings);
+  const [paymentMethod, setPaymentMethod] = useState('');
   const [couponCode, setCouponCode] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
 
   const [couponApplied, setCouponApplied] = useState(false);
   const [shippingMethod, setShippingMethod] = useState('');
-  const {
-    cartSummary,
-    couponDiscount,
-    cartId,
-    shippingAddress,
-    billingAddress,
-  } = useSelector((state) => state.cart);
+  const {cartSummary, couponDiscount, cartId, shippingAddress, billingAddress} =
+    useSelector(state => state.cart);
 
   const {
     pincode: shipping_pincode,
@@ -67,15 +65,15 @@ const CheckoutDetails = ({ navigation }) => {
     country: biller_country,
   } = billingAddress;
 
-  const { email: userEmail, _id } = userDetails;
+  const {email: userEmail, _id} = userDetails;
 
   const mrpArray = [
-    { id: 1, name: 'Total MRP', value: 'mrpTotal' },
-    { id: 2, name: 'Discount On MRP', value: 'discountTotal' },
-    { id: 3, name: 'Discount By Coupon', value: 'couponDiscount' },
-    { id: 4, name: 'Shipping Fee', value: 'totalShipping' },
-    { id: 5, name: 'Total Amount', value: 'grandTotal' },
-  ]
+    {id: 1, name: 'Total MRP', value: 'mrpTotal'},
+    {id: 2, name: 'Discount On MRP', value: 'discountTotal'},
+    {id: 3, name: 'Discount By Coupon', value: 'couponDiscountTotal'},
+    {id: 4, name: 'Shipping Fee', value: 'totalShipping'},
+    {id: 5, name: 'Total Amount', value: 'grandTotal'},
+  ];
   useEffect(() => {
     dispatch(getShippingMethods());
   }, []);
@@ -95,7 +93,7 @@ const CheckoutDetails = ({ navigation }) => {
       return;
     }
     let cartpro = [];
-    cartItems.map((cart) => {
+    cartItems.map(cart => {
       cartpro.push({
         productId: cart.productId,
         // total: cart.total,
@@ -107,10 +105,17 @@ const CheckoutDetails = ({ navigation }) => {
       cartItems: cartpro,
       userId: userDetails._id,
     };
-    dispatch(applyCouponAction(payload, setCouponApplied));
+    setCouponLoading(true);
+    dispatch(applyCouponAction(payload, setCouponApplied, setCouponLoading));
   };
 
-  const checkoutDetails = () => {
+  const checkoutDetails = async () => {
+    // const payloadss = {"id": "66bc931f57d87b6301772e77", "paymentStatus": "success"}
+    // const response = await mutation(UPDATE_PAYMENT_STATUS, payloadss);
+    // const { data } = response;
+    // console.log(data)
+    // return
+
     // if (isEmpty(shippingMethod)) {
     //   alert('Please select shipping Method');
     //   return;
@@ -144,13 +149,13 @@ const CheckoutDetails = ({ navigation }) => {
         phone: shipping_phone || '1234',
         notes: '',
       },
+      couponCode: couponCode,
     };
     const navParams = {
       cartProducts: cartItems,
       shippingMethod: shippingMethod,
       paymentMethod: paymentMethod,
     };
-    // return;
     if (paymentMethod.toLowerCase() !== 'paypal') {
       dispatch(
         checkoutDetailsAction(
@@ -163,7 +168,10 @@ const CheckoutDetails = ({ navigation }) => {
         ),
       );
     } else {
-      navigation.navigate('PaypalPayment', { orderData: payload });
+      navigation.navigate('PaypalPayment', {
+        orderData: payload,
+        navParams: navParams,
+      });
     }
     // } else {
     //   navigation.navigate('StripePayment');
@@ -179,6 +187,8 @@ const CheckoutDetails = ({ navigation }) => {
       <BackHeader navigation={navigation} name="Checkout" />
 
       <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps={'always'}
         contentContainerStyle={styles.scrollContentContainerStyle}
         style={styles.scrollStyle}>
         <CouponSection
@@ -187,6 +197,7 @@ const CheckoutDetails = ({ navigation }) => {
           couponApplied={couponApplied}
           removeCoupon={removeCoupon}
           ApplyCoupon={ApplyCoupon}
+          couponLoading={couponLoading}
         />
         {/* <ShippingOrPaymentSection
           title={'Shipping Method'}
@@ -196,9 +207,11 @@ const CheckoutDetails = ({ navigation }) => {
         /> */}
         <ShippingOrPaymentSection
           title={'Payment Mode'}
-          data={Object.values(paymentSetting).filter((item => item.enable))}
+          data={Object.values(paymentSetting).filter(item => item.enable)}
           selected={paymentMethod}
-          setSelected={(item) => { setPaymentMethod(item.__typename) }}
+          setSelected={item => {
+            setPaymentMethod(item.__typename);
+          }}
         />
         <View style={styles.containerStyles}>
           <AText style={styles.orderTextStyle} large>
@@ -207,15 +220,22 @@ const CheckoutDetails = ({ navigation }) => {
           <CartProductDisplayCard
             navigation={navigation}
             cartProducts={cartItems}
-            ShowIncrementDecreement={false} />
+            ShowIncrementDecreement={false}
+          />
         </View>
-        <View style={{ width: '100%', marginBottom: 25, marginTop: 25 }}>
-          {mrpArray.map((item) => <CartPriceTags item={item} cartSummary={cartSummary} couponDiscount={couponDiscount} />)}
+        <View style={{width: '100%', marginBottom: 25, marginTop: 25}}>
+          {mrpArray.map(item => (
+            <CartPriceTags
+              item={item}
+              cartSummary={cartSummary}
+              couponDiscount={couponDiscount}
+            />
+          ))}
         </View>
       </ScrollView>
-
-
       <AButton
+        bgColor={paymentMethod === '' ? '#dcdcdc' : APP_PRIMARY_COLOR}
+        borderColor={paymentMethod === '' ? '#dcdcdc' : APP_PRIMARY_COLOR}
         disabled={paymentMethod === '' ? true : false}
         title="PLACE ORDER"
         style={styles.placeOrderBtn}
@@ -236,19 +256,19 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     backgroundColor: Colors.whiteColor,
   },
-  containerStyles: { marginTop: 25 },
+  containerStyles: {marginTop: 25},
   scrollContentContainerStyle: {
     paddingBottom: 45,
   },
   orderTextStyle: {
     color: '#000',
     marginBottom: 5,
-    fontFamily: FontStyle.fontBold
+    fontFamily: FontStyle.fontBold,
   },
   scrollStyle: {
     marginHorizontal: 15,
     flex: 1,
-    marginTop: 45,
+    marginTop: 15,
   },
   placeOrderBtn: {
     borderRadius: 25,

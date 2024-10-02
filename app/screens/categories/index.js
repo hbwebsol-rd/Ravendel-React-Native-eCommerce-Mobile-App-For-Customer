@@ -82,7 +82,7 @@ const CategoriesScreen = ({ navigation }) => {
       <View style={styles.emptyViewStyle}>
         <AText
           style={styles.emptyTextStyle}>
-          No Records Found
+          No Categories Found
         </AText>
       </View>
     )
@@ -135,11 +135,13 @@ const styles = StyleSheet.create({
     marginTop: 30,
     flexWrap: 'wrap',
     padding: 15,
-
+    alignItems:'center',
   },
   emptyTextStyle: {
     fontSize: 16,
     alignSelf: 'center',
     color: 'grey',
+    textAlign:'center',
+    width:'100%'
   }
 });

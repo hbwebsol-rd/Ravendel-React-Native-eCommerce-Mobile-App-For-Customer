@@ -14,7 +14,7 @@ const pincodeReg = '^[0-9]{5,10}$';
 const PASSWORD_MSG =
   'Password Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character';
 export const validationSchema = yup.object().shape({
-  firstname: yup.string().label('First Name').min(4).required(),
+  firstname: yup.string().label('First Name').min(2).required(),
   lastname: yup.string().label('Last Name').min(2).required(),
   phone: yup
     .string()
@@ -78,7 +78,7 @@ export const signupValidationSchema = yup.object().shape({
 export const editProfileValidationSchema = yup.object().shape({
   first_name: yup.string().label('First Name').min(4).required('First Name is required'),
   last_name: yup.string().label('Last Name').min(2).required('Last Name is required'),
-  email: yup.string().label('Email').email().required('EmailD is required'),
+  email: yup.string().label('Email').email().required('EmailD is required').matches(regexEmail, 'Enter valid email'),
   phone: yup
     .string()
     // .matches(phoneReg, 'Phone number is not valid')
@@ -91,6 +91,34 @@ export const loginValidationSchema = yup.object().shape({
   password: yup.string().label('Password').required(),
   // .min(2, 'Seems a bit short...'),
 });
+
+export const changePasswordValidationSchema = yup.object().shape({
+  old_password: yup.string().label('Password').required("Password is required"),
+  new_password: yup
+  .string('')
+  .required('Please enter password')
+  .min(8, PASSWORD_MSG)
+  .required('Password is required')
+  .matches(regexsmallet, PASSWORD_MSG)
+  .matches(regexcaps, PASSWORD_MSG)
+  .matches(regexdigi, PASSWORD_MSG)
+  .matches(regexspeChar, PASSWORD_MSG)
+  .matches(regularExpression, 'Password too weak'),
+  confirm_password: yup
+  .string()
+  .required('Confirm password is required')
+  .label('Confirm password')
+  .test('passwords-match', 'Passwords must match', function (value) {
+    return this.parent.new_password === value;
+  }),
+  // .min(2, 'Seems a bit short...'),
+});
+
+export const forgotPasswordValidationSchema = yup.object().shape({
+  email: yup.string().label('Email').email().required('Please enter email').matches(regexEmail, 'Enter valid email')
+  ,
+});
+
 export const reviewValidationSchema = yup.object().shape({
   title: yup.string().label('Title').required(),
   review: yup.string().label('Review').required(),

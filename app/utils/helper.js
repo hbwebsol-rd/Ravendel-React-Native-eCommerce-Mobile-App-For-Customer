@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BASEURL, dummyImage } from './config';
+import {BASEURL, dummyImage} from './config';
 
-export const isEmpty = (value) =>
+export const isEmpty = value =>
   value === undefined ||
   value === null ||
   (typeof value === 'object' && Object.keys(value).length === 0) ||
@@ -14,17 +14,15 @@ if (process.env.NODE_ENV === "production") {
   baseURL = "http://localhost:8000";
 }*/
 
-export const uriImage = (value) => {
-  return !isEmpty(value)
-    ? BASEURL + value
-    : dummyImage
-}
+export const uriImage = value => {
+  return !isEmpty(value) ? BASEURL + value : dummyImage;
+};
 /*-------------------------------------------------------------------------------------------------------------------------------------- */
 //simple category array to Tree array
 export const unflatten = (items, id = null, link = 'parentId') => {
   const arr = items
-    .filter((item) => item[link] === id)
-    .map((item) => ({ ...item, children: unflatten(items, item.id) }));
+    .filter(item => item[link] === id)
+    .map(item => ({...item, children: unflatten(items, item.id)}));
   return arr;
 };
 
@@ -77,16 +75,19 @@ export const shippedFinalStatuscolor = (status, alpha) => {
 // };
 
 export var categoriesPrint = '';
-export const printTree = (tree) => {
+export const printTree = tree => {
   categoriesPrint += "<ul className='category-dropdown'>";
 
   for (let i in tree) {
-    categoriesPrint += `<li className="${tree[i].children && tree[i].children.length ? 'has-submenu' : ''
-      }">                               
-                        <label for="${tree[i].name
-      }" className="checkmark-container">${tree[i].name}
-                          <input type='checkbox' name="abc" id="${tree[i].name
-      }">
+    categoriesPrint += `<li className="${
+      tree[i].children && tree[i].children.length ? 'has-submenu' : ''
+    }">                               
+                        <label for="${
+                          tree[i].name
+                        }" className="checkmark-container">${tree[i].name}
+                          <input type='checkbox' name="abc" id="${
+                            tree[i].name
+                          }">
                           <span className="checkmark"></span>
                         </label>`;
     if (tree[i].children && tree[i].children.length) {
@@ -111,7 +112,7 @@ export const getToken = async () => {
   return token;
 };
 
-export const getValue = async (key) => {
+export const getValue = async key => {
   var data = '';
   try {
     const storageToken = await AsyncStorage.getItem(key);
@@ -134,9 +135,8 @@ export const checkUserLoginStorage = async () => {
   };
 };
 
-
 export const formatCurrency = (amt, currencyOptions, currencySymbol) => {
-  if (!amt || !currencyOptions || !currencySymbol) {
+  if (!currencyOptions || !currencySymbol) {
     return '';
   }
   var amount = parseFloat(amt);
@@ -144,9 +144,13 @@ export const formatCurrency = (amt, currencyOptions, currencySymbol) => {
     let postion = currencyOptions.currency_position;
     let decimal = currencyOptions.number_of_decimals || 2;
     let thousand_separator = currencyOptions.thousand_separator || ',';
-    return `${postion == 'left' || postion === 'left_space' ? currencySymbol : ''
-      }${amount.toFixed(decimal).replace(/\B(?=(\d{3})+(?!\d))/g, thousand_separator)}${postion == 'right' || postion === 'right_space' ? currencySymbol : ''
-      }`;
+    return `${
+      postion == 'left' || postion === 'left_space' ? currencySymbol : ''
+    }${amount
+      .toFixed(decimal)
+      .replace(/\B(?=(\d{3})+(?!\d))/g, thousand_separator)}${
+      postion == 'right' || postion === 'right_space' ? currencySymbol : ''
+    }`;
   } else {
     return `$${amount}`;
   }
@@ -158,6 +162,6 @@ export function capitalizeFirstLetter(string) {
   }
 }
 
-export const wait = (timeout) => {
-  return new Promise((resolve) => setTimeout(resolve, timeout));
+export const wait = timeout => {
+  return new Promise(resolve => setTimeout(resolve, timeout));
 };

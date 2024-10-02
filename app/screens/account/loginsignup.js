@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
+  Alert,
+  Image,
   ImageBackground,
   StyleSheet,
   TouchableOpacity,
@@ -16,8 +18,13 @@ import {
   FontStyle,
 } from '../../utils/config';
 import ForgotPasswordScreen from './forgotPassword';
+import AIcon from 'react-native-vector-icons/AntDesign';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import { registerAction } from '../../store/action';
+import { LoginByGoogleAction } from '../../store/action/loginAction';
 
 const UserEntry = ({ navigation }) => {
+  const dispatch = useDispatch()
   const loading = useSelector((state) => state.login.loading);
   const [activetab, setActivetab] = useState('Signin');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -26,17 +33,64 @@ const UserEntry = ({ navigation }) => {
     setActivetab(tabname);
   };
 
+  const signIn = async () => {
+    try {
+      await GoogleSignin.hasPlayServices({
+        showPlayServicesUpdateDialog: true,
+      });
+      const userInfo = await GoogleSignin.signIn();
+      if (userInfo) {
+        console.log(userInfo,'iuiuiu')
+        // const payload = {
+        //   FirstName: userInfo.user.givenName,
+        //   LastName: userInfo.user.familyName,
+        //   EmailId: userInfo.user.email,
+        //   MobNum: '',
+        //   Password: 'na',
+        //   UserType: 1,
+        // };
+      
+        const registerValue = {
+          idToken: userInfo.idToken
+        };
+        dispatch(LoginByGoogleAction(registerValue, navigation, handleActiveTab));
+        // console.log(payload, 'pylload');
+        // dispatch(SignupAction(payload, navigation));
+      }
+      // console.log(userInfo);
+      // setUser(userInfo);
+    } catch (error) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        // User canceled the sign-in
+        // Alert.alert('Google Sign-In Cancelled');
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        // Sign-in is in progress already
+        Alert.alert('Google Sign-In In Progress');
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        // Play Services not available or outdated
+        Alert.alert('Play Services Not Available');
+      } else {
+        // Other error
+        console.log(error);
+        Alert.alert('Error', error.message);
+      }
+    }
+  };
+
+
   return (
     <>
       {loading && <AppLoader />}
       <MainLayout>
-        <ImageBackground
+        <View
           style={styles.backimage}
           resizeMode="stretch"
           source={require('../../assets/images/loginscreen.png')}>
+            {/* <View style={styles.circle}></View> */}
           <AText textStyle={styles.appNameTextStyle} title>
             {APP_NAME}
           </AText>
+          <AIcon name="arrowleft" style={{position:'absolute',top:10,left:23,}} onPress={() => navigation.goBack()} size={22} />
           <View style={[styles.logincard, { shadowColor: APP_PRIMARY_COLOR }]}>
             {showForgotPassword ? (
               <>
@@ -69,7 +123,7 @@ const UserEntry = ({ navigation }) => {
                   style={[
                     styles.singupheader,
                     {
-                      borderColor: APP_SECONDARY_COLOR,
+                      borderColor: APP_PRIMARY_COLOR+'20',
                     },
                   ]}>
                   {['Signin', 'Signup'].map((tab) => (
@@ -107,15 +161,48 @@ const UserEntry = ({ navigation }) => {
                 )}
               </>
             )}
+            {
+              !showForgotPassword?
+            <TouchableOpacity style={styles.google} onPress={signIn}>
+             <Image
+              source={require('../../assets/images/google.png')}
+              style={{width: 20, height: 20}}
+            /> 
+            <AText
+              medium
+              style={{color: 'black', marginLeft: 5}}
+              fonts={FontStyle.fontRegular}>
+              Continue with Google
+            </AText>
+          </TouchableOpacity>:null}
           </View>
           <View style={styles.marginBottom} />
-        </ImageBackground>
+        </View>
       </MainLayout>
     </>
   );
 };
 
 const styles = StyleSheet.create({
+  google: {
+    flexDirection: 'row',
+    // paddingVertical: 10,
+    height: 40,
+    borderWidth: 0.5,
+    borderColor: '#707070',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  circle: {
+    position:'absolute',
+    width: '100%',  // Set the width of the circle
+    height: 400, // Set the height of the circle (equal to width to make it a circle)
+    borderRadius: 180, // Half of width/height to make it a perfect circle
+    backgroundColor: '#000', // Set your desired color
+    top: -170, // Adjust this to make the circle hang off the top
+  },
   backimage: {
     flex: 1,
     width: '100%',
@@ -123,7 +210,7 @@ const styles = StyleSheet.create({
   },
   appNameTextStyle: {
     textAlign: 'center',
-    color: '#fff',
+    color: '#000',
     marginBottom: 50,
     fontFamily: FontStyle.fontBold,
   },

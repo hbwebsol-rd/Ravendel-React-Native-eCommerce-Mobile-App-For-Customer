@@ -29,6 +29,7 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Platform,
 } from 'react-native';
 import StarRating from 'react-native-star-rating';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -48,6 +49,7 @@ import { checkPincodeValid } from '../../store/action/checkoutAction';
 import AttributeListing from './Components/attributeUI';
 import RatingReviewBlock from './Components/ratingReviewBlock';
 import SpecificationBlock from './Components/specificationBlock';
+import RenderHTML from 'react-native-render-html';
 
 const SingleProductScreen = ({ navigation, route }) => {
   // States and Variables
@@ -172,15 +174,29 @@ const SingleProductScreen = ({ navigation, route }) => {
       }
       setTimeout(() => {
         if (!isEmpty(cartItems) && cartItems.length > 0) {
-          cartItems.map((item) => {
+          console.log(cartItems,' cartitemmmmm')
+          // cartItems.map((item) => {
+          //   if (item.productId === ProductIds) {
+          //     console.log(' im running yoyoy',ProductIds)
+          //     setItemInCart(true);
+          //   }else{
+          //     console.log(' im running',ProductIds)
+          //     setItemInCart(false);
+          //   }
+          // });
+
+          for (let i = 0; i < cartItems.length; i++) {
+            const item = cartItems[i];
             if (item.productId === ProductIds) {
               setItemInCart(true);
-            }else{
+              break; // Exit the loop early
+            } else {
               setItemInCart(false);
             }
-          });
+          }
+
         }
-      }, 1000);
+      }, 100);
     } else {
       dispatch({
         type: PRODUCT_CLEAR,
@@ -199,14 +215,22 @@ const SingleProductScreen = ({ navigation, route }) => {
     var res = await dispatch(checkPincodeValid({ zipcode: pinCode }));
     setDeliverable(res);
   };
+  
+  const tagsStyles = {
+    body: {
+      color: 'black', // Change this to your desired text color
+    },
+    p: { marginVertical: 0 },
+  };
 
   return (
     <MainLayout hideScroll>
       {singleProductLoading || Loading ? <AppLoader /> : null}
-
+      <AIcon name="arrowleft" style={styles.arrowStyle} onPress={() => navigation.goBack()} size={22} />
       {!isEmpty(SingleProduct) && !Loading ? (
         <>
           <ScrollView
+            showsVerticalScrollIndicator={false}
             ref={scrollViewRef}
             keyboardShouldPersistTaps={'always'}
             contentContainerStyle={styles.scrollContentContainerStyle}
@@ -311,10 +335,9 @@ const SingleProductScreen = ({ navigation, route }) => {
                 <AText style={styles.productDetailTextStyle} large >
                   Product Details
                 </AText>
-                <HTMLView
-                  stylesheet={htmlStyles}
-                  style={{ marginHorizontal: 5 }}
-                  value={cleanHTMLContent(SingleProduct.description)}
+                <RenderHTML
+                  tagsStyles={tagsStyles}
+                  source={{html: cleanHTMLContent(SingleProduct.description)}}
                 />
                 <View style={styles.boderLineView} />
               </View>
@@ -513,7 +536,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginVertical: 7,
-    marginHorizontal: 10,
+    // marginHorizontal: 10,
     paddingHorizontal: 5,
   },
   pinCodeCheckBtnStyle: {
@@ -578,8 +601,14 @@ const styles = StyleSheet.create({
   },
   checkTextStyle: {
     fontFamily: FontStyle.fontBold,
-    marginBottom: 5,
+    // marginBottom: 5,
     color: '#fff'
+  },
+  arrowStyle:{
+    position:'absolute',
+    top:Platform.OS==='android'? 10:60,
+    left:23,
+    zIndex:5
   }
 });
 export default SingleProductScreen;

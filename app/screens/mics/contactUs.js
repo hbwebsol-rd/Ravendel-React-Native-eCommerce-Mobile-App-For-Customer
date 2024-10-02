@@ -6,20 +6,32 @@ import {
   Image,
   SafeAreaView,
   TouchableOpacity,
+  Platform,
+  Linking,
 } from 'react-native';
 import Header from '../components/Header';
 import Styles from '../../Theme';
 import Colors from '../../constants/Colors';
-import { AText, BackHeader } from '../../theme-components';
+import {AText, BackHeader} from '../../theme-components';
 import FIcon from 'react-native-vector-icons/Feather';
 import EIcon from 'react-native-vector-icons/Entypo';
-import { APP_PRIMARY_COLOR, FontStyle } from '../../utils/config';
-import { ImageBackground } from 'react-native';
+import {APP_PRIMARY_COLOR, FontStyle} from '../../utils/config';
+import {ImageBackground} from 'react-native';
+import {useSelector} from 'react-redux';
+import {isEmpty} from '../../utils/helper';
 
-const ContactUs = ({ navigation }) => {
-  const ContactDetail = ({ color, iconName, title, info }) => {
+const ContactUs = ({navigation}) => {
+  const {storeAddress} = useSelector(state => state.settings);
+  const ContactDetail = ({color, iconName, title, info}) => {
     return (
       <TouchableOpacity
+        onPress={() => {
+          iconName === 'mail'
+            ? Linking.openURL(`mailto:${info}`)
+            : iconName === 'phone'
+            ? Linking.openURL(`tel:${info}`)
+            : '';
+        }}
         activeOpacity={0.9}
         style={{
           marginLeft: 20,
@@ -28,7 +40,7 @@ const ContactUs = ({ navigation }) => {
           alignItems: 'center',
         }}>
         <FIcon name={iconName} size={16} color={color} />
-        <View style={{ justifyContent: 'center', marginLeft: 8 }}>
+        <View style={{justifyContent: 'center', marginLeft: 8}}>
           <AText medium color={color}>
             {title}
           </AText>
@@ -40,11 +52,16 @@ const ContactUs = ({ navigation }) => {
 
   return (
     <SafeAreaView style={Styles.mainContainer}>
-      <View style={{ position: 'absolute' }}>
+      <View
+        style={{
+          position: 'absolute',
+          top: Platform.OS === 'ios' ? 55 : 0,
+          zIndex: 5,
+        }}>
         <BackHeader navigation={navigation} name={'Contact Us'} />
       </View>
       <ImageBackground
-        style={{ flex: 1 }}
+        style={{flex: 1}}
         source={require('../../assets/images/map.png')}
       />
       <View style={styles.cardStyle}>
@@ -54,43 +71,45 @@ const ContactUs = ({ navigation }) => {
         <ContactDetail
           title={'Address:'}
           color={Colors.redColor}
-          info={'Central park, Huston'}
+          info={`${storeAddress.addressLine1} ${storeAddress.addressLine2} ${
+            storeAddress.city
+          } ${storeAddress.zip ? storeAddress.zip : ''} ${
+            storeAddress.country
+          }`}
           iconName={'map-pin'}
         />
         <ContactDetail
           title={'Phone No:'}
           color={Colors.blue}
-          info={'+91 63625-55254'}
+          info={storeAddress.phone_number}
           iconName={'phone'}
         />
         <ContactDetail
           title={'Email:'}
           color={Colors.green}
-          info={'hbwebsol@gmail.com'}
+          info={storeAddress.email}
           iconName={'mail'}
         />
-        <AText style={styles.textStyle} large>
-          Social Media
-        </AText>
+        {!isEmpty(storeAddress.social_media) ? (
+          <AText style={styles.textStyle} large>
+            Social Media
+          </AText>
+        ) : null}
         <View style={styles.socialMediaContaineStyle}>
-          <EIcon
-            name="facebook-with-circle"
-            size={35}
-            color={APP_PRIMARY_COLOR}
-          />
-          <EIcon
-            name="instagram-with-circle"
-            size={35}
-            color={APP_PRIMARY_COLOR}
-          />
-          <EIcon
-            name="twitter-with-circle"
-            size={35}
-            color={APP_PRIMARY_COLOR}
-          />
+          {!isEmpty(storeAddress.social_media) &&
+            storeAddress.social_media.map(item => (
+              <>
+                <EIcon
+                  name={item?.iconName ?? 'globe'}
+                  size={35}
+                  color={APP_PRIMARY_COLOR}
+                  style={{marginRight: 10}}
+                  onPress={() => Linking.openURL(item.handle)}
+                />
+              </>
+            ))}
         </View>
-        <View
-          style={[styles.iconStyle, { backgroundColor: APP_PRIMARY_COLOR }]}>
+        <View style={[styles.iconStyle, {backgroundColor: APP_PRIMARY_COLOR}]}>
           <FIcon name="send" size={20} color={Colors.whiteColor} />
         </View>
       </View>
@@ -109,7 +128,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     marginTop: 20,
     marginLeft: 25,
-    color: '#000'
+    color: '#000',
   },
   text: {
     fontSize: 24,
@@ -119,7 +138,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 16,
     marginLeft: 20,
-    color: '#000'
+    color: '#000',
   },
   iconStyle: {
     backgroundColor: '#088178',
@@ -146,7 +165,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     position: 'absolute',
     top: '40%',
-    width: '85%',
+    width: '90%',
     alignSelf: 'center',
   },
   socialMediacardStyle: {
@@ -159,7 +178,7 @@ const styles = StyleSheet.create({
   },
   socialMediaContaineStyle: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignSelf: 'center',
     width: '35%',
   },

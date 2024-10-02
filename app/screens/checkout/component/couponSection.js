@@ -1,13 +1,13 @@
 import React from 'react';
-import { TextInput, StyleSheet, View } from 'react-native';
+import { TextInput, StyleSheet, View, Platform, ActivityIndicator } from 'react-native';
 import { AText, AButton } from '../../../theme-components';
 import { APP_PRIMARY_COLOR } from '../../../utils/config';
 
 import Colors from '../../../constants/Colors';
 import PropTypes from 'prop-types';
 
-const CouponSection = ({ couponCode, setCouponCode, couponApplied, removeCoupon, ApplyCoupon }) => (
-    <View style={{...styles.couponContainerStyle,paddingVertical:!couponApplied?0:10, }}>
+const CouponSection = ({ couponCode, setCouponCode, couponApplied, removeCoupon, ApplyCoupon,couponLoading }) => (
+    <View style={{...styles.couponContainerStyle,paddingVertical:!couponApplied && Platform.OS!=='ios'?0:Platform.OS==='ios'?10: 10, }}>
         {!couponApplied?
         <TextInput
             type="text"
@@ -18,14 +18,17 @@ const CouponSection = ({ couponCode, setCouponCode, couponApplied, removeCoupon,
         />
         :null}
         <View style={styles.couponBtn}>
+            {
+            couponLoading?<ActivityIndicator color={APP_PRIMARY_COLOR}/>
+            :
             <AButton
                 style={[styles.applyBtnStyle, { backgroundColor: APP_PRIMARY_COLOR }]}
                 onPress={couponApplied ? removeCoupon : ApplyCoupon}
                 title={couponApplied ? 'Applied' : 'Apply'}
                 small
-            />
+            />}
         </View>
-        {couponApplied && <AText style={styles.appliedTextStyle}>Coupon Applied successfully</AText>}
+        {couponApplied && <AText style={styles.appliedTextStyle}>{couponCode}</AText>}
     </View>
 );
 
@@ -33,7 +36,7 @@ const CouponSection = ({ couponCode, setCouponCode, couponApplied, removeCoupon,
 
 const styles = StyleSheet.create({
     couponContainerStyle: {
-        width: '90%',
+        width: '100%',
         flexDirection: 'row',
         alignItems: 'center',
         alignSelf: 'center',

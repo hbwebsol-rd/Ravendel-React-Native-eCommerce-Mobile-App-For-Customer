@@ -12,11 +12,12 @@ const CartPriceTags = ({ item, cartSummary, couponDiscount }) => {
     
     return (
         <>
-            {(couponDiscount && item.value == 'couponDiscount') || item.value !== 'couponDiscount' ?
+            {(couponDiscount && item.value == 'couponDiscountTotal') || item.value !== 'couponDiscountTotal' ?
                 < View style={item.value == 'grandTotal' ? styles.grandTotalsummaryStyle : styles.summary} >
+                  
                     <AText fonts={FontStyle.semiBold}>{item.name}</AText>
-                    <AText color={item.value == 'discountTotal' ? Colors.green : Colors.grayColor}>
-                        {item.value == 'discountTotal' ? '- ' : ''}
+                    <AText color={item.value == 'discountTotal'|| item.value == 'couponDiscountTotal' ? Colors.green : Colors.grayColor}>
+                        {item.value == 'discountTotal' || item.value == 'couponDiscountTotal' ? '- ' : ''}
                         {cartSummary?.totalShipping === 0 && item.value == 'totalShipping'
                             ? 'FREE SHIPPING'
                             : formatCurrency(

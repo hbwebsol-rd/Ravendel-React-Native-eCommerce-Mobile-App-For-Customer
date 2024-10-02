@@ -1,19 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableHighlight } from 'react-native';
 import WebView from 'react-native-webview';
 import { useDispatch, useSelector } from 'react-redux';
 import { paymentStatus } from '../../store/action/checkoutAction';
 import { MainLayout } from '../../theme-components';
+import { BASEURL } from '../../utils/config';
 
 const Paypalpayment = ({ navigation, route }) => {
   const dispatch = useDispatch();
+  const [apiRun,setApiRun] = useState(false);
   const orderData = route.params.orderData;
+  const navParams = route.params.navParams;
   const token = useSelector((state) => state.login.user_token);
   orderData.token = token;
 
   const onNavigationStateChange = (path) => {
     const urls = path.nativeEvent.url;
-    if (urls.includes('http://localhost')) {
+    console.log(urls,' url change')
+    if (urls.includes('thankyou')) {
       const regex = /[?&]([^=#]+)=([^&#]*)/g;
       let match;
       const params = {};
@@ -27,14 +31,17 @@ const Paypalpayment = ({ navigation, route }) => {
         id: params.orderId,
         paymentStatus: 'success',
       };
-      dispatch(paymentStatus(payload, navigation));
+      if(!apiRun){
+        dispatch(paymentStatus(payload, navigation,navParams,params.orderId));
+        setApiRun(true)
+      }
     }
   };
   return (
     <MainLayout hideScroll style={styles.container}>
       <WebView
         source={{
-          uri: `https://a666-116-75-243-3.ngrok-free.app/reactNativePaypal?orderData=${JSON.stringify(
+          uri: `https://zemjet.com/reactNativePaypal?orderData=${JSON.stringify(
             orderData,
           )}`,
         }}

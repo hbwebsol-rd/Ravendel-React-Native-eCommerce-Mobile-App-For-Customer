@@ -35,7 +35,7 @@ const CartScreen = ({ navigation }) => {
   const mrpArray = [
     { id: 1, name: 'Total MRP', value: 'mrpTotal' },
     { id: 2, name: 'Discount On MRP', value: 'discountTotal' },
-    { id: 3, name: 'Discount By Coupon', value: 'couponDiscount' },
+    { id: 3, name: 'Discount By Coupon', value: 'couponDiscountTotal' },
     { id: 4, name: 'Shipping Fee', value: 'totalShipping' },
     { id: 5, name: 'Total Amount', value: 'grandTotal' },
   ]
@@ -269,6 +269,8 @@ const CartScreen = ({ navigation }) => {
                   Your cart is currently empty.
                 </AText>
                 <AButton
+                  style={{borderRadius: 25}}
+                  round
                   title="Shop Now"
                   onPress={() =>
                     navigation.navigate(NavigationConstants.CATEGORIES_SCREEN)

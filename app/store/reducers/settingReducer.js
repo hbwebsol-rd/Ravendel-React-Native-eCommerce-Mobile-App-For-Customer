@@ -11,6 +11,7 @@ import {
 } from '../action/settingAction';
 
 const initialState = {
+  storeAddress:'',
   themeSettings: [],
   loading: false,
   success: false,
@@ -53,6 +54,8 @@ export default (state = initialState, action) => {
         manage_stock: action.payload.store.inventory.manage_stock,
         stock_display_format:
           action.payload.store.inventory.stock_display_format,
+        storeAddress:
+        action.payload.store.store_address,
         stock_left_quantity: action.payload.store.inventory.left_quantity,
         paymentSetting: action.payload.payment,
       };

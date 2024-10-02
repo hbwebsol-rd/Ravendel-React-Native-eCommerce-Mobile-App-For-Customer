@@ -118,7 +118,7 @@ const RemoveItem = styled.TouchableOpacity`
 const ItemImage = styled.ImageBackground`
   width: 90px;
   height: 105px;
-  resize-mode: cover;
+  resize-mode: contain;
 `;
 const ItemDescription = styled.View`
   flex: 1;
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
         position: 'relative',
         borderWidth: 1,
         borderColor: '#D4D4D4',
-        marginHorizontal: 2,
+        // marginHorizontal: 2,
         paddingHorizontal: 7,
         paddingVertical: 5,
     },

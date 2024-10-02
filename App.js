@@ -1,17 +1,18 @@
 import 'react-native-gesture-handler';
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import store from './app/store';
-import { Provider } from 'react-redux';
-import { ApolloProvider } from '@apollo/react-hooks';
+import {Provider} from 'react-redux';
+import {ApolloProvider} from '@apollo/react-hooks';
 import APclient from './app/Client';
-import { NavigationContainer } from '@react-navigation/native';
-import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
-import { LogBox } from 'react-native';
-import { Splash } from './app/screens';
+import {NavigationContainer} from '@react-navigation/native';
+import {DefaultTheme, Provider as PaperProvider} from 'react-native-paper';
+import {LogBox} from 'react-native';
+import {Splash} from './app/screens';
 import AlertError from './app/theme-components/alert';
-import { APP_NAME_SMALL, updatePrimaryColor } from './app/utils/config';
+import {updatePrimaryColor} from './app/utils/config';
 import Navigation from './app/navigation';
-import { getValue } from './app/utils/helper';
+import {getValue} from './app/utils/helper';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 // XMLHttpRequest = GLOBAL.originalXMLHttpRequest
 //   ? GLOBAL.originalXMLHttpRequest
@@ -41,9 +42,8 @@ const App = () => {
   });
 
   const updateColor = async () => {
-    const color = await getValue('PrimaryColor');
-    const image = await getValue('PlaceholderImage');
-    updatePrimaryColor(color,image);
+    const col = await getValue('PrimaryColor');
+    updatePrimaryColor(col);
   };
 
   useEffect(() => {
@@ -51,7 +51,7 @@ const App = () => {
   }, []);
 
   const linking = {
-    prefixes: [`${APP_NAME_SMALL}://`, `https://${APP_NAME_SMALL}`],
+    prefixes: ['zemjet://', 'https://zemjet'],
     config: {
       initialRouteName: 'Home',
       screens: {
@@ -65,13 +65,24 @@ const App = () => {
     },
   };
 
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId:
+        '514553229331-978vs4neuump1uu23ohqt3e6orfvdstf.apps.googleusercontent.com', // Replace with your web client ID
+      offlineAccess: true,
+      forceCodeForRefreshToken: true,
+      accountName: '',
+    });
+  }, []);
+
+
   return (
     <>
       <Provider store={store}>
         <ApolloProvider client={APclient}>
           <PaperProvider theme={theme}>
-            <NavigationContainer linking={linking}>
-              {splash ? <Splash /> : <Navigation />}
+            <NavigationContainer linking={linking} >
+              {splash ? <Splash /> : <Navigation/>}
             </NavigationContainer>
             <AlertError />
           </PaperProvider>

@@ -160,8 +160,8 @@ const CHECK_ZIPCODE = gql`
 `;
 
 const ADD_ORDER = gql`
-  mutation ($userId: ID, $billing: customObject, $shipping: customObject) {
-    addOrder(userId: $userId, shipping: $shipping, billing: $billing) {
+  mutation ($userId: ID, $billing: customObject, $shipping: customObject,$couponCode: String) {
+    addOrder(userId: $userId, shipping: $shipping, billing: $billing, couponCode: $couponCode) {
       message
       success
       redirectUrl

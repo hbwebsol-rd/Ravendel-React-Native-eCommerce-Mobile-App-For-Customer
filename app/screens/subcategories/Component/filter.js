@@ -1,7 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, {useState, useMemo} from 'react';
 import {
   Modal,
+  Platform,
   Pressable,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -11,9 +13,9 @@ import {
 import IonIcon from 'react-native-vector-icons/Ionicons';
 import AIcon from 'react-native-vector-icons/AntDesign';
 
-import { AText } from '../../../theme-components';
-import { isEmpty } from '../../../utils/helper';
-import { APP_PRIMARY_COLOR, FontStyle } from '../../../utils/config';
+import {AText} from '../../../theme-components';
+import {isEmpty} from '../../../utils/helper';
+import {APP_PRIMARY_COLOR, FontStyle} from '../../../utils/config';
 import Colors from '../../../constants/Colors';
 
 const FilterModal = ({
@@ -24,10 +26,12 @@ const FilterModal = ({
   handleReset,
   handleFilter,
   setSortBy,
-  filterApply
+  filterApply,
+  setSortData,
+  setFilterApplied
 }) => {
   const [filterSelect, setFilterSelect] = useState(0);
-// console.log(JSON.stringify(filterList),' filterlist')
+  // console.log(JSON.stringify(filterList),' filterlist')
   const renderPressable = (startPrice, endPrice, i, isSelected, onPress) => (
     <Pressable
       key={i}
@@ -37,7 +41,7 @@ const FilterModal = ({
       <IonIcon
         color={APP_PRIMARY_COLOR}
         name={isSelected ? 'radio-button-on' : 'radio-button-off'}
-        style={{ marginHorizontal: 5 }}
+        style={{marginHorizontal: 5}}
         size={20}
       />
       <AText key={`text-${i}`} xtrasmall color="#000" center>
@@ -48,36 +52,36 @@ const FilterModal = ({
   );
 
   const rangeFilterRenderComponent = useMemo(
-    () => (type) => {
+    () => type => {
       let priceSegments = [];
       if (type === 'range') {
         const minPrice =
           filterList[filterSelect].data.minValue !==
-            filterList[filterSelect].data.maxValue
+          filterList[filterSelect].data.maxValue
             ? filterList[filterSelect].data.minValue
             : 0;
         const maxPrice = filterList[filterSelect].data.maxValue;
         const segments =
           filterList[filterSelect].data.minValue !==
-            filterList[filterSelect].data.maxValue
+          filterList[filterSelect].data.maxValue
             ? 6
             : 1;
         const step = (maxPrice - minPrice) / segments;
-        priceSegments = Array.from({ length: segments }, (_, i) => {
+        priceSegments = Array.from({length: segments}, (_, i) => {
           var startPrice = (minPrice + i * step).toFixed(0);
           var endPrice = (minPrice + (i + 1) * step).toFixed(0);
-          startPrice =
-            i !== 0 ? Math.ceil(startPrice / 100) * 1000 : startPrice;
-          endPrice = Math.ceil(endPrice / 100) * 1000;
+          // startPrice =
+          //   i !== 0 ? Math.ceil(startPrice / 100) * 1000 : startPrice;
+          // endPrice = Math.ceil(endPrice / 100) * 1000;
           const isSelected =
             !isEmpty(filterList[filterSelect].select) &&
-            filterList[filterSelect].select.minPrice == startPrice &&
-            filterList[filterSelect].select.maxPrice == endPrice;
+            filterList[filterSelect].select.minValue == startPrice &&
+            filterList[filterSelect].select.maxValue == endPrice;
           return renderPressable(startPrice, endPrice, i, isSelected, () => {
             const newFilterList = JSON.parse(JSON.stringify(filterList));
             newFilterList[filterSelect].select = {
-              minPrice: startPrice,
-              maxPrice: endPrice,
+              minValue: Number(startPrice),
+              maxValue: Number(endPrice),
             };
             setFilterList(newFilterList);
           });
@@ -85,14 +89,14 @@ const FilterModal = ({
       } else {
         const segments = 5;
 
-        priceSegments = Array.from({ length: segments }, (_, i) => {
+        priceSegments = Array.from({length: segments}, (_, i) => {
           i = i + 1;
           const isSelected =
             !isEmpty(filterList[filterSelect].select) &&
             filterList[filterSelect].select.minValue == i;
           return renderPressable(null, null, i, isSelected, () => {
             const newFilterList = JSON.parse(JSON.stringify(filterList));
-            newFilterList[filterSelect].select = { minValue: i };
+            newFilterList[filterSelect].select = {minValue: i};
             setFilterList(newFilterList);
           });
         });
@@ -105,13 +109,15 @@ const FilterModal = ({
   return (
     <Modal
       visible={filterModal}
-      contentContainerStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
-      style={{ flex: 1, flexDirection: 'row' }}>
+      contentContainerStyle={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}}
+      style={{flex: 1, flexDirection: 'row', marginTop: 100}}>
+      {/* <SafeAreaView> */}
       <View style={styles.filterModalHeader}>
-        <View style={{ flexDirection: 'row' }}>
-          <TouchableOpacity style={{ marginEnd: 10 }} onPress={handleReset}>
+        <View style={{flexDirection: 'row'}}>
+          <TouchableOpacity style={{marginEnd: 10}} onPress={handleReset}>
             <AIcon
-              onPress={() => setFilterModal(false)}
+              color={Colors.blackColor}
+              onPress={() => {setFilterModal(false)}}
               name="arrowleft"
               size={20}
             />
@@ -125,36 +131,36 @@ const FilterModal = ({
           style={styles.filterListView}>
           {!isEmpty(filterList) && filterList.length > 0
             ? filterList.map((category, index) => {
-              return !isEmpty(category.data) ? (
-                <Pressable
-                  activeOpacity={0.9}
-                  style={[
-                    styles.filterListingWrapper,
-                    filterSelect === index && styles.selectedFilter,
-                  ]}
-                  onPress={() => {
-                    setFilterSelect(index);
-                  }}>
-                  <AText style={styles.headingTextStyle} xtrasmall>
-                    {category.heading}
-                  </AText>
-                </Pressable>
-              ) : null;
-            })
+                return !isEmpty(category.data) ? (
+                  <Pressable
+                    activeOpacity={0.9}
+                    style={[
+                      styles.filterListingWrapper,
+                      filterSelect === index && styles.selectedFilter,
+                    ]}
+                    onPress={() => {
+                      setFilterSelect(index);
+                    }}>
+                    <AText style={styles.headingTextStyle} xtrasmall>
+                      {category.heading}
+                    </AText>
+                  </Pressable>
+                ) : null;
+              })
             : null}
         </ScrollView>
         <ScrollView
           style={styles.filterOptionsView}
           showsVerticalScrollIndicator={false}>
           {!isEmpty(filterSelect) &&
-            !isEmpty(filterList[filterSelect]) &&
-            !isEmpty(filterList[filterSelect].type)
+          !isEmpty(filterList[filterSelect]) &&
+          !isEmpty(filterList[filterSelect].type)
             ? filterList[filterSelect].type == 'choice' &&
               filterList[filterSelect].field == 'rating'
               ? rangeFilterRenderComponent('rating')
               : filterList[filterSelect].type == 'array' ||
                 filterList[filterSelect].type == 'choice'
-                ? filterList[filterSelect].data &&
+              ? filterList[filterSelect].data &&
                 filterList[filterSelect].data.map((item, index) => (
                   <Pressable
                     key={index}
@@ -171,21 +177,21 @@ const FilterModal = ({
                           newFilterList[filterSelect].select.push(item.value);
                         } else {
                           newFilterList[filterSelect].select.filter(
-                            (id) => item.value !== id,
+                            id => item.value !== id,
                           );
                         }
                         newFilterList[filterSelect].data[index].select =
                           !newFilterList[filterSelect].data[index].select;
                       } else {
                         if (filterList[filterSelect].field == 'sort') {
-                          setSortBy(
-                            filterList[filterSelect].data[index].value,
-                          );
+                          setSortBy(filterList[filterSelect].data[index].value);
                         }
                         newFilterList[filterSelect].data.map((key, i) => {
                           key.select = i == index;
                         });
                       }
+                      const sortType = newFilterList.filter(item => item.heading === 'Sort')
+                      setSortData(sortType[0])
                       setFilterList(newFilterList);
                     }}>
                     <IonIcon
@@ -196,10 +202,10 @@ const FilterModal = ({
                             ? 'radio-button-on'
                             : 'checkbox-outline'
                           : filterList[filterSelect].type === 'choice'
-                            ? 'radio-button-off'
-                            : 'square-outline'
+                          ? 'radio-button-off'
+                          : 'square-outline'
                       }
-                      style={{ marginHorizontal: 5 }}
+                      style={{marginHorizontal: 5}}
                       size={20}
                     />
                     <AText xtrasmall color="#000" center>
@@ -207,41 +213,38 @@ const FilterModal = ({
                     </AText>
                   </Pressable>
                 ))
-                : filterList[filterSelect].type == 'range'
-                  ? rangeFilterRenderComponent('range')
-                  : null
+              : filterList[filterSelect].type == 'range'
+              ? rangeFilterRenderComponent('range')
+              : null
             : null}
         </ScrollView>
       </View>
       <View style={styles.filterModalFooter}>
-        {
-          filterApply
-        ?
-        <TouchableOpacity
-          onPress={handleReset}
-          style={[styles.clearBtnStyle, { borderColor: APP_PRIMARY_COLOR }]}>
-          <AText color={APP_PRIMARY_COLOR} fonts={FontStyle.semiBold}>
-            Clear Filter
-          </AText>
-        </TouchableOpacity>:null}
+        {filterApply ? (
+          <TouchableOpacity
+            onPress={handleReset}
+            style={[styles.clearBtnStyle, {borderColor: APP_PRIMARY_COLOR}]}>
+            <AText color={APP_PRIMARY_COLOR} fonts={FontStyle.semiBold}>
+              Clear Filter
+            </AText>
+          </TouchableOpacity>
+        ) : null}
         <TouchableOpacity
           onPress={handleFilter}
-          style={[
-            styles.applyButton,
-            { backgroundColor: APP_PRIMARY_COLOR },
-          ]}>
+          style={[styles.applyButton, {backgroundColor: APP_PRIMARY_COLOR}]}>
           <AText color="#fff" fonts={FontStyle.semiBold}>
             Apply
           </AText>
         </TouchableOpacity>
       </View>
+      {/* </SafeAreaView> */}
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  filterBodyStyle: { flexDirection: 'row', flex: 1 },
-  filterListView: { width: '10%', backgroundColor: '#F1F1F1', marginTop: 4 },
+  filterBodyStyle: {flexDirection: 'row', flex: 1},
+  filterListView: {width: '10%', backgroundColor: '#F1F1F1', marginTop: 4},
   filterListingWrapper: {
     marginBottom: 20,
     justifyContent: 'center',
@@ -251,10 +254,13 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   headingTextStyle: {
-    textTransform: "uppercase", color: "#000", textAlign: 'center'
+    textTransform: 'uppercase',
+    color: '#000',
+    textAlign: 'center',
   },
-  selectedFilter: { backgroundColor: '#fff', width: '100%' },
+  selectedFilter: {backgroundColor: '#fff', width: '100%'},
   filterModalHeader: {
+    marginTop: Platform.OS === 'ios' ? 50 : 0,
     flexDirection: 'row',
     shadowColor: '#000',
     justifyContent: 'space-between',

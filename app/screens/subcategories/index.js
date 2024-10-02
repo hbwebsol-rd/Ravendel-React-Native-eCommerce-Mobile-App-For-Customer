@@ -16,6 +16,7 @@ import {
 } from '../../utils/helper';
 import {
   Image,
+  SafeAreaView,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -35,6 +36,7 @@ const SubCategoriesScreen = ({ navigation, route }) => {
   const [loader, setLoader] = useState(false);
 
   const handlePresentModalPress = useCallback(() => {
+    
     setFilterModal(!filterModal);
   }, []);
 
@@ -56,15 +58,8 @@ const SubCategoriesScreen = ({ navigation, route }) => {
   const [filterModal, setFilterModal] = useState(false);
   const [filterList, setFilterList] = useState([]);
   const [filterApply, setFilterApply] = useState(false);
-  const [sortBy, setSortBy] = useState({
-    field: 'date',
-    type: 'desc',
-  });
-
-  const handleinpiut = (e) => {
-    setInpvalue(e);
-  };
-  const sortData = {
+  const [filterApplied, setFilterApplied] = useState([]);
+  const [sortData, setSortData] = useState({
     heading: 'Sort',
     type: 'choice',
     field: 'sort',
@@ -96,11 +91,56 @@ const SubCategoriesScreen = ({ navigation, route }) => {
         select: false,
       },
     ],
+  });
+  const [sortBy, setSortBy] = useState({
+    field: 'date',
+    type: 'desc',
+  });
+
+  const handleinpiut = (e) => {
+    setInpvalue(e);
   };
+  // const sortData = {
+  //   heading: 'Sort',
+  //   type: 'choice',
+  //   field: 'sort',
+  //   category: 'static',
+  //   valueType: 'ObjectId',
+  //   data: [
+  //     {
+  //       label: 'Lowest to highest',
+  //       value: {
+  //         field: 'pricing.sellprice',
+  //         type: 'asc',
+  //       },
+  //       select: false,
+  //     },
+  //     {
+  //       label: 'highest to Lowest',
+  //       value: {
+  //         field: 'pricing.sellprice',
+  //         type: 'desc',
+  //       },
+  //       select: false,
+  //     },
+  //     {
+  //       label: 'Newest',
+  //       value: {
+  //         field: 'date',
+  //         type: 'desc',
+  //       },
+  //       select: false,
+  //     },
+  //   ],
+  // };
 
   useEffect(() => {
     setFilterList([sortData, ...filterData]);
   }, [filterData]);
+
+  // useEffect(()=>{
+  //   setFilterApplied(filterList);
+  // },[filterList])
 
   const handleLoadMore = () => {
     setLoader(true);
@@ -209,10 +249,11 @@ const SubCategoriesScreen = ({ navigation, route }) => {
       pageNo: 1,
       limit: 10,
     };
-    // console.log(JSON.stringify(filter),' filtererere')
+    console.log(JSON.stringify(filter),' filtererere')
     dispatch(catProductAction(filter, true));
     setFilterApply(true)
     setFilterModal(false);
+    setFilterApplied(filterList)
     setInpvalue('')
   };
 
@@ -251,7 +292,11 @@ const SubCategoriesScreen = ({ navigation, route }) => {
           placeholdercolor={'#959696'}
         />
         <TouchableOpacity
-          onPress={() => handlePresentModalPress()}
+          onPress={() => {handlePresentModalPress();
+            if(filterApply){
+              setFilterList(filterApplied)
+            }
+          }}
           style={[
             styles.filterBtnstyle,
             { backgroundColor: APP_PRIMARY_COLOR },
@@ -262,10 +307,12 @@ const SubCategoriesScreen = ({ navigation, route }) => {
           />
         </TouchableOpacity>
       </View>
+      {
+        !isEmpty(withChild)?
       <HorizontalHeaderFilter
         data={[{ name: 'All', url: 'All' }, ...withChild]}
         selectedCat={selectedCat}
-        onPress={(item) => { setInpvalue(''), handleselectedCat(item.url, item.id) }} />
+        onPress={(item) => { setInpvalue(''), handleselectedCat(item.url, item.id) }} />:null}
 
       <ProductList
         categorydata={categorydata}
@@ -284,6 +331,8 @@ const SubCategoriesScreen = ({ navigation, route }) => {
         handleFilter={() => handleFilter()}
         setSortBy={(val) => setSortBy(val)}
         filterApply={filterApply}
+        setSortData={setSortData}
+        setFilterApplied={setFilterApplied}
         // setFilterApply={setFilterApply}
       />
     </MainLayout>
@@ -320,7 +369,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
-    paddingHorizontal: 7
+    paddingHorizontal: 7,
+    marginBottom:5
   },
   searchTextInputStyle: {
     height: 40,

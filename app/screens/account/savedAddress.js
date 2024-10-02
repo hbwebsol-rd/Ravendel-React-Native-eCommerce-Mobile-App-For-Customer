@@ -114,6 +114,8 @@ const SavedAddressScreen = ({ navigation, route }) => {
       country: values.country,
       pincode: values.pincode,
       _id: values._id,
+      defaultAddress: values.defaultAddress ?? false,
+      addressType: values.addressType ?? '',
     });
     setAddressForm(true);
   };
@@ -171,7 +173,21 @@ const SavedAddressScreen = ({ navigation, route }) => {
           navigation={navigation}
           addForm={onSubmit}
           onStopScroll={() => setScrollEnable(!scrollenable)}
-          cancelAddForm={() => setAddressForm(false)}
+          cancelAddForm={() => {
+            setInitialFormValues({
+              firstname: userDetails.firstName,
+              lastname: userDetails.lastName,
+              phone: userDetails.phone,
+              address: '',
+              landmark: '',
+              city: '',
+              state: '',
+              country: '',
+              pincode: '',
+              defaultAddress: true,
+              addressType: '',
+            });
+            setAddressForm(false)}}
           showBottomPanel={true}
           showHeader={true}
           initialFormValues={initialFormValues}
@@ -228,7 +244,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     flexDirection: 'row',
     justifyContent: 'center',
-    width: '95%',
+    width: '100%',
     alignSelf: 'center',
   },
   plusStyle: {

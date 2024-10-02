@@ -36,6 +36,7 @@ const AlertError = () => {
       {isOpen ? (
         <View
           style={{
+            borderRadius:5,
             alignSelf: 'center',
             position: 'absolute',
             bottom: 10,

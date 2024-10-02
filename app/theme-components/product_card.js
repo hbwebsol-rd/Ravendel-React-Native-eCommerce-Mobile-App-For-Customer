@@ -75,7 +75,7 @@ function ProductCard({
         </View>
       ) : null}
       <View style={styles.textContainer}>
-        <AText numberOfLines={2} style={{ marginBottom: 5, fontFamily: FontStyle.fontBold }} small>
+        <AText numberOfLines={2} style={{ marginBottom: 5,marginRight:5, fontFamily: FontStyle.fontBold }} small>
           {category.name}
         </AText>
         <ProductPriceText fontsizesmall={true} Pricing={category.pricing} />
@@ -143,8 +143,8 @@ const styles = StyleSheet.create({
   imageStyle: {
     width: '97%',
     height: '77%',
-    borderRadius: 10,
-    resizeMode: 'cover',
+    // borderRadius: 10,
+    resizeMode: 'contain',
     // position: 'absolute',
     // bottom: 0,
     // justifyContent: 'flex-end',

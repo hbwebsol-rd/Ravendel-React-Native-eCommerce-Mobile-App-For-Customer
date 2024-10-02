@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import WebView from 'react-native-webview';
 import { useDispatch } from 'react-redux';
@@ -8,11 +8,15 @@ import { BASEURL } from '../../utils/config';
 
 const StripePayment = ({ navigation, route }) => {
   const dispatch = useDispatch();
+  const [apiRun,setApiRun] = useState(false);
   const url = route.params.url;
   const navParams = route.params.navParams;
   const onNavigationStateChange = (path) => {
     const urls = path.nativeEvent.url;
-    if (urls.includes(BASEURL)) {
+    if(urls.includes('paymentfailed')){
+      navigation.goBack()
+    }
+    else if (urls.includes(BASEURL)) {
       const regex = /[?&]([^=#]+)=([^&#]*)/g;
       let match;
       const params = {};
@@ -26,7 +30,10 @@ const StripePayment = ({ navigation, route }) => {
         id: params.orderId,
         paymentStatus: 'success',
       };
-      dispatch(paymentStatus(payload, navigation, navParams));
+      if(!apiRun){
+      dispatch(paymentStatus(payload, navigation, navParams,params.orderId));
+      setApiRun(true)
+      }
     }
   };
   return (

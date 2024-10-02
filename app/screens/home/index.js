@@ -28,6 +28,7 @@ import Styles from '../../Theme';
 import NavigationConstants from '../../navigation/NavigationConstants';
 import Carousel from 'react-native-snap-carousel';
 import GridCardContainer from '../../theme-components/GridCardContainer';
+import NoConnection from '../../theme-components/nointernet';
 
 const HomeScreen = ({ navigation }) => {
   // States and Variables
@@ -44,10 +45,10 @@ const HomeScreen = ({ navigation }) => {
   const { homeData, allSections, homeslider } = useSelector(
     state => state.settings,
   );
+  const { netConnection } = useSelector((state) => state.alert);
 
   const settingLoading = useSelector(state => state.settings.loading);
   const settingTheme = useSelector(state => state.settings.themeSettings);
-  console.log(JSON.stringify(settingTheme))
   const [allCategories, setAllCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const carouselRef = useRef(null);
@@ -138,6 +139,7 @@ const HomeScreen = ({ navigation }) => {
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
     dispatch(AppSettingAction());
+    dispatch(homeScreenFields());
     wait(2000).then(() => setRefreshing(false));
   }, []);
 
@@ -181,8 +183,9 @@ const HomeScreen = ({ navigation }) => {
           style={{
             width: itemWidth,
             height: 150,
-            resizeMode: 'stretch',
-            borderRadius: 10,
+            resizeMode: 'cover',
+            // borderRadius: 10,
+            // aspectRatio:1
           }}
           source={{
             uri: uriImage(item.image)
@@ -191,6 +194,10 @@ const HomeScreen = ({ navigation }) => {
       </View>
     );
   };
+
+   if (netConnection) {
+    return <NoConnection />;
+  }
 
   return (
     <MainLayout hideScroll style={Styles.mainContainer}>
@@ -240,18 +247,19 @@ const HomeScreen = ({ navigation }) => {
             navigateNextScreen(item);
           }}
           allCategories={allCategories}
-        />
+          />
         {allSections && allSections.length > 0 &&
           allSections.map(item =>
             item.display_type === 'SLIDER' ? (
               <>
-              {/* {console.log(`${BASEURL}${item.section_img}`)} */}
+              {
+                item.section_img?
                <Image
                   source={{
                     uri: `${BASEURL}${item.section_img}`
                   }}
                   style={styles.PopularPicksImage}
-                />
+                />:null}
               <SectionView>
                 <ProductsSlider
                   title={item.name}
@@ -270,12 +278,14 @@ const HomeScreen = ({ navigation }) => {
               </>
             ) : (
               <>
+               {
+                item.section_img?
                <Image
                   source={{
                     uri: `${BASEURL}${item.section_img}`
                   }}
                   style={styles.PopularPicksImage}
-                />
+                />:null}
               <SectionView>
                 {/* <PopularPicksImage
                   source={{
@@ -308,7 +318,6 @@ const HomeScreen = ({ navigation }) => {
 
 const SectionView = styled.View`
   padding: 10px 0;
-  border-bottom-width: 2px;
   border-color: #ddd;
 `;
 const PopularPicksImage = styled.Image`
@@ -322,13 +331,13 @@ const PopularPicksImage = styled.Image`
 
 const styles = StyleSheet.create({
   PopularPicksImage:{
-      aspectRatio:1,
+      aspectRatio:2,
       height: 'auto',
       width: '100%',
       alignSelf:'center',
       marginTop: 20,
       marginBottom: 20,
-      resizeMode: 'stretch',
+      resizeMode: 'contain',
   },
   container: { flex: 1, backgroundColor: 'white' },
   searchstyle: {
@@ -347,7 +356,7 @@ const styles = StyleSheet.create({
     marginBottom: 20
   },
   textInputViewStyle: {
-    height: 50,
+    height: 45,
     padding: 0,
     paddingLeft: 35,
     backgroundColor: '#EFF0F0',
@@ -365,9 +374,9 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   slideStyle: {
-    marginHorizontal: 5,
-    borderRadius: 10
+    // marginHorizontal: 5,
+    // borderRadius: 10,
   }
 });
-const itemWidth = windowWidth * 0.65;
+const itemWidth = windowWidth * 1;
 export default HomeScreen;

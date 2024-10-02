@@ -21,8 +21,8 @@ const Styles = StyleSheet.create({
   iosBox: {
     borderColor: 'black',
     borderWidth: 1,
-    width: 22,
-    height: 22,
+    width: 15,
+    height: 15,
     backgroundColor: 'transparent',
     position: 'absolute',
     left: 7,

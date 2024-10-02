@@ -104,9 +104,7 @@ const Navigation = () => {
   const HomeIconWithBadge = (props) => {
     return <IconWithBadge {...props} badgeCount={cartItems.length} />;
   };
-  if (netConnection) {
-    return <NoConnection />;
-  }
+ 
   return (
     <>
       <Tab.Navigator
@@ -223,7 +221,7 @@ const Navigation = () => {
         />
         <Stack.Screen
           name={NVC.CHECKOUT_DETAILS_SCREEN}
-          options={{ headerShown: false, tabBarButton: () => null }}
+          options={{ headerShown: false, tabBarButton: () => null,tabBarStyle: { display: 'none' } }}
           component={CheckoutDetails}
         />
         <Stack.Screen
@@ -244,16 +242,6 @@ const Navigation = () => {
         />
         {/* Cart End */}
 
-        {/* Account */}
-        {/* <Tab.Screen
-          name="AccountWrapper"
-          component={AccountStack}
-          options={({ route }) => ({
-            unmountOnBlur: true,
-            lazy: false,
-            tabBarLabel: 'Account',
-          })}
-        /> */}
         <Stack.Screen name={NVC.ACCOUNT_SCREEN} component={AccountScreen} />
         <Stack.Screen
           name={NVC.SAVED_ADDRESS_SCREEN}

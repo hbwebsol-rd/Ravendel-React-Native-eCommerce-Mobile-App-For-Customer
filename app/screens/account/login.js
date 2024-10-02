@@ -7,6 +7,7 @@ import { LoginAction } from '../../store/action';
 import { Keyboard, TouchableOpacity, View } from 'react-native';
 import { StyleSheet } from 'react-native';
 import NavigationConstants from '../../navigation/NavigationConstants';
+import { APP_PRIMARY_COLOR, FontStyle } from '../../utils/config';
 
 const LoginScreen = ({ navigation, showForgotPassword }) => {
   const dispatch = useDispatch();
@@ -39,6 +40,7 @@ const LoginScreen = ({ navigation, showForgotPassword }) => {
           placeholdercolor={'#ABA7A7'}
           StylesTextInput={styles.textInputStyle}
           inputBgColor="transparent"
+          bc={APP_PRIMARY_COLOR+'20'}
         />
         {formik.errors.email && formik.touched.email ? (
           <AText textStyle={styles.errorTextStyle} xtrasmall >
@@ -59,6 +61,7 @@ const LoginScreen = ({ navigation, showForgotPassword }) => {
           StylesTextInput={styles.textInputStyle}
           placeholdercolor={'#ABA7A7'}
           inputBgColor="transparent"
+          bc={APP_PRIMARY_COLOR+'20'}
         />
         {formik.errors.password && formik.touched.password ? (
           <AText textStyle={styles.errorTextStyle} xtrasmall>
@@ -72,13 +75,13 @@ const LoginScreen = ({ navigation, showForgotPassword }) => {
           activeOpacity={0.9}
           style={{ marginTop: 5 }}
           onPress={() => showForgotPassword(true)}>
-          <AText bold xtrasmall color={'#ABA7A7'}>
+          <AText style={{fontFamily:FontStyle.fontBold}} xtrasmall color={'#ABA7A7'}>
             Forgot password?
           </AText>
         </TouchableOpacity>
       </View>
       <AButton
-        title={'Log in'}
+        title={'Signin'}
         buttonStyle={styles.loginBtnStyle}
         onPress={formik.handleSubmit}
       />

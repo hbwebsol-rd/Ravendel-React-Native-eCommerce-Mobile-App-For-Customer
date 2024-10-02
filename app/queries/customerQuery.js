@@ -66,6 +66,8 @@ const UPDATE_ADDRESSBOOK = gql`
     $state: String
     $pincode: String
     $defaultAddress: Boolean
+    $addressType: ADDRESS_TYPE
+
   ) {
     updateAddressBook(
       id: $id
@@ -80,6 +82,7 @@ const UPDATE_ADDRESSBOOK = gql`
       country: $country
       state: $state
       pincode: $pincode
+      addressType: $addressType
       defaultAddress: $defaultAddress
     ) {
       message

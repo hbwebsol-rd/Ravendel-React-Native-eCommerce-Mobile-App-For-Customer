@@ -1,5 +1,7 @@
 export default {
   primaryColor: '#d8fefe',
+  orange: 'orange',
+  yellow: '#ebc000',
   darkPrimaryColor: '#088178',
   lightestPrimaryColor: '#F8FAF9',
   splashBackgroundColor: '#F5F5F5',

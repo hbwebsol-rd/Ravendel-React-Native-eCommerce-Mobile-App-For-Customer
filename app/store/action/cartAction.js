@@ -223,7 +223,7 @@ export const removeCartAction = (userID) => async (dispatch) => {
 };
 
 export const applyCouponAction =
-  (payload, setCouponApplied) => async (dispatch) => {
+  (payload, setCouponApplied,setCouponLoading) => async (dispatch) => {
     dispatch({ type: CART_LOADING });
 
     try {
@@ -260,6 +260,7 @@ export const applyCouponAction =
           ),
         });
         setCouponApplied(true);
+        setCouponLoading(false);
       } else {
         dispatch({ type: CART_FAIL });
         dispatch({
@@ -270,6 +271,7 @@ export const applyCouponAction =
             'Something went wrong. Please try again later.',
           ),
         });
+        setCouponLoading(false);
       }
     } catch (error) {
       dispatch({ type: CART_FAIL });
@@ -277,6 +279,7 @@ export const applyCouponAction =
         type: ALERT_ERROR,
         payload: 'Something went wrong. Please try again later.',
       });
+      setCouponLoading(false);
     }
   };
 

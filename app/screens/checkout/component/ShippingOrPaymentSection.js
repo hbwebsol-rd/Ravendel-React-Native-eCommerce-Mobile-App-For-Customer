@@ -95,20 +95,22 @@ const styles = StyleSheet.create({
         fontFamily: FontStyle.semiBold
     },
     containerStyles: {
-        marginHorizontal: 15,
+        // marginHorizontal: 15,
         marginVertical: 10,
+        marginTop:15
     },
     addressCard: {
         paddingHorizontal: 20,
         paddingVertical: 15,
-        marginVertical: 10,
+        // marginVertical: 10,
         backgroundColor: '#fff',
         borderRadius: 8,
         borderWidth: 1,
         borderColor: '#D4D4D4',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        marginVertical:4
     },
     textStyle: {
         marginLeft: 8,

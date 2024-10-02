@@ -24,18 +24,18 @@ export const AppSettingAction = () => async (dispatch) => {
       );
       let crSymbol = '';
       if (
-        currencyOptions.currency === 'usd' ||
-        currencyOptions.currency === 'cad'
+        currencyOptions.currency.toLowerCase() === 'usd' ||
+        currencyOptions.currency.toLowerCase() === 'cad'
       ) {
         crSymbol =
           currencyOptions.currency_position === 'left_space' ? '$ ' : ' $';
-      } else if (currencyOptions.currency === 'eur') {
+      } else if (currencyOptions.currency.toLowerCase() === 'eur') {
         crSymbol =
           currencyOptions.currency_position === 'left_space' ? '€ ' : ' €';
-      } else if (currencyOptions.currency === 'gbp') {
+      } else if (currencyOptions.currency.toLowerCase() === 'gbp') {
         crSymbol =
           currencyOptions.currency_position === 'left_space' ? '£ ' : ' £';
-      } else if (currencyOptions.currency === 'inr') {
+      } else if (currencyOptions.currency.toLowerCase() === 'inr') {
         crSymbol =
           currencyOptions.currency_position === 'left_space' ? '₹ ' : ' ₹';
       }

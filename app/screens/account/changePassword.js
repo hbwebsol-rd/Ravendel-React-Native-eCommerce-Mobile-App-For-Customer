@@ -5,16 +5,44 @@ import {
   BackHeader,
   TextInput,
   MainLayout,
+  AText,
 } from '../../theme-components';
 import { isEmpty } from '../../utils/helper';
 import { changePasswordAction } from '../../store/action';
 import { ALERT_ERROR } from '../../store/reducers/alert';
-import { StyleSheet, View } from 'react-native';
+import { Keyboard, StyleSheet, View } from 'react-native';
+import { useFormik } from 'formik';
+import { changePasswordValidationSchema } from '../checkout/validationSchema';
 
 const ChangePasswordScreen = ({ navigation }) => {
 
   const dispatch = useDispatch();
   const userData = useSelector((state) => state.customer.userDetails);
+
+  const formik = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      old_password: '',
+      new_password: '',
+      confirm_password: '',
+    },
+    validationSchema: changePasswordValidationSchema,
+    onSubmit: (values, { setSubmitting, resetForm }) => {
+      setSubmitting(false);
+      sendValues(values);
+    },
+  });
+
+  const sendValues = (values) => {
+    Keyboard.dismiss();
+    const profileUpdateObject={
+      id: userData._id,
+      oldPassword: values.old_password,
+      newPassword: values.new_password,
+    }
+    dispatch(changePasswordAction(profileUpdateObject, navigation));
+  };
+
   const [userDetails, setuserDetails] = useState({
     old_password: '',
     new_password: '',
@@ -25,45 +53,8 @@ const ChangePasswordScreen = ({ navigation }) => {
     { id: 1, name: 'New Password', key: 'new_password' },
     { id: 1, name: 'Confirm Password', key: 'confirm_password' }
   ];
-  useEffect(() => {
-    if (!isEmpty(userData)) {
-      var userDetailObject = {
-        old_password: '',
-        new_password: '',
-        confirm_password: '',
-      };
-      setuserDetails(userDetailObject);
-    }
-  }, [userData]);
 
-  const profileUpdate = () => {
-    var Error_msg = '';
-    if (isEmpty(userDetails.old_password)) {
-      Error_msg = "Old password can't be empty";
-    }
-    if (isEmpty(userDetails.new_password) && isEmpty(Error_msg)) {
-      Error_msg = "New password can't be empty";
-    }
-    if (
-      userDetails.new_password !== userDetails.confirm_password &&
-      isEmpty(Error_msg)
-    ) {
-      Error_msg = "Password doesn't match";
-    }
-    if (!isEmpty(Error_msg)) {
-      dispatch({
-        type: ALERT_ERROR,
-        payload: Error_msg,
-      });
-      return;
-    }
-    var profileUpdateObject = {
-      id: userData._id,
-      oldPassword: userDetails.old_password,
-      newPassword: userDetails.new_password,
-    };
-    dispatch(changePasswordAction(profileUpdateObject, navigation));
-  };
+  
   return (
     <MainLayout>
       <BackHeader navigation={navigation} name="Change Password" back />
@@ -71,16 +62,12 @@ const ChangePasswordScreen = ({ navigation }) => {
         style={styles.container}>
         <View style={styles.contentContainer}>
           {fieldArray.map(({ name, key }) =>
+          <>
             <TextInput
               placeholder={name}
-              value={userDetails[key]}
+              value={formik.values[key]}
               secureTextEntry={true}
-              onchange={(text) =>
-                setuserDetails({
-                  ...userDetails,
-                  [key]: text,
-                })
-              }
+              onchange={(val) => formik.setFieldValue(key, val)}
               hookuse
               iconColor={'#9F9F9F'}
               icon={'eye-off'}
@@ -89,11 +76,18 @@ const ChangePasswordScreen = ({ navigation }) => {
               placeholdercolor={'#ABA7A7'}
               inputBgColor="transparent"
             />
+            {
+            formik.touched[key] && formik.errors[key] && (
+              <AText color="red" style={{marginLeft:5}} xtrasmall>
+                {formik.errors[key]}
+              </AText>
+            )
+          }
+            </>
           )}
           <AButton
-            onPress={() => {
-              profileUpdate();
-            }}
+            style={{borderRadius: 25}}
+            onPress={formik.handleSubmit}
             buttonStyle={{ marginTop: 20 }}
             title="Submit"
           />

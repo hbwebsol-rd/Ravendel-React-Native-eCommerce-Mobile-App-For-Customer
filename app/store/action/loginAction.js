@@ -13,15 +13,19 @@ import { CART_EMPTY } from './cartAction';
 import { userDetailsfetch } from './customerAction';
 import { ONE_SIGNAL_APP_ID } from '../../utils/config';
 import OneSignal from 'react-native-onesignal';
+import NavigationConstants from '../../navigation/NavigationConstants';
+import DeviceInfo from 'react-native-device-info';
 
 
 
 const save_playerid = async player_id => {
+  const versionName = DeviceInfo.getVersion(); // e.g. "1.0"
+
   const payload = {
     "deviceInfo": {
     "device_id": player_id,
     "device_type": Platform.OS.toUpperCase(),
-    "app_version": "1.0"
+    "app_version": versionName
   }
   }
   const response = await mutation(SAVE_DEVICE_ID, payload);
@@ -130,14 +134,72 @@ export const LoginAction =
       });
     }
   };
-export const ForgotPasswordAction = (email) => async (dispatch) => {
+
+  export const LoginByGoogleAction =
+  (googleToken, navigation) => async (dispatch) => {
+    dispatch({
+      type: LOGIN_LOADING,
+    });
+    dispatch({
+      type: CART_EMPTY,
+    });
+    try {
+      const response = await PostFetchWithoutToken(`apis/customers/googleOAuth`, googleToken);
+      console.log(response,' google respone')
+      let data = response.data;
+      if (!isEmpty(response.data.success) && response.data.success) {
+        console.log('hello',JSON.stringify(data),data?.customer,'oooo',data?.data?.customer)
+        InitOneSignal()
+        const userDetails = data.data.customer;
+        await APclient.resetStore();
+        storeData('token', data.data.token);
+        storeData('userDetails', JSON.stringify(userDetails));
+        dispatch({
+          type: LOGIN,
+          payload: { user_token: data.data.token },
+        });
+        dispatch({
+          type: USER,
+          payload: userDetails,
+        });
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Home' }],
+        });
+
+        dispatch({
+          type: ALERT_SUCCESS,
+          payload: 'Login  successfully',
+        });
+      } else {
+        dispatch({
+          type: LOGIN_STOP,
+        });
+        dispatch({
+          type: ALERT_ERROR,
+          payload: 'Invalid Email or Password',
+        });
+      }
+    } catch (error) {
+      console.log(error)
+      dispatch({
+        type: LOGIN_FAIL,
+      });
+      dispatch({
+        type: ALERT_ERROR,
+        payload: 'Something went wrong. Please try again later.',
+      });
+    }
+  };
+
+export const ForgotPasswordAction = (email,showForgotPassword) => async (dispatch) => {
   dispatch({
     type: LOGIN_LOADING,
   });
-  console.log(email,' email')
   try {
     const response = await mutation(FORGOT_PASSWORD, { email: email });
-    if (!isEmpty(response.data.sendForgetPasswordEmail.success) && response.data.sendForgetPasswordEmail.success) {
+    console.log(response)
+    if (response.data.sendForgetPasswordEmail.success) {
       dispatch({
         type: LOGIN_STOP,
       });
@@ -145,6 +207,7 @@ export const ForgotPasswordAction = (email) => async (dispatch) => {
         type: ALERT_SUCCESS,
         payload: response.data.sendForgetPasswordEmail.message ?? "Email sent successfully",
       });
+      showForgotPassword(false)
     } else {
       dispatch({
         type: LOGIN_STOP,
@@ -155,6 +218,7 @@ export const ForgotPasswordAction = (email) => async (dispatch) => {
       });
     }
   } catch (error) {
+    console.log(error)
     dispatch({
       type: LOGIN_FAIL,
     });
@@ -185,6 +249,7 @@ export const registerAction =
     });
     try {
       const response = await mutation(ADD_CUSTOMER, payload);
+      console.log(response,' resspopop')
       const { data } = response;
       const { addCustomer } = data;
       if (!isEmpty(addCustomer) && addCustomer.success) {

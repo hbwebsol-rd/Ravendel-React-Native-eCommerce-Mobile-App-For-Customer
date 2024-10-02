@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { AText } from '../../../theme-components';
 import { FontStyle, GREYTEXT } from '../../../utils/config';
-import { uriImage } from '../../../utils/helper';
+import { isEmpty, uriImage } from '../../../utils/helper';
 import PropTypes from 'prop-types';
 
 function CategoryItem({ category, navigateNextScreen }) {

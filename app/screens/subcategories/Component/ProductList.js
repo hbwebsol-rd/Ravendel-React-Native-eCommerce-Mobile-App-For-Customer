@@ -50,13 +50,14 @@ const ProductList = ({ categorydata, handleLoadMore, navigation, currentPage, to
 
     const ListEmptyComponent = React.memo(() => (
         <View style={styles.emptyComponent}>
-            <AText style={styles.emptyText}>No Records Found</AText>
+            <AText style={styles.emptyText}>No Products Found</AText>
         </View>
     ));
 
     return (
 
         <FlatList
+            showsVerticalScrollIndicator={false}
             numColumns={2}
             data={categorydata}
             snapToAlignment="center"
@@ -85,9 +86,9 @@ ProductList.propTypes = {
 };
 
 const styles = StyleSheet.create({
-    flatListContainerStyle: {
-        paddingBottom: 20,
-    },
+    // flatListContainerStyle: {
+    //     paddingBottom: 20,
+    // },
     emptyComponent: {
         justifyContent: 'center',
         alignItems: 'center',

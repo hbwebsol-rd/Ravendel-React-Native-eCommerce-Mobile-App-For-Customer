@@ -19,7 +19,7 @@ const ThankYou = ({ navigation, route }) => {
   const mrpArray = [
     { id: 1, name: 'Total MRP', value: 'mrpTotal' },
     { id: 2, name: 'Discount On MRP', value: 'discountTotal' },
-    { id: 3, name: 'Discount By Coupon', value: 'couponDiscount' },
+    { id: 3, name: 'Discount By Coupon', value: 'couponDiscountTotal' },
     { id: 4, name: 'Shipping Fee', value: 'totalShipping' },
     { id: 5, name: 'Total Amount', value: 'grandTotal' },
   ]
@@ -49,7 +49,7 @@ const ThankYou = ({ navigation, route }) => {
             <View style={{ alignItems: 'center' }}>
               <Icon name={'checkmark-circle'} size={30} color={APP_PRIMARY_COLOR} />
               <AText style={styles.headerTextStyle} large>
-                Ordered Placed Successfully
+                Order Placed Successfully
               </AText>
             </View>
             <View>
@@ -99,8 +99,8 @@ const ThankYou = ({ navigation, route }) => {
                     {orderDetails?.shipping?.lastname}
                   </AText>
                   <AText color={GREYTEXT}>
-                    {orderDetails?.shipping?.address}, {' '}
-                    {orderDetails?.shipping?.city} {orderDetails?.shipping?.state}
+                    {orderDetails?.shipping?.address},
+                    {orderDetails?.shipping?.city} {orderDetails?.shipping?.state}{' '}
                     ,{orderDetails?.shipping?.zip}
                   </AText>
                 </View>
@@ -120,7 +120,7 @@ const ThankYou = ({ navigation, route }) => {
               </View>
               {orderDetails?.totalSummary &&
                 <View style={styles.priceTagStyle}>
-                  {mrpArray.map((item) => <CartPriceTags item={item} cartSummary={orderDetails?.totalSummary} couponDiscount={false} />)}
+                  {mrpArray.map((item) => <CartPriceTags item={item} cartSummary={orderDetails?.totalSummary} couponDiscount={orderDetails?.totalSummary?.couponDiscountTotal>0?true:false} />)}
                 </View>
               }
             </View>
@@ -171,9 +171,11 @@ const styles = StyleSheet.create({
   },
   priceTagStyle: {
     width: '92%',
-    marginHorizontal: 17,
+    alignSelf:'center',
+    // marginHorizontal: 17,
+    justifyContent:'center',
     marginBottom: 5,
-    marginTop: 25,
+    // marginTop: 25,
   },
 });
 

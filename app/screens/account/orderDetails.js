@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView, BackHandler } from 'react-native';
-import { AButton, AText, AppLoader, MainLayout } from '../../theme-components';
+import { AButton, AText, AppLoader, BackHeader, MainLayout } from '../../theme-components';
 import NavigationConstants from '../../navigation/NavigationConstants';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { APP_PRIMARY_COLOR, FontStyle, GREYTEXT } from '../../utils/config';
@@ -9,6 +9,9 @@ import moment from 'moment';
 import { getOrder } from '../../store/action/checkoutAction';
 import CartProductDisplayCard from '../../theme-components/cartProductDisplayCard';
 import CartPriceTags from '../components/cartPriceTags';
+import { AppSettingAction } from '../../store/action';
+import AIcon from 'react-native-vector-icons/AntDesign';
+import Colors from '../../constants/Colors';
 
 const OrderDetailScreen = ({ navigation, route }) => {
   const dispatch = useDispatch();
@@ -19,14 +22,16 @@ const OrderDetailScreen = ({ navigation, route }) => {
   const mrpArray = [
     { id: 1, name: 'Total MRP', value: 'mrpTotal' },
     { id: 2, name: 'Discount On MRP', value: 'discountTotal' },
-    { id: 3, name: 'Discount By Coupon', value: 'couponDiscount' },
+    { id: 3, name: 'Discount By Coupon', value: 'couponDiscountTotal' },
     { id: 4, name: 'Shipping Fee', value: 'totalShipping' },
     { id: 5, name: 'Total Amount', value: 'grandTotal' },
   ];
   const { loading } = useSelector((state) => state.cart);
 
+
   useEffect(() => {
     getOrderDetail();
+    dispatch(AppSettingAction());
   }, []);
 
   const getOrderDetail = async () => {
@@ -43,18 +48,20 @@ const OrderDetailScreen = ({ navigation, route }) => {
         <ScrollView
           contentContainerStyle={styles.scollContentContainerStyle}
           style={styles.scrollContainer}>
-          <View style={{ alignItems: 'center' }}>
-            {/* <Icon name={'checkmark-circle'} size={30} color={APP_PRIMARY_COLOR} /> */}
+          <View style={{ alignItems: 'center',flexDirection:'row',marginHorizontal:15 }}>
+            <AIcon name="arrowleft" onPress={() => navigation.goBack()} size={22} color={Colors.blackColor} />
             <AText style={styles.headerTextStyle} large>
-              Ordered Summary
+              Order Summary
             </AText>
           </View>
+          {/* <BackHeader navigation={navigation} name="Ordered Summary" /> */}
+
           <View>
             <View style={styles.contentContainerStyle}>
-              <AText style={styles.textContentStyle} medium>
+              <AText style={{...styles.textContentStyle,marginBottom:5}} medium>
                 Order Information
               </AText>
-              <View style={styles.container}>
+              <View style={{...styles.container,marginBottom:0}}>
                 <AText style={styles.textContentStyle} small>
                   Order Number
                 </AText>
@@ -76,12 +83,12 @@ const OrderDetailScreen = ({ navigation, route }) => {
                 Billing Address
               </AText>
               <View>
-                <AText color={GREYTEXT} fonts={FontStyle.semiBold}>
+                <AText style={{textTransform:'capitalize'}} color={GREYTEXT} fonts={FontStyle.semiBold}>
                   {orderDetails?.billing?.firstname}{' '}
                   {orderDetails?.billing?.lastname}
                 </AText>
                 <AText color={GREYTEXT}>
-                  {orderDetails?.billing?.address},{orderDetails?.billing?.city}{' '}
+                  {orderDetails?.billing?.address}, {orderDetails?.billing?.city}{' '}
                   {orderDetails?.billing?.state}, {orderDetails?.billing?.zip}
                 </AText>
               </View>
@@ -91,14 +98,14 @@ const OrderDetailScreen = ({ navigation, route }) => {
                 Shipping Address
               </AText>
               <View>
-                <AText color={GREYTEXT} fonts={FontStyle.semiBold}>
+                <AText style={{textTransform:'capitalize'}} color={GREYTEXT} fonts={FontStyle.semiBold}>
                   {orderDetails?.shipping?.firstname}{' '}
                   {orderDetails?.shipping?.lastname}
                 </AText>
                 <AText color={GREYTEXT}>
-                  {orderDetails?.shipping?.address}, ,{' '}
+                  {orderDetails?.shipping?.address},{' '}
                   {orderDetails?.shipping?.city} {orderDetails?.shipping?.state}
-                  ,{orderDetails?.shipping?.zip}
+                  , {orderDetails?.shipping?.zip}
                 </AText>
               </View>
             </View>
@@ -121,6 +128,7 @@ const OrderDetailScreen = ({ navigation, route }) => {
                   navigation={navigation}
                   cartProducts={orderDetails.products}
                   ShowIncrementDecreement={false}
+                  navigateProduct={true}
                 />
               ) : null}
             </View>
@@ -130,7 +138,7 @@ const OrderDetailScreen = ({ navigation, route }) => {
                   <CartPriceTags
                     item={item}
                     cartSummary={orderDetails?.totalSummary}
-                    couponDiscount={false}
+                    couponDiscount={orderDetails?.totalSummary?.couponDiscountTotal>0?true:false}
                   />
                 ))}
               </View>
@@ -158,12 +166,13 @@ const styles = StyleSheet.create({
   },
   headerTextStyle: {
     color: '#000',
-    marginBottom: 5,
+    // marginBottom: 5,
+    marginLeft:15,
     fontFamily: FontStyle.fontBold,
   },
   scollContentContainerStyle: {
     flexGrow: 1,
-    paddingTop: 35,
+    paddingTop: 15,
     paddingBottom: 75,
   },
   contentContainerStyle: {

@@ -1,10 +1,10 @@
-import React, { Fragment, useEffect, useState } from 'react';
-import { AText, AButton, AHeader, BackHeader } from '../../theme-components';
-import { Formik, useFormik } from 'formik';
+import React, {Fragment, useEffect, useRef, useState} from 'react';
+import {AText, AButton, AHeader, BackHeader} from '../../theme-components';
+import {Formik, useFormik} from 'formik';
 import styled from 'styled-components/native';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 
-import { Appbar, Checkbox, RadioButton, TextInput } from 'react-native-paper';
+import {Appbar, Checkbox, RadioButton, TextInput} from 'react-native-paper';
 import {
   KeyboardAvoidingView,
   Modal,
@@ -16,8 +16,8 @@ import {
   View,
 } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-import { countryArray } from '../../utils/CountryData';
-import { validationSchema } from '../checkout/validationSchema';
+import {countryArray} from '../../utils/CountryData';
+import {validationSchema} from '../checkout/validationSchema';
 import {
   APP_PRIMARY_COLOR,
   APP_SECONDARY_COLOR,
@@ -26,6 +26,7 @@ import {
 import Colors from '../../constants/Colors';
 import PropTypes from 'prop-types';
 import AIcon from 'react-native-vector-icons/AntDesign';
+import {CountryPicker} from 'react-native-country-codes-picker';
 
 const AdressForm = ({
   initialFormValues,
@@ -34,15 +35,22 @@ const AdressForm = ({
   showHeader,
   showBottomPanel,
   handleSubmit,
+  marginBottom,
+  onStopScroll,
+  editAddress
 }) => {
+  const textInputRef = useRef(null);
+
   const [openCountryModal, setOpenCountryModal] = useState(false);
   const [openStateModal, setOpenStateModal] = useState(false);
   const [countrySelectIndex, setCountrySelectIndex] = useState(1);
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
+
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialFormValues,
     validationSchema: validationSchema,
-    onSubmit: (values, { setSubmitting, resetForm }) => {
+    onSubmit: (values, {setSubmitting, resetForm}) => {
       onSubmit(values);
       setSubmitting(false);
       // resetForm({});
@@ -54,7 +62,17 @@ const AdressForm = ({
     }
   }, [handleSubmit]);
 
-  const onSubmit = (values) => {
+  useEffect(()=>{
+    if(openCountryModal || openStateModal){
+      console.log('runnin')
+      onStopScroll(false)
+    }
+    else if(!openCountryModal || !openStateModal){
+      onStopScroll(true)
+    }
+  },[openCountryModal,openStateModal])
+
+  const onSubmit = values => {
     const FormValue = {
       firstname: values.firstname,
       lastname: values.lastname,
@@ -80,22 +98,24 @@ const AdressForm = ({
         visible={true}
         animationInTiming={1500}> */}
       <View
-        style={{ flex: 1, width: '100%', backgroundColor: Colors.whiteColor }}>
+        style={{flex: 1, width: '100%', backgroundColor: Colors.whiteColor,marginBottom:marginBottom??0}}>
         {showHeader && (
           <View style={styles.header}>
             <AIcon name="arrowleft" onPress={cancelAddForm} size={22} />
             <AText style={styles.newAddtextStyle} large>
-              Add New Address
+              {editAddress?'Update Address':'Add New Address'}
             </AText>
           </View>
         )}
 
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
+          automaticallyAdjustKeyboardInsets={true}
+          contentContainerStyle={{flexGrow: 1}}
           style={[styles.scrollViewStyle, {}]}
           showsVerticalScrollIndicator={false}
           nestedScrollEnabled={true}
-          scrollEnabled={!openStateModal}>
+          scrollEnabled={!openStateModal && !openCountryModal}
+          >
           <Fragment>
             <TextInput
               style={styles.textinputstyle}
@@ -122,8 +142,32 @@ const AdressForm = ({
                 {formik.errors.lastname}
               </AText>
             )}
-
+            <CountryPicker
+              show={showCountryPicker}
+              style={{
+                modal: {
+                  height: 500,
+                },
+              }}
+              // when picker button press you will get the country object with dial code
+              pickerButtonOnPress={item => {
+                formik.setFieldValue('phone', item.dial_code);
+                setShowCountryPicker(false);
+                if (textInputRef.current) {
+                  // Focus on the input field if editable state changes to true
+                  // setTimeout(() => {
+                  textInputRef.current.focus();
+                  // }, 100);
+                }
+              }}
+              // showOnly={['UA', 'EN', 'IN', 'US', 'UA']}
+            />
             <TextInput
+              textInputRef={textInputRef}
+              onfocus={() => {
+                console.log(' hyyyy');
+                setShowCountryPicker(true);
+              }}
               style={styles.textinputstyle}
               label="Phone no."
               value={formik.values.phone}
@@ -165,43 +209,92 @@ const AdressForm = ({
                 {formik.errors.landmark}
               </AText>
             )}
-
-            <DropDownPicker
-            searchable={true}
-              open={openCountryModal}
-              value={formik.values.country}
-              label="Country"
-              items={countryArray}
-              placeholder={'Country'}
-              setOpen={setOpenCountryModal}
-              onSelectItem={(item) => {
-                setCountrySelectIndex(item.id),
-                  formik.setFieldValue('country', item.value);
-              }}
-              style={styles.dropDownStyle}
-            />
-            {formik.touched.country && formik.errors.country && (
-              <AText color="red" xtrasmall>
-                {formik.errors.country}
-              </AText>
-            )}
-            <DropDownPicker
-              searchable={true}
-              open={openStateModal}
-              value={formik.values.state}
-              placeholder={'State'}
-              autoScroll={true}
-              items={countryArray[countrySelectIndex - 1].state}
-              setOpen={setOpenStateModal}
-              onSelectItem={(item) => {
-                formik.setFieldValue('state', item.value);
-              }}
-              style={styles.dropDownStyle}
-            />
-            {formik.touched.state && formik.errors.state && (
-              <AText color="red" xtrasmall>
-                {formik.errors.state}
-              </AText>
+            {Platform.OS === 'ios' ? (
+              <>
+                <View style={{zIndex: 5}}>
+                  <DropDownPicker
+                    searchable={true}
+                    open={openCountryModal}
+                    value={formik.values.country}
+                    label="Country"
+                    items={countryArray}
+                    placeholder={'Country'}
+                    setOpen={setOpenCountryModal}
+                    onSelectItem={item => {
+                      setCountrySelectIndex(item.id),
+                        formik.setFieldValue('country', item.value);
+                    }}
+                    style={{...styles.dropDownStyle}}
+                    // zIndex={5}
+                  />
+                  {formik.touched.country && formik.errors.country && (
+                    <AText color="red" xtrasmall>
+                      {formik.errors.country}
+                    </AText>
+                  )}
+                </View>
+                <View style={{zIndex: 1}}>
+                  <DropDownPicker
+                    searchable={true}
+                    open={openStateModal}
+                    value={formik.values.state}
+                    placeholder={'State'}
+                    autoScroll={true}
+                    items={countryArray[countrySelectIndex - 1].state}
+                    setOpen={setOpenStateModal}
+                    onSelectItem={item => {
+                      formik.setFieldValue('state', item.value);
+                    }}
+                    style={styles.dropDownStyle}
+                  />
+                  {formik.touched.state && formik.errors.state && (
+                    <AText color="red" xtrasmall>
+                      {formik.errors.state}
+                    </AText>
+                  )}
+                </View>
+              </>
+            ) : (
+              <>
+                <DropDownPicker
+                  searchable={true}
+                  open={openCountryModal}
+                  value={formik.values.country}
+                  label="Country"
+                  items={countryArray}
+                  placeholder={'Country'}
+                  setOpen={setOpenCountryModal}
+                  onSelectItem={item => {
+                    setCountrySelectIndex(item.id),
+                      formik.setFieldValue('country', item.value);
+                  }}
+                  style={{...styles.dropDownStyle}}
+                  // zIndex={5}
+                />
+                {formik.touched.country && formik.errors.country && (
+                  <AText color="red" xtrasmall>
+                    {formik.errors.country}
+                  </AText>
+                )}
+                <DropDownPicker
+                  searchable={true}
+                  open={openStateModal}
+                  value={formik.values.state}
+                  placeholder={'State'}
+                  autoScroll={true}
+                  items={countryArray[countrySelectIndex - 1].state}
+                  setOpen={setOpenStateModal}
+                  onSelectItem={item => {
+                    formik.setFieldValue('state', item.value);
+                  }}
+                  style={styles.dropDownStyle}
+                />
+                {formik.touched.state && formik.errors.state && (
+                  <AText color="red" xtrasmall>
+                    {formik.errors.state}
+                  </AText>
+                )}
+              </>
             )}
             <TextInput
               style={styles.textinputstyle}
@@ -242,7 +335,7 @@ const AdressForm = ({
                       ? 'radio-button-on'
                       : 'radio-button-off'
                   }
-                  style={{ marginHorizontal: 5 }}
+                  style={{marginHorizontal: 5}}
                   size={20}
                 />
                 <Text>Home</Text>
@@ -258,7 +351,7 @@ const AdressForm = ({
                       ? 'radio-button-on'
                       : 'radio-button-off'
                   }
-                  style={{ marginHorizontal: 5 }}
+                  style={{marginHorizontal: 5}}
                   size={20}
                 />
                 <Text>Office</Text>
@@ -266,7 +359,7 @@ const AdressForm = ({
             </View>
             {showBottomPanel && (
               <TouchableOpacity
-                style={{ flexDirection: 'row', alignItems: 'center' }}
+                style={{flexDirection: 'row', alignItems: 'center'}}
                 activeOpacity={0.5}
                 onPress={() =>
                   formik.setFieldValue(
@@ -281,7 +374,7 @@ const AdressForm = ({
                       ? 'checkbox-outline'
                       : 'square-outline'
                   }
-                  style={{ marginHorizontal: 5 }}
+                  style={{marginHorizontal: 5}}
                   size={20}
                 />
                 <Text>Set Default Address</Text>
@@ -290,14 +383,23 @@ const AdressForm = ({
             {showBottomPanel && (
               <BottomSpacer>
                 <AButton
-                  style={{ width: '40%', borderRadius: 40, borderColor: "transparent", backgroundColor: 'red' }}
+                  style={{
+                    width: '40%',
+                    borderRadius: 40,
+                    borderColor: 'transparent',
+                    backgroundColor: 'red',
+                  }}
                   title="Cancel"
                   onPress={cancelAddForm}
                 />
                 <AButton
                   borderColor="transparent"
-                  style={{ width: '40%', borderRadius: 40, borderColor: "transparent" }}
-                  title="Next"
+                  style={{
+                    width: '40%',
+                    borderRadius: 40,
+                    borderColor: 'transparent',
+                  }}
+                  title="Save"
                   disabled={!formik.isValid}
                   onPress={formik.handleSubmit}
                 />
@@ -333,7 +435,8 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   newAddtextStyle: {
-    fontFamily: FontStyle.semiBold, marginLeft: 20
+    fontFamily: FontStyle.semiBold,
+    marginLeft: 20,
   },
   textinputstyle: {
     marginTop: 5,

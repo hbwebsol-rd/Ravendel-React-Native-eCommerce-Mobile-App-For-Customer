@@ -12,7 +12,8 @@ const AddressCard = ({ addressDefault, item, setAddressDefault, editForm, editDe
     const addressTypeIcon = item.addressType === 'Home' ? 'home-outline' : 'briefcase-outline';
 
     return (
-        <View
+        <TouchableOpacity
+        onPress={() => setAddressDefault(item._id)}
             style={[
                 styles.addressCard,
                 isDefault && { backgroundColor: APP_SECONDARY_COLOR, borderColor: APP_PRIMARY_COLOR }
@@ -49,7 +50,7 @@ const AddressCard = ({ addressDefault, item, setAddressDefault, editForm, editDe
             <TouchableOpacity style={styles.editButton} onPress={editForm}>
                 <MIcon name="pencil-outline" size={15} color={APP_PRIMARY_COLOR} />
             </TouchableOpacity>
-        </View>
+        </TouchableOpacity>
     );
 };
 

@@ -33,7 +33,7 @@ const MenuListing = ({ data, type, onPress, selectedItem }) => {
                                 onPress={() => onPress(category)}>
                                 <Image
                                     style={[isMainCategory ? styles.mainCategoryImageStyle : styles.subCategoryImageStyle]}
-                                    source={{ uri: uriImage(category.image) }}
+                                    source={{ uri: uriImage(!isMainCategory? category.thumbnail_image: category.image) }}
                                 />
                                 <AText xtrasmall={isMainCategory} small={!isMainCategory} style={styles.catNameStyle} >
                                     {category.name}

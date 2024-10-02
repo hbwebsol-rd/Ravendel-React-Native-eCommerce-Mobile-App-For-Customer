@@ -61,24 +61,26 @@ export const checkoutDetailsAction =
               description: `Credits towards ${APP_NAME}`,
               image: 'https://i.imgur.com/3g7nmJC.png',
               currency: 'INR',
-              key: paymentSetting.razorpay.live_client_id, // Your api key
-              amount: totalAmt * 100, //cartSummary?.grandTotal * 100,
+              key: paymentSetting.razorpay.test_mode ?paymentSetting.razorpay.sandbox_client_id:paymentSetting.razorpay.live_client_id, // Your api key
+              amount: totalAmt*100, //cartSummary?.grandTotal * 100,
               name: APP_NAME,
+              order_id: response.data.addOrder.razorpayOrderId,
               prefill: {
-                email: 'void@razorpay.com',
-                contact: '9191919191',
-                name: 'Razorpay Software',
+                email: checkoutDetailsData.billing.email,
+                contact: checkoutDetailsData.billing.phone,
+                name: checkoutDetailsData.billing.firstname,
               },
               theme: { color: APP_PRIMARY_COLOR },
             };
-            RazorpayCheckout.open(options)
-              .then((data) => {
+            RazorpayCheckout.open(options).then((data) => {
                 // handle success
                 const payload = {
                   id: response.data.addOrder.id,
                   paymentStatus: 'success',
                 };
-                dispatch(paymentStatus(payload, navigation, navParams));
+                console.log(data,' razorpay response')
+
+                dispatch(paymentStatus(payload, navigation, navParams,response.data.addOrder.id));
               })
               .catch((error) => {
                 // handle failure
@@ -104,7 +106,6 @@ export const checkoutDetailsAction =
 export const checkPincodeValid =
   (payload, navigation, navParams) => async (dispatch) => {
     dispatch({ type: CHECKOUT_LOADING });
-
     try {
       const response = await query(CHECK_ZIPCODE, payload);
       if (!isEmpty(response) && _.get(response, 'data.checkZipcode.success')) {
@@ -172,13 +173,14 @@ export const getShippingMethods = () => async (dispatch) => {
 };
 
 export const paymentStatus =
-  (paymentStatusData, navigation, navParams) => async (dispatch) => {
+  (paymentStatusData, navigation, navParams,orderId) => async (dispatch) => {
     dispatch({ type: CHECKOUT_LOADING });
-
+    console.log(paymentStatusData)
     try {
       const response = await mutation(UPDATE_PAYMENT_STATUS, paymentStatusData);
+      console.log(response,' success on payment')
       if (!isEmpty(response)) {
-        navigation.navigate(NavigationConstants.THANK_YOU_SCREEN, navParams);
+        navigation.navigate(NavigationConstants.THANK_YOU_SCREEN, {...navParams,orderId:orderId});
       } else {
         dispatch({ type: CHECKOUT_LOADING_STOP });
         dispatch({

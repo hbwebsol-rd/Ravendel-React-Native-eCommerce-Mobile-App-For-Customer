@@ -47,6 +47,7 @@ const ShippingScreen = ({ navigation }) => {
   const [formSubmit, setFormSubmit] = useState(false);
   const [addressDefault, setaddressDefault] = useState(0);
   const [shippingAddress, setShippingAddress] = useState({});
+  const [addressEdit, setAddressEdit] = useState(false);
   const [initialFormValues, setInitialFormValues] = useState({
     firstname: userDetails.firstName,
     lastname: userDetails.lastName,
@@ -67,7 +68,7 @@ const ShippingScreen = ({ navigation }) => {
       let address = userDetails.addressBook;
       setAddressForm(false);
       var found = address.find((item) => {
-        return item.default_address == true;
+        return item.defaultAddress == true;
       });
       if (!isEmpty(found)) {
         setaddressDefault(found._id);
@@ -104,7 +105,7 @@ const ShippingScreen = ({ navigation }) => {
         defaultAddress: values.defaultAddress,
         addressType: values.addressType,
       };
-      if (!sameShipingAdress && !addressForm) {
+      if (sameShipingAdress && !addressForm) {
         setShippingAddress(payload);
         handleShipping(payload);
       } else {
@@ -142,6 +143,7 @@ const ShippingScreen = ({ navigation }) => {
         addressType: '',
       });
       setAddressForm(false);
+      // console.log(payload,' edit address')
       dispatch(updateAddressAction(payload));
     }
   };
@@ -161,6 +163,7 @@ const ShippingScreen = ({ navigation }) => {
       addressType: values.addressType ?? '',
     });
     setAddressForm(true);
+    setAddressEdit(true);
   };
 
   const handleShipping = (shipAddresspayload) => {
@@ -169,18 +172,18 @@ const ShippingScreen = ({ navigation }) => {
       userDetails.addressBook.find((item) => item._id == addressDefault);
     const payload = {
       zipcode:
-        !sameShipingAdress && shipAddresspayload
+        sameShipingAdress && shipAddresspayload
           ? shipAddresspayload.pincode
-          : !sameShipingAdress && shippingAddress
+          : sameShipingAdress && shippingAddress
           ? shippingAddress.pincode
           : billAddress.pincode,
     };
     const navigationParams = {
       screen: 'CheckoutDetails',
       shippingAddress:
-        !sameShipingAdress && shipAddresspayload
+        sameShipingAdress && shipAddresspayload
           ? shipAddresspayload
-          : !sameShipingAdress && shippingAddress
+          : sameShipingAdress && shippingAddress
           ? shippingAddress
           : billAddress,
       billingAddress: billAddress,
@@ -196,16 +199,33 @@ const ShippingScreen = ({ navigation }) => {
         <AdressForm
           navigation={navigation}
           addForm={onSubmit}
-          onStopScroll={() => setScrollEnable(!scrollenable)}
+          onStopScroll={(e) => setScrollEnable(e)}
           showBottomPanel={true}
           showHeader={true}
-          cancelAddForm={() => setAddressForm(false)}
+          cancelAddForm={() => {
+            setInitialFormValues({
+              firstname: userDetails.firstName,
+              lastname: userDetails.lastName,
+              phone: userDetails.phone,
+              address: '',
+              landmark: '',
+              city: '',
+              state: '',
+              country: '',
+              pincode: '',
+              defaultAddress: true,
+              addressType: '',
+            });
+            setAddressEdit(false)
+            setAddressForm(false)}}
           initialFormValues={initialFormValues}
+          editAddress={addressEdit}
         />
       ) : (
         <>
           <BackHeader navigation={navigation} name="Checkout" />
           <ScrollView
+            keyboardShouldPersistTaps={true}
             style={styles.scrollStyle}
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
@@ -249,29 +269,30 @@ const ShippingScreen = ({ navigation }) => {
               <IonIcon
                 color={APP_PRIMARY_COLOR}
                 name={sameShipingAdress ? 'checkbox-outline' : 'square-outline'}
-                style={{ marginHorizontal: 5 }}
+                style={{ marginRight: 5 }}
                 size={20}
               />
-              <Text>Ship to a different address</Text>
+              <Text style={{color:'#000'}}>Ship to a different address</Text>
             </TouchableOpacity>
 
             <AddressWrapper>
-              {!sameShipingAdress && (
+            {sameShipingAdress && ( 
                 <AdressForm
+                  // marginBottom={60}
                   navigation={navigation}
                   handleSubmit={formSubmit}
                   addForm={onSubmit}
-                  onStopScroll={() => setScrollEnable(!scrollenable)}
-                  cancelAddForm={() => setAddressForm(false)}
+                  onStopScroll={(e) => setScrollEnable(e)}
+                  cancelAddForm={() => {setAddressForm(false)}}
                   initialFormValues={initialFormValues}
                 />
-              )}
+            )}
             </AddressWrapper>
             <AButton
               style={styles.nextBtnStyle}
               onPress={() => {
                 if(addressDefault){
-                  sameShipingAdress ? handleShipping() : setFormSubmit(true);
+                  !sameShipingAdress ? handleShipping() : setFormSubmit(true);
                   setTimeout(() => {
                     setFormSubmit(false);
                   }, 700);
@@ -282,6 +303,7 @@ const ShippingScreen = ({ navigation }) => {
               title="Next"
             />
           </ScrollView>
+          
         </>
       )}
     </MainLayout>
@@ -304,11 +326,11 @@ const styles = StyleSheet.create({
     color: 'black',
     fontFamily: FontStyle.semiBold,
   },
-  scrollStyle: { marginHorizontal: 20, marginTop: 10, flex: 1 },
+  scrollStyle: { marginHorizontal: 20, marginTop: 10, padding:0 },
   billingAddressBtnStyle: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginStart: 5,
+    // marginStart: 5,
   },
   iconStyle: {
     height: 26,
@@ -321,6 +343,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'center',
     borderRadius: 25,
+    // position:'absolute',
+    // bottom:0
   },
   addaddresscard: {
     marginHorizontal: 2,

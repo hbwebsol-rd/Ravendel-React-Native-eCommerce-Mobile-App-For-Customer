@@ -22,6 +22,12 @@ const GET_APP_SETTING = gql`
           state
           zip
           hour
+          email
+          phone_number
+          social_media {
+            name
+            handle
+          }
         }
         inventory {
           manage_stock

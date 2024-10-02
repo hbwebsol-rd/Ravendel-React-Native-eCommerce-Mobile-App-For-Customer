@@ -40,10 +40,10 @@ import locationIcon from '../../assets/images/locationIcon.png';
 import orderIcon from '../../assets/images/orderIcon.png';
 import { useMutation } from '@apollo/client';
 import { DELETE_CUSTOMER } from '../../queries/customerQuery';
+import { Divider } from 'react-native-paper';
 
 const AccountScreen = ({ navigation }) => {
   const { isLoggin, userDetails } = useSelector((state) => state.customer);
-  console.log(userDetails, 'udd');
   const dispatch = useDispatch();
   const [deleteCustomer, { loadings, errors }] = useMutation(DELETE_CUSTOMER, {
     onError: (error) => {
@@ -88,24 +88,24 @@ const AccountScreen = ({ navigation }) => {
     {
       id: 1,
       name: 'Return and Refund Policy',
-      navigationScreen: `${BASEURL}/abouts/privacypolicy`,
+      navigationScreen: `${BASEURL}returns-refunds`,
       openLink: true,
     },
     {
       id: 2,
       name: 'Terms and Condition',
-      navigationScreen: `${BASEURL}/abouts/terms&condition`,
+      navigationScreen: `${BASEURL}terms-conditions`,
       openLink: true,
     },
     {
       id: 3,
       name: 'Privacy Policy',
-      navigationScreen: `${BASEURL}/abouts/privacypolicy`,
+      navigationScreen: `${BASEURL}privacy-policy`,
       openLink: true,
     },
     {
       id: 3,
-      name: 'Contact US',
+      name: 'Contact Us',
       navigationScreen: NavigationConstants.ContactUs,
       openLink: false,
     },
@@ -181,10 +181,11 @@ const AccountScreen = ({ navigation }) => {
           <View style={styles.container}>
             <AText
               medium
-              textStyle={[styles.containerTextStyle, { color: '#000' }]}>
+              textStyle={[styles.containerTextStyle, { color: '#000',marginBottom:8 }]}>
               Important Information
             </AText>
             {impInfoFieldArray.map((item) => (
+              <>
               <TouchableOpacity
                 onPress={() => {
                   item.navigationScreen && !item.openLink
@@ -197,6 +198,8 @@ const AccountScreen = ({ navigation }) => {
                 <AText textStyle={styles.containerTextStyle}>{item.name}</AText>
                 <FIcon color={'#8A8A8A'} name="chevron-right" size={15} />
               </TouchableOpacity>
+              <Divider style={{marginVertical:5,height:1}}/>
+              </>
             ))}
           </View>
         </>
@@ -273,6 +276,7 @@ const styles = StyleSheet.create({
     color: '#000',
     textAlign: 'center',
     fontFamily: FontStyle.semiBold,
+    textTransform:'capitalize'
   },
   subHeadingTextStyle: {
     textAlign: 'center',

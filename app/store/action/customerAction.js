@@ -142,6 +142,14 @@ export const addAddressAction = (payload, navigation) => async (dispatch) => {
         dispatch(userDetailsfetch(payload.id));
       }, 1500);
       dispatch({ type: CUSTOMER_LOADING_FAIL });
+      dispatch({
+        type: ALERT_SUCCESS,
+        payload: _.get(
+          response,
+          'data.addAddressBook.message',
+          'Something went wrong. Please try again later.',
+        ),
+      });
     } else {
       dispatch({ type: CUSTOMER_LOADING_FAIL });
       dispatch({
@@ -209,6 +217,14 @@ export const updateAddressAction =
         setTimeout(() => {
           dispatch(userDetailsfetch(payload.id));
         }, 2500);
+        dispatch({
+          type: ALERT_SUCCESS,
+          payload: _.get(
+            response,
+            'data.updateAddressBook.message',
+            'Something went wrong. Please try again later.',
+          ),
+        });
         dispatch({ type: CUSTOMER_LOADING_FAIL });
       } else {
         dispatch({ type: CUSTOMER_LOADING_FAIL });
