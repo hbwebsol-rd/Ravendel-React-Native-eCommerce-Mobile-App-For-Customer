@@ -1,16 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 
-const NoConnection = () => {
+const NoConnection = ({serverDown}) => {
   return (
     <View style={styles.container}>
       <Image
         style={styles.image}
-        source={require('../assets/images/nointernet.png')} // Replace with your own image URL if needed
+        source={serverDown?require('../assets/images/upset.png'):require('../assets/images/nointernet.png')} // Replace with your own image URL if needed
       />
-      <Text style={styles.title}>No Internet</Text>
+      <Text style={styles.title}>{serverDown?'Oops!':'No Internet'}</Text>
       <Text style={styles.subtitle}>
-        Please check your network connection and try again.
+        {serverDown?'Server is under maintenance please keep patience.':'Please check your network connection and try again.'}
       </Text>
     </View>
   );
@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F0F8FF', // Light cyan background color
+    backgroundColor: '#fff', // Light cyan background color
     padding: 20,
   },
   image: {

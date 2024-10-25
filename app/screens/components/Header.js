@@ -19,7 +19,7 @@ const Header = ({ navigation, title, showProfileIcon, titleColor }) => {
       <AText large color={titleColor ?? '#000'} fonts={FontStyle.fontBold}>
         {title}
       </AText>
-      {showProfileIcon ? (
+      {false && showProfileIcon ? (
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={() =>

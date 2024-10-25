@@ -52,6 +52,7 @@ ProductsSlider.propTypes = {
 const styles = StyleSheet.create({
   titleStyle: {
     marginBottom: 10,
+    marginLeft:10,
     fontFamily: FontStyle.fontBold,
   },
   container: {

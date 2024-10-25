@@ -14,6 +14,7 @@ import { getSubcategories } from '../../store/action/productAction';
 import { query } from '../../utils/service';
 import { GET_FILTEREDPRODUCTS_WITH_PAGINATION } from '../../queries/productQuery';
 import MenuListing from './Components/menuListing';
+import NoConnection from '../../theme-components/nointernet';
 
 const CategoriesScreen = ({ navigation }) => {
   const mainLoading = useSelector((state) => state.products.loading);
@@ -27,6 +28,7 @@ const CategoriesScreen = ({ navigation }) => {
   const [allCategoriesWithChildData, setAllCategoriesWithChildData] = useState(
     [],
   );
+  const { netConnection } = useSelector((state) => state.alert);
 
   useEffect(() => {
     if (allCategoriesWithChild) {
@@ -38,7 +40,7 @@ const CategoriesScreen = ({ navigation }) => {
   useEffect(() => {
     if (subcategories?.getCategoryPageData) {
       setSubcategoriesData(
-        subcategories.getCategoryPageData.mostParentCategoryData.subCategories,
+        subcategories?.getCategoryPageData?.mostParentCategoryData?.subCategories,
       );
     }
   }, [subcategories]);
@@ -65,7 +67,7 @@ const CategoriesScreen = ({ navigation }) => {
     }
   };
   const getSubcategory = (singleCat) => {
-    // setSelectedCategory(singleCat.id);
+    setSelectedCategory(singleCat?.id);
     const subcat = {
       mainFilter: {
         categoryUrl: singleCat?.url,
@@ -88,10 +90,14 @@ const CategoriesScreen = ({ navigation }) => {
     )
   }
 
+  if (netConnection) {
+    return <NoConnection />;
+  }
+
   return (
     <SafeAreaView style={styles.safeAreaViewStyle}>
       {mainLoading || loading ? <AppLoader /> : null}
-      <Header navigation={navigation} title="Categories" />
+      <Header navigation={navigation} title="All Categories" />
       {!isEmpty(allCategoriesWithChildData) &&
         allCategoriesWithChildData.length > 0 ?
         <View style={styles.contentContainerView}>

@@ -23,7 +23,7 @@ function CategoryItem({ category, navigateNextScreen }) {
           uri: uriImage(category.image)
 
         }}
-        style={{ width: 60, height: 60, borderRadius: 30 }}
+        style={{ width: 60, height: 60, borderRadius: 30, resizeMode:'cover' }}
       />
       <AText center small color={GREYTEXT} fonts={FontStyle.fontBold}>
         {category.name}

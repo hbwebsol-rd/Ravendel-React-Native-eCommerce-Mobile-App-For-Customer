@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,7 +10,7 @@ import { formatCurrency, isEmpty } from '../../utils/helper';
 
 import { REMOVE_ALL_CART_PRODUCT, UPDATE_CART_PRODUCT } from '../../store/action/checkoutAction';
 import { CartQtyAction, REMOVE_ITEM_IN_CART, removeCartAction } from '../../store/action/cartAction';
-import { FontStyle } from '../../utils/config';
+import { APP_PRIMARY_COLOR, FontStyle } from '../../utils/config';
 import Colors from '../../constants/Colors';
 import Header from '../components/Header';
 import NavigationConstants from '../../navigation/NavigationConstants';
@@ -19,6 +19,8 @@ import ProductsSlider from '../../theme-components/ProductsSlider';
 import ProductDisplayCard from '../../theme-components/cartProductDisplayCard';
 import CartProductDisplayCard from '../../theme-components/cartProductDisplayCard';
 import CartPriceTags from '../components/cartPriceTags';
+import FIcon from 'react-native-vector-icons/Feather'
+import NoConnection from '../../theme-components/nointernet';
 
 const CartScreen = ({ navigation }) => {
 
@@ -28,6 +30,7 @@ const CartScreen = ({ navigation }) => {
   const { loading, products: cartItems, cartSummary: cartSummaryPrice } = useSelector((state) => state.cart);
   const { additionalProduct: relatedProducts, products } = useSelector((state) => state.products);
   const { currencySymbol, currencyOptions } = useSelector((state) => state.settings);
+  const { netConnection } = useSelector((state) => state.alert);
 
   const [cartSummary, setCartSummary] = useState({});
   const [cartProducts, setCartProduct] = useState([]);
@@ -198,6 +201,10 @@ const CartScreen = ({ navigation }) => {
     setCartProduct(cartItems);
   };
 
+  if (netConnection) {
+    return <NoConnection />;
+  }
+
   return (
     <>
       {loading ? <AppLoader /> : null}
@@ -212,6 +219,7 @@ const CartScreen = ({ navigation }) => {
                   contentContainerStyle={{ flexGrow: 1 }}
                   style={{ width: '100%', flex: 1 }}
                   showsVerticalScrollIndicator={false}>
+                    {console.log(cartProducts,' displa')}
                   <CartProductDisplayCard
                     navigation={navigation}
                     cartProducts={cartProducts}
@@ -265,8 +273,9 @@ const CartScreen = ({ navigation }) => {
               </>
             ) : (
               <EmptyWrapper>
+                <Image source={require('../../assets/images/shopping-cart.png')} style={{height:100,width:100,marginRight:15}} />
                 <AText style={styles.emptyTextStyle} large>
-                  Your cart is currently empty.
+                  Your Cart is Currently empty.
                 </AText>
                 <AButton
                   style={{borderRadius: 25}}
@@ -351,7 +360,9 @@ const styles = StyleSheet.create({
   },
   emptyTextStyle: {
     textAlign: 'center',
-    marginBottom: 10
+    marginBottom: 10,
+    fontWeight:'bold',
+    marginTop:20
   }
 });
 export default CartScreen;

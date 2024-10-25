@@ -256,6 +256,7 @@ const AdressForm = ({
               </>
             ) : (
               <>
+              {console.log(formik.values,' htmul')}
                 <DropDownPicker
                   searchable={true}
                   open={openCountryModal}
@@ -267,6 +268,7 @@ const AdressForm = ({
                   onSelectItem={item => {
                     setCountrySelectIndex(item.id),
                       formik.setFieldValue('country', item.value);
+                      formik.setFieldValue('state', '');
                   }}
                   style={{...styles.dropDownStyle}}
                   // zIndex={5}
@@ -400,7 +402,7 @@ const AdressForm = ({
                     borderColor: 'transparent',
                   }}
                   title="Save"
-                  disabled={!formik.isValid}
+                  // disabled={!formik.isValid}
                   onPress={formik.handleSubmit}
                 />
               </BottomSpacer>

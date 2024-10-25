@@ -30,6 +30,10 @@ import {
   TextInput,
   ScrollView,
   Platform,
+  Modal,
+  Image,
+  Text,
+  Vibration,
 } from 'react-native';
 import StarRating from 'react-native-star-rating';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -75,7 +79,7 @@ const SingleProductScreen = ({ navigation, route }) => {
   const [pinCode, setPinCode] = useState('');
   const [deliverable, setDeliverable] = useState('');
   const scrollViewRef = useRef(null);
-
+  const [showCelebrateModal, setShowCelebrateModal] = useState(false);
   useEffect(() => {
     scrollViewRef.current?.scrollTo({
       y: 0,
@@ -138,6 +142,8 @@ const SingleProductScreen = ({ navigation, route }) => {
       });
 
       _storeData(products);
+      setShowCelebrateModal(true)
+
     } else {
       setItemInCart(true);
       _storeData([
@@ -149,8 +155,18 @@ const SingleProductScreen = ({ navigation, route }) => {
           attributes: SingleProduct.attribute,
         },
       ]);
+      setShowCelebrateModal(true)
     }
+    Vibration.vibrate(100);
   };
+
+  useEffect(()=>{
+    if(showCelebrateModal){
+      setTimeout(() => {
+        setShowCelebrateModal(false)
+      }, 2000);
+    }
+  },[showCelebrateModal])
 
   useEffect(() => {
     setSingleProductLoading(true);
@@ -221,6 +237,10 @@ const SingleProductScreen = ({ navigation, route }) => {
       color: 'black', // Change this to your desired text color
     },
     p: { marginVertical: 0 },
+    ul:{
+      marginVertical: 0
+    }
+    
   };
 
   return (
@@ -251,7 +271,7 @@ const SingleProductScreen = ({ navigation, route }) => {
                 </AText>
               </View>
               <View style={styles.ratingPriceAndStockViewStyle}>
-                <View style={{ width: '70%' }}>
+                <View style={{ width: '65%' }}>
                   {!isEmpty(SingleProduct.rating) &&
                     SingleProduct.rating > 0 ? (
                     <View style={styles.starstyle}>
@@ -267,7 +287,7 @@ const SingleProductScreen = ({ navigation, route }) => {
                       />
                     </View>
                   ) : null}
-                  <ProductPriceText Pricing={SingleProduct.pricing} />
+                  <ProductPriceText showLargeText={true} Pricing={SingleProduct.pricing} />
                 </View>
                 <View style={styles.stockContainer}>
                   <AText
@@ -456,6 +476,20 @@ const SingleProductScreen = ({ navigation, route }) => {
           </NotFoundWrapper>
         ))
       )}
+      <Modal
+          animationType="fade"
+          transparent={true}
+          visible={showCelebrateModal}
+          onRequestClose={() => {
+            setShowCelebrateModal(!showCelebrateModal);
+          }}>
+          <View style={styles.overlay}>
+            <View style={styles.modalView}>
+              <Image source={require('../../assets/images/cap.png')} style={{width:100,height:100}}/>
+              <Text style={{fontWeight:'bold',fontSize:14}}>Horray! {cartQuantity} Item Added to the Cart</Text>
+            </View>
+          </View>
+      </Modal>
     </MainLayout>
   );
 };
@@ -607,8 +641,24 @@ const styles = StyleSheet.create({
   arrowStyle:{
     position:'absolute',
     top:Platform.OS==='android'? 10:60,
-    left:23,
+    left:10,
     zIndex:5
-  }
+  },
+  overlay: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalView: {
+    backgroundColor: '#fff',
+    // paddingTop: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 80,
+    borderRadius: 8,
+    paddingBottom:20,
+    paddingTop:10
+    // flex: 1,
+  },
 });
 export default SingleProductScreen;

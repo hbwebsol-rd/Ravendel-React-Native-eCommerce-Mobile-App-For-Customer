@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Image, StatusBar, StyleSheet, View } from 'react-native';
+import { Alert, BackHandler, Image, StatusBar, StyleSheet, View } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { useIsFocused } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 
 import Icon from 'react-native-vector-icons/Feather';
 import styled from 'styled-components/native';
@@ -42,7 +42,7 @@ const HomeScreen = ({ navigation }) => {
   const userDetails = useSelector(state => state.customer.userDetails);
   const loginState = useSelector(state => state.login);
   const [refreshing, setRefreshing] = useState(false);
-  const { homeData, allSections, homeslider } = useSelector(
+  const { homeData, allSections, homeslider, serverError } = useSelector(
     state => state.settings,
   );
   const { netConnection } = useSelector((state) => state.alert);
@@ -143,6 +143,21 @@ const HomeScreen = ({ navigation }) => {
     wait(2000).then(() => setRefreshing(false));
   }, []);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        // Show a confirmation dialog before exiting the app (optional)
+        BackHandler.exitApp()
+      };
+
+      // Add event listener for hardware back button press
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      // Cleanup event listener when the screen is unfocused
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [])
+  );
+
   useEffect(() => {
     if (isFocused) {
       dispatch(AppSettingAction());
@@ -198,6 +213,10 @@ const HomeScreen = ({ navigation }) => {
    if (netConnection) {
     return <NoConnection />;
   }
+  
+  if (serverError) {
+    return <NoConnection serverDown={serverError} />;
+  }
 
   return (
     <MainLayout hideScroll style={Styles.mainContainer}>
@@ -220,6 +239,7 @@ const HomeScreen = ({ navigation }) => {
           fs={12}
           placeholder={'Search'}
           placeholdercolor={'black'}
+          color={Colors.blackColor}
         />
       </View>
       <AContainer

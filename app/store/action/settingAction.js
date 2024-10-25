@@ -14,6 +14,7 @@ import { CATS_SUCCESS } from './productAction';
 import { updatePrimaryColor } from '../../utils/config';
 
 export const AppSettingAction = () => async (dispatch) => {
+  console.log(' respo')
   const response = await query(GET_APP_SETTING);
   try {
     if (!isEmpty(_.get(response, 'data.getSettings'))) {
@@ -83,7 +84,9 @@ export const AppSettingAction = () => async (dispatch) => {
       });
     }
   } catch (error) {
+    console.log(error,' error in setting api')
     dispatch({ type: SETTING_FAIL });
+    dispatch({ type: SERVER_ERROR });
   }
 };
 
@@ -200,3 +203,4 @@ export const SALE_PRODUCTS = 'SALE_PRODUCTS ';
 export const CATEGORY_PRODUCT = 'CATEGORY_PRODUCT ';
 export const GET_BRANDS = 'GET_BRANDS ';
 export const GET_ALL_DATA = 'GET_ALL_DATA ';
+export const SERVER_ERROR = 'SERVER_ERROR ';

@@ -10,6 +10,7 @@ import {
 import { AText } from '../../../theme-components';
 import { uriImage } from '../../../utils/helper';
 import Colors from '../../../constants/Colors';
+import { windowWidth } from '../../../utils/config';
 
 
 const MenuListing = ({ data, type, onPress, selectedItem }) => {
@@ -27,7 +28,7 @@ const MenuListing = ({ data, type, onPress, selectedItem }) => {
                                 activeOpacity={0.9}
                                 style={[
                                     styles.CategoriesListingWrapper,
-                                    !isMainCategory && { width: '40%' },
+                                    !isMainCategory && { width:windowWidth<370?'35%': '30%',alignSelf: 'flex-start', },
                                     isSelected && styles.selectedCategory
                                 ]}
                                 onPress={() => onPress(category)}>
@@ -89,11 +90,13 @@ const styles = StyleSheet.create({
         height: 40,
         width: 45,
         borderRadius: 5,
-        resizeMode: 'contain',
+        resizeMode: 'cover',
     },
     subCategoryImageStyle: {
         height: 70,
         width: 75,
-        resizeMode: 'contain'
+        resizeMode: 'cover',
+        borderRadius:35,
+        aspectRatio:1
     },
 });

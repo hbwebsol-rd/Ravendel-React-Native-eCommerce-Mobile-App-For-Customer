@@ -3,6 +3,7 @@ import { View } from 'react-native-animatable';
 import { Colors, Caption } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import { ALERT_HIDE } from '../store/reducers/alert';
+import { isEmpty } from '../utils/helper';
 
 const AlertError = () => {
   const dispatch = useDispatch();
@@ -11,10 +12,10 @@ const AlertError = () => {
 
   const HideAlert = () => {
     setTimeout(() => {
-      setisOpen(false);
       dispatch({
         type: ALERT_HIDE,
       });
+      setisOpen(false);
     }, 4000);
   };
 
@@ -44,7 +45,7 @@ const AlertError = () => {
             width: '90%',
             padding: 7,
             justifyContent: 'center',
-            backgroundColor: error ? Colors.red800 : Colors.green800,
+            backgroundColor: isEmpty(message)? 'transparent': error ? Colors.red800 : Colors.green800,
           }}>
           <Caption style={{ color: '#fff', fontSize: 14 }}>
             {typeof message === 'string' ? message : ''}

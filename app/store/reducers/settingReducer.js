@@ -8,6 +8,7 @@ import {
   GET_FEATURE_PRODUCT,
   GET_BRANDS,
   GET_ALL_DATA,
+  SERVER_ERROR
 } from '../action/settingAction';
 
 const initialState = {
@@ -37,6 +38,7 @@ const initialState = {
   manage_stock: false,
   stock_display_format:'',
   stock_left_quantity:0,
+  serverError:false
 };
 
 export default (state = initialState, action) => {
@@ -58,6 +60,7 @@ export default (state = initialState, action) => {
         action.payload.store.store_address,
         stock_left_quantity: action.payload.store.inventory.left_quantity,
         paymentSetting: action.payload.payment,
+        serverError: false,
       };
     case GET_FEATURE_PRODUCT:
       return {
@@ -94,6 +97,12 @@ export default (state = initialState, action) => {
         ...state,
         loading: false,
         success: false,
+      };
+    case SERVER_ERROR:
+      return {
+        ...state,
+        loading: false,
+        serverError: true,
       };
     case GET_BRANDS:
       return {

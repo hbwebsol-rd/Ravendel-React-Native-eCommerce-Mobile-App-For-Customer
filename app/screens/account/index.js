@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   AText,
   AContainer,
@@ -18,6 +18,7 @@ import {
   BASEURL,
   FontStyle,
   VERSION,
+  windowWidth,
 } from '../../utils/config';
 import AIcon from 'react-native-vector-icons/AntDesign';
 import FIcon from 'react-native-vector-icons/Feather';
@@ -41,10 +42,16 @@ import orderIcon from '../../assets/images/orderIcon.png';
 import { useMutation } from '@apollo/client';
 import { DELETE_CUSTOMER } from '../../queries/customerQuery';
 import { Divider } from 'react-native-paper';
+import DeviceInfo from 'react-native-device-info';
+import NVC from '../../navigation/NavigationConstants';
+import NoConnection from '../../theme-components/nointernet';
 
 const AccountScreen = ({ navigation }) => {
   const { isLoggin, userDetails } = useSelector((state) => state.customer);
   const dispatch = useDispatch();
+  const versionName = DeviceInfo.getVersion();
+  const { netConnection } = useSelector((state) => state.alert);
+
   const [deleteCustomer, { loadings, errors }] = useMutation(DELETE_CUSTOMER, {
     onError: (error) => {
       // Handle error as needed
@@ -136,6 +143,15 @@ const AccountScreen = ({ navigation }) => {
       { text: 'OK', onPress: () => dispatch(LogOut(navigation)) },
     ]);
   };
+
+  useEffect(()=>{
+    !isLoggin ? navigation.navigate(NVC.LOGIN_SIGNUP_SCREEN) : null
+  },[])
+
+  if (netConnection) {
+    return <NoConnection />;
+  }
+
   return (
     <MainLayout style={Styles.mainContainer}>
       <Header navigation={navigation} title={'My Account'} />
@@ -205,7 +221,7 @@ const AccountScreen = ({ navigation }) => {
         </>
       ) : (
         <View style={styles.emptyContainer}>
-          <AText large>Please sign in</AText>
+          <AText large>Please Signin</AText>
         </View>
       )}
       <UserSection>
@@ -238,7 +254,7 @@ const AccountScreen = ({ navigation }) => {
             <AText medium color={GREYTEXT}>
               {APP_NAME}{' '}
               <AText small color={GREYTEXT}>
-                App Version: {VERSION}
+                App Version: {versionName}
               </AText>
             </AText>
           </AppInfo>
@@ -295,7 +311,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     flexDirection: 'row',
-    width: '45%',
+    width: windowWidth > 370?'45%': '47%',
     margin: 3,
     borderColor: '#D4D4D4',
     paddingHorizontal: 12,

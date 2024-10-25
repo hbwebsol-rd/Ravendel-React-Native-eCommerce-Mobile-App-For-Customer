@@ -11,6 +11,8 @@ const ProductPriceText = ({
   DontshowPercentage,
   showInMulipleLine,
   fontColor,
+  showLargeText,
+  dontShowFull
 }) => {
   const { currencyOptions, currencySymbol } = useSelector(
     (state) => state.settings,
@@ -31,6 +33,7 @@ const ProductPriceText = ({
       style={{
         ...styles.productPriceView,
         flexDirection: showInMulipleLine ? showInMulipleLine : 'row',
+        width: dontShowFull ? '90%' : '100%',
       }}>
       <AText
         center={
@@ -45,8 +48,9 @@ const ProductPriceText = ({
         }
         medium={!isEmpty(fontsizesmall) ? !fontsizesmall : true}
         small={!isEmpty(fontsizesmall) ? fontsizesmall : false}
+        big1={showLargeText}
         color={
-          !isEmpty(fontColor) ? fontColor : hasSalePrice ? '#7b7b7b' : '#3a3a3a'
+          !isEmpty(fontColor) ? fontColor : hasSalePrice ? '#4a4a4a' : '#3a3a3a'
         }
         fonts={FontStyle.fontBold}>
         {hasSalePrice &&
@@ -54,8 +58,9 @@ const ProductPriceText = ({
         <AText
           center
           {...priceTextStyles}
-          small={hasSalePrice || (!isEmpty(fontsizesmall) && fontsizesmall)}>
-          {formatCurrency(Pricing.price, currencyOptions, currencySymbol)}
+          small={hasSalePrice || (!isEmpty(fontsizesmall) && fontsizesmall)}
+          >
+          {formatCurrency(Pricing.price??0, currencyOptions, currencySymbol)}
         </AText>
         {(isEmpty(DontshowPercentage) || !DontshowPercentage) &&
           hasSalePrice && (
@@ -73,8 +78,7 @@ const styles = StyleSheet.create({
   productPriceView: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    width: '90%',
+    flexWrap: 'wrap'
   },
 });
 

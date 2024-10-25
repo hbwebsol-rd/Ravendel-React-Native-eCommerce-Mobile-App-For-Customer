@@ -16,6 +16,7 @@ import {
 } from '../../utils/helper';
 import {
   Image,
+  Modal,
   SafeAreaView,
   StyleSheet,
   TouchableOpacity,

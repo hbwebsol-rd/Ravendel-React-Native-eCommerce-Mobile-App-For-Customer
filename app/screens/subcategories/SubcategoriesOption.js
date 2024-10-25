@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, Image } from 'react-native';
 import Colors from '../../constants/Colors';
 import {
   ACol,
@@ -21,12 +21,14 @@ import {
 } from '../../store/action/productAction';
 import { GET_FILTEREDPRODUCTS_WITH_PAGINATION } from '../../queries/productQuery';
 import { query } from '../../utils/service';
+import NoConnection from '../../theme-components/nointernet';
 
 const SubcategoryOption = ({ navigation, route }) => {
   const dispatch = useDispatch();
   const singleCat = route?.params?.singleCategory;
   const singleCatChildern = route?.params?.withChildern;
   const { subcategories, loading } = useSelector((state) => state.products);
+  const { netConnection } = useSelector((state) => state.alert);
   const [subcategoriesData, setSubcategoriesData] = useState([]);
 
   useEffect(() => {
@@ -137,6 +139,10 @@ const SubcategoryOption = ({ navigation, route }) => {
     });
   };
 
+  if (netConnection) {
+    return <NoConnection />;
+  }
+
   return (
     <MainLayout
       hideScroll
@@ -148,19 +154,20 @@ const SubcategoryOption = ({ navigation, route }) => {
           {capitalizeFirstLetter(singleCat?.url)}
         </AText>
       </View>
-      <ScrollView style={{ backgroundColor: Colors.whiteColor, marginTop: 45 }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1,marginTop:40 }}>
         <View style={{ marginTop: 5 }} />
         {!isEmpty(subcategoriesData) && subcategoriesData.length > 0 ? (
           <ARow row wrap>
             {menuListing(subcategoriesData)}
           </ARow>
         ) : (
-          <View>
+          <View style={{flex:1,alignSelf:'center',justifyContent:'center'}}>
+            <Image source={require('../../assets/images/noresult.png')} style={{height:100,width:100,alignSelf:'center'}} />
             <AText
               style={{
                 fontSize: 16,
                 alignSelf: 'center',
-                color: 'grey',
+                color: '#000',
                 marginTop: 20,
               }}>
               No Records Found

@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
@@ -27,19 +27,25 @@ import {
   ContactUs,
   OrderDetailScreen
 } from '../screens';
-import { View, Text, Image, StyleSheet, Platform } from 'react-native';
+import { View, Text, Image, StyleSheet, Platform, Linking } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { getValue, isEmpty } from '../utils/helper';
 import AlertError from '../theme-components/alert';
 import { sessionCheck } from '../store/action/loginAction';
 import { checkStorageAction } from '../store/action';
 import { useIsFocused } from '@react-navigation/native';
-import { APP_PRIMARY_COLOR } from '../utils/config';
+import { APP_PRIMARY_COLOR, ONE_SIGNAL_APP_ID } from '../utils/config';
 import Colors from '../constants/Colors';
 import NVC from '../navigation/NavigationConstants';
 import NoConnection from '../theme-components/nointernet';
 import NetInfo from '@react-native-community/netinfo';
 import { NET_OFF, NET_ON } from '../store/reducers/alert';
+import { initial } from 'lodash';
+import { OneSignal } from 'react-native-onesignal';
+import DeviceInfo from 'react-native-device-info';
+import { SAVE_DEVICE_ID } from '../queries/userQuery';
+import { mutation } from '../utils/service';
+import { TouchableOpacity } from 'react-native';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 const setting = { themes: [{ primaryColor: '#3a3a3a', productsCount: '3' }] };
@@ -51,6 +57,7 @@ const Navigation = () => {
   const cartItems = useSelector((state) => state.cart.products) || 0;
   const { isLoggin } = useSelector((state) => state.customer);
   const { netConnection } = useSelector((state) => state.alert);
+  const [showAlert, setShowAlert] = useState(false);
 
   // Custom Function
   const getCart = async () => {
@@ -63,6 +70,44 @@ const Navigation = () => {
     }
   };
 
+  const save_playerid = async player_id => {
+    const versionName = DeviceInfo.getVersion(); // e.g. "1.0"
+  
+    const payload = {
+      "deviceInfo": {
+      "device_id": player_id,
+      "device_type": Platform.OS.toUpperCase(),
+      "app_version": versionName
+    }
+    }
+    const response = await mutation(SAVE_DEVICE_ID, payload);
+    const { data } = response;
+  };
+  
+  const setDeviceId = async () => {
+    const deviceState = await OneSignal.User.pushSubscription.getIdAsync();
+    // const pid = await getValue('playerid');
+    console.log(deviceState, 'Plaery Id Get');
+    // if (deviceState && deviceState.userId && isEmpty(pid)) {
+    save_playerid(deviceState); //
+    // }
+  };
+  
+  
+  const InitOneSignal = async () => {
+    OneSignal.initialize(ONE_SIGNAL_APP_ID)
+    OneSignal.setConsentRequired(true);
+    OneSignal.setConsentGiven(true);
+    
+    setTimeout(() => {
+      OneSignal.Notifications.requestPermission(false).then(s=>{(Array.isArray(s)&& !s[0]) || !s?setShowAlert(true):null})        
+    }, 3000);
+    
+    setTimeout(() => {
+      setDeviceId();
+    }, 12000);
+  };
+
   useEffect(() => {
     NetInfo.addEventListener((networkState) => {
       dispatch({ type: networkState.isConnected ? NET_ON : NET_OFF });
@@ -72,6 +117,9 @@ const Navigation = () => {
   useEffect(() => {
     dispatch(sessionCheck());
     getCart();
+    if(isLoggin){
+      InitOneSignal()
+    }
   }, [isFocused, isLoggin]);
 
   // Custom Components
@@ -104,7 +152,9 @@ const Navigation = () => {
   const HomeIconWithBadge = (props) => {
     return <IconWithBadge {...props} badgeCount={cartItems.length} />;
   };
- 
+  // if (netConnection) {
+  //   return <NoConnection />;
+  // }
   return (
     <>
       <Tab.Navigator
@@ -242,6 +292,16 @@ const Navigation = () => {
         />
         {/* Cart End */}
 
+        {/* Account */}
+        {/* <Tab.Screen
+          name="AccountWrapper"
+          component={AccountStack}
+          options={({ route }) => ({
+            unmountOnBlur: true,
+            lazy: false,
+            tabBarLabel: 'Account',
+          })}
+        /> */}
         <Stack.Screen name={NVC.ACCOUNT_SCREEN} component={AccountScreen} />
         <Stack.Screen
           name={NVC.SAVED_ADDRESS_SCREEN}
@@ -288,6 +348,18 @@ const Navigation = () => {
         />
         {/* Account End*/}
       </Tab.Navigator>
+      {
+        showAlert?
+        <TouchableOpacity activeOpacity={0.8} onPress={()=>{
+          if (Platform.OS === 'ios') {
+            // For iOS, opens the app's settings where users can enable notifications
+            Linking.openURL('app-settings:');
+          } else {
+            // For Android, opens the app-specific settings page for notifications
+            Linking.openSettings();
+          }
+        }} style={style.alert}><Text style={{color:'black',margin:0,padding:0}}>Turn on notifications in your settings to stay updated on the latest deals, offers, and updates! <TouchableOpacity onPress={()=>setShowAlert(false)}><Text style={{textDecorationLine:'underline',color:'black'}}>Dismiss</Text></TouchableOpacity></Text></TouchableOpacity>:null
+      }
       <AlertError />
     </>
   );
@@ -300,4 +372,5 @@ const style = StyleSheet.create({
     width: 15,
     height: 15,
   },
+  alert:{position:'absolute',marginBottom:70,backgroundColor:'#ff999c',padding:10,alignSelf:'center',bottom:0,borderRadius:10,textAlign:'center'}
 });

@@ -53,7 +53,9 @@ const CartProductDisplayCard = ({
                                 {product.productTitle}
                             </AText>
                             <View style={styles.contentCardStyle}>
+                                {console.log(product.productPrice,product.mrp)}
                                 <ProductPriceText
+                                    dontShowFull={true}
                                     fontsizesmall={true}
                                     fontColor={Colors.blackColor}
                                     Pricing={{

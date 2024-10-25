@@ -54,7 +54,46 @@ const ChangePasswordScreen = ({ navigation }) => {
     { id: 1, name: 'Confirm Password', key: 'confirm_password' }
   ];
 
-  
+  // useEffect(() => {
+  //   if (!isEmpty(userData)) {
+  //     var userDetailObject = {
+  //       old_password: '',
+  //       new_password: '',
+  //       confirm_password: '',
+  //     };
+  //     setuserDetails(userDetailObject);
+  //   }
+  // }, [userData]);
+
+  // const profileUpdate = () => {
+  //   var Error_msg = '';
+  //   if (isEmpty(userDetails.old_password)) {
+  //     Error_msg = "Old password can't be empty";
+  //   }
+  //   if (isEmpty(userDetails.new_password) && isEmpty(Error_msg)) {
+  //     Error_msg = "New password can't be empty";
+  //   }
+  //   if (
+  //     userDetails.new_password !== userDetails.confirm_password &&
+  //     isEmpty(Error_msg)
+  //   ) {
+  //     Error_msg = "Password doesn't match";
+  //   }
+  //   if (!isEmpty(Error_msg)) {
+  //     dispatch({
+  //       type: ALERT_ERROR,
+  //       payload: Error_msg,
+  //     });
+  //     return;
+  //   }
+  //   var profileUpdateObject = {
+  //     id: userData._id,
+  //     oldPassword: userDetails.old_password,
+  //     newPassword: userDetails.new_password,
+  //   };
+  //   dispatch(changePasswordAction(profileUpdateObject, navigation));
+  // };
+
   return (
     <MainLayout>
       <BackHeader navigation={navigation} name="Change Password" back />

@@ -3,6 +3,7 @@ import {
   View,
   StyleSheet,
   ScrollView,
+  Image,
 } from 'react-native';
 import {
   CLEAR_SEARCH_PRODUCT,
@@ -80,6 +81,7 @@ const SearchProduct = ({ navigation, route }) => {
             onchange={(e) => setsearchTerm(e)}
             placeholder={'Search'}
             placeholdercolor={'black'}
+            color={Colors.blackColor}
           />
         </View>
       </View>
@@ -96,6 +98,7 @@ const SearchProduct = ({ navigation, route }) => {
           />
         ) : (
           <View style={styles.emptyContainer}>
+            <Image source={require('../../assets/images/noresult.png')} style={{height:100,width:100,alignSelf:'center'}} />
             <AText
               textStyle={styles.textStyle}>
               No Product Found
@@ -139,12 +142,14 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
     borderWidth: 0.9,
   },
-  emptyContainer: { alignSelf: 'center', marginTop: 100 },
+  emptyContainer: { flex:1,alignSelf: 'center',justifyContent:'center' },
   textStyle: {
-    fontSize: 16,
+    fontSize: 18,
     alignSelf: 'center',
     color: 'grey',
     marginTop: 20,
+    fontWeight:'bold',
+    color:'#000'
   },
 });
 

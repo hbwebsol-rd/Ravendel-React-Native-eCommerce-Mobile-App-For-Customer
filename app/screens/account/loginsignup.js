@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Alert,
+  BackHandler,
   Image,
   ImageBackground,
   StyleSheet,
@@ -22,6 +23,8 @@ import AIcon from 'react-native-vector-icons/AntDesign';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { registerAction } from '../../store/action';
 import { LoginByGoogleAction } from '../../store/action/loginAction';
+import { useFocusEffect } from '@react-navigation/native';
+import NavigationConstants from '../../navigation/NavigationConstants';
 
 const UserEntry = ({ navigation }) => {
   const dispatch = useDispatch()
@@ -77,6 +80,21 @@ const UserEntry = ({ navigation }) => {
     }
   };
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        // Navigate to a specific screen (e.g., 'ScreenA')
+        navigation.navigate(NavigationConstants.HOME_SCREEN);
+        return true;  // Returning true prevents the default behavior (exiting the app or going back).
+      };
+
+      // Add event listener for the back button
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      // Cleanup event listener when leaving the screen
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [navigation])
+  );
 
   return (
     <>
@@ -90,7 +108,7 @@ const UserEntry = ({ navigation }) => {
           <AText textStyle={styles.appNameTextStyle} title>
             {APP_NAME}
           </AText>
-          <AIcon name="arrowleft" style={{position:'absolute',top:10,left:23,}} onPress={() => navigation.goBack()} size={22} />
+          <AIcon name="arrowleft" style={{position:'absolute',top:10,left:23,}} onPress={() => navigation.navigate(NavigationConstants.HOME_SCREEN)} size={22} />
           <View style={[styles.logincard, { shadowColor: APP_PRIMARY_COLOR }]}>
             {showForgotPassword ? (
               <>
