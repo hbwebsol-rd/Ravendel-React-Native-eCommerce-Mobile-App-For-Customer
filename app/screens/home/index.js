@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, BackHandler, Image, StatusBar, StyleSheet, View } from 'react-native';
+import { Alert, BackHandler, Image, Modal, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 
-import Icon from 'react-native-vector-icons/Feather';
+import FIcon from 'react-native-vector-icons/SimpleLineIcons';
 import styled from 'styled-components/native';
 
 import {
@@ -29,6 +29,7 @@ import NavigationConstants from '../../navigation/NavigationConstants';
 import Carousel from 'react-native-snap-carousel';
 import GridCardContainer from '../../theme-components/GridCardContainer';
 import NoConnection from '../../theme-components/nointernet';
+import Voice from '@react-native-voice/voice';
 
 const HomeScreen = ({ navigation }) => {
   // States and Variables
@@ -52,6 +53,58 @@ const HomeScreen = ({ navigation }) => {
   const [allCategories, setAllCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const carouselRef = useRef(null);
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [resultText, setResultText] = useState('');
+
+  useEffect(() => {
+    Voice.onSpeechStart = onSpeechStart;
+    Voice.onSpeechEnd = onSpeechEnd;
+    Voice.onSpeechResults = onSpeechResults;
+
+    return () => {
+      Voice.destroy().then(Voice.removeAllListeners);
+    };
+  }, []);
+
+  const onSpeechStart = () => {
+    setIsListening(true);
+  };
+
+  const onSpeechEnd = () => {
+    setIsListening(false);
+  };
+
+  const onSpeechResults = (e) => {
+    const text = e.value[0];
+    console.log(text,' texxx')
+    setResultText(text);
+    navigation.navigate(NavigationConstants.SEARCH_PRODUCT_SCREEN, {
+      searchTerm: text,
+    });
+    setIsModalVisible(false);
+    // handleSearch(text);
+  };
+
+  const startRecording = async () => {
+    setResultText('');
+    setIsModalVisible(true);
+    try {
+      await Voice.start('en-US');
+    } catch (error) {
+      console.error('Error in starting voice recognition:', error);
+    }
+  };
+
+  const stopRecording = async () => {
+    setIsModalVisible(false);
+    try {
+      await Voice.stop();
+    } catch (error) {
+      console.error('Error in stopping voice recognition:', error);
+    }
+  };
 
   //Custom Functions
   const checkUserLoggedIn = async () => {
@@ -241,6 +294,9 @@ const HomeScreen = ({ navigation }) => {
           placeholdercolor={'black'}
           color={Colors.blackColor}
         />
+        <View style={{position:'absolute',right:15}}>
+          <FIcon onPress={startRecording}  name={'microphone'} size={20} color={'#000'} />
+        </View>
       </View>
       <AContainer
         onRefresh={onRefresh}
@@ -332,6 +388,21 @@ const HomeScreen = ({ navigation }) => {
 
           )}
       </AContainer>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={() => setIsModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalText}>
+            {isListening ? 'Listening...' : 'Tap to start speaking'}
+          </Text>
+          <TouchableOpacity onPress={stopRecording} style={styles.stopButton}>
+            <Text style={styles.stopButtonText}>Stop</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </MainLayout>
   );
 };
@@ -350,6 +421,34 @@ const PopularPicksImage = styled.Image`
 `;
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalText: {
+    color: '#fff',
+    fontSize: 20,
+    marginBottom: 20,
+  },
+  stopButton: {
+    backgroundColor: '#ff4757',
+    padding: 10,
+    borderRadius: 8,
+  },
+  stopButtonText: {
+    color: '#fff',
+    fontSize: 18,
+  },
+  searchInput: {
+    marginTop: 20,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    padding: 10,
+    width: '80%',
+    borderRadius: 8,
+  },
   PopularPicksImage:{
       aspectRatio:2,
       height: 'auto',
