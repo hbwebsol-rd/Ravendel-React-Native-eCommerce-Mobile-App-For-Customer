@@ -1,8 +1,7 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { View } from 'react-native-animatable';
-import { Snackbar, Colors, Caption } from 'react-native-paper';
+import { Colors, Caption } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
-import * as Animatable from 'react-native-animatable';
 import { ALERT_HIDE } from '../store/reducers/alert';
 
 const AlertError = () => {
@@ -46,7 +45,9 @@ const AlertError = () => {
             justifyContent: 'center',
             backgroundColor: error ? Colors.red800 : Colors.green800,
           }}>
-          <Caption style={{ color: '#fff', fontSize: 14 }}>{message}</Caption>
+          <Caption style={{ color: '#fff', fontSize: 14 }}>
+            {typeof message === 'string' ? message : ''}
+          </Caption>
         </View>
       ) : null}
     </>

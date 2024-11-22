@@ -1,134 +1,209 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  ImageBackground,
-  TouchableOpacity,
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
 import Colors from '../../constants/Colors';
-import { AText } from '../../theme-components';
-import { FontStyle } from '../../utils/config';
+import {
+  ACol,
+  ARow,
+  AText,
+  AppLoader,
+  MainLayout,
+} from '../../theme-components';
+import { BASEURL, FontStyle } from '../../utils/config';
 import AIcon from 'react-native-vector-icons/AntDesign';
-import { capitalizeFirstLetter, isEmpty } from '../../utils/helper';
-import FastImage from 'react-native-fast-image';
-import URL from '../../utils/baseurl';
+import { capitalizeFirstLetter, isEmpty, uriImage } from '../../utils/helper';
+import NavigationConstants from '../../navigation/NavigationConstants';
+import PropTypes from 'prop-types';
+import styled from 'styled-components';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  CLEAR_SUBCATEGORY,
+  getSubcategories,
+} from '../../store/action/productAction';
+import { GET_FILTEREDPRODUCTS_WITH_PAGINATION } from '../../queries/productQuery';
+import { query } from '../../utils/service';
 
 const SubcategoryOption = ({ navigation, route }) => {
+  const dispatch = useDispatch();
   const singleCat = route?.params?.singleCategory;
   const singleCatChildern = route?.params?.withChildern;
-  console.log(singleCat, '---', singleCatChildern);
+  const { subcategories, loading } = useSelector((state) => state.products);
+  const [subcategoriesData, setSubcategoriesData] = useState([]);
+
+  useEffect(() => {
+    if (subcategories?.getCategoryPageData) {
+      setSubcategoriesData(
+        subcategories.getCategoryPageData.mostParentCategoryData.subCategories,
+      );
+    }
+  }, [subcategories]);
+
+  useEffect(() => {
+    return () => {
+      dispatch({ type: CLEAR_SUBCATEGORY });
+    };
+  }, []);
+
+  useEffect(() => {
+    const subcat = {
+      mainFilter: {
+        categoryUrl: singleCat.url,
+      },
+      filters: [
+        {
+          field: 'brand',
+          type: 'array',
+          category: 'static',
+          valueType: 'ObjectId',
+          select: [],
+        },
+        {
+          field: 'pricing.sellprice',
+          type: 'range',
+          category: 'static',
+          select: {
+            minValue: 500,
+            maxValue: 50000,
+          },
+        },
+        {
+          field: 'rating',
+          type: 'choice',
+          category: 'static',
+          valueType: 'Integer',
+          select: {
+            minValue: 0,
+          },
+        },
+      ],
+      pageNo: 1,
+      limit: 3,
+    };
+    dispatch(getSubcategories(subcat));
+  }, []);
+
+  const handleGetSubcategory = async (url) => {
+    const subcatPayload = {
+      mainFilter: {
+        categoryUrl: url,
+      },
+      filters: [],
+      pageNo: 1,
+      limit: 3,
+    };
+    const res = await query(
+      GET_FILTEREDPRODUCTS_WITH_PAGINATION,
+      subcatPayload,
+    );
+    if (!res.data.getCategoryPageData.isMostParentCategory) {
+      navigation.navigate(NavigationConstants.SUBCATEGORIES_SCREEN, {
+        singleCategory: res.data.getCategoryPageData.categoryTree.subCategories,
+        withChildern:
+          res.data.getCategoryPageData.categoryTree.subCategories.subCategories,
+      });
+    }
+  };
+
+  //List of categories
+  const menuListing = (Categories) => {
+    return Categories.map((category) => {
+      // if (category.parentId === null) {
+      return (
+        <ACol style={{ marginTop: 60 }} col={2} key={category.id}>
+          <CategoriesListingWrapper
+            activeOpacity={0.9}
+            onPress={() => {
+              handleGetSubcategory(category.url);
+            }}>
+            <ARow height="100%" padding={0}>
+              <ACol col={1}>
+                <CategoryImageWrapper>
+                  <CategoryImage
+                    source={{
+                      uri: uriImage(category.image)
+                    }}
+                  />
+                </CategoryImageWrapper>
+              </ACol>
+              <ACol col={1}>
+                <AText style={styles.catNameStyle} small >
+                  {category.name}
+                </AText>
+              </ACol>
+            </ARow>
+          </CategoriesListingWrapper>
+        </ACol>
+      );
+      // }
+    });
+  };
+
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
+    <MainLayout
+      hideScroll
+      style={{ flex: 1, backgroundColor: Colors.whiteColor }}>
+      {loading ? <AppLoader /> : null}
       <View style={styles.header}>
-        <AIcon
-          onPress={() => navigation.navigate('Home')}
-          name="arrowleft"
-          size={22}
-        />
-        <AText fonts={FontStyle.semiBold} ml="20px">
-          {capitalizeFirstLetter(singleCat.url)}
+        <AIcon onPress={() => navigation.goBack()} name="arrowleft" size={22} />
+        <AText style={styles.categorytextStyle} large >
+          {capitalizeFirstLetter(singleCat?.url)}
         </AText>
       </View>
-      <View style={styles.catcontainer}>
-        {singleCat.children.map((item) => (
-          <>
-            {/* {console.log(JSON.stringify(item), 'iteeeem')} */}
-            <TouchableOpacity
+      <ScrollView style={{ backgroundColor: Colors.whiteColor, marginTop: 15 }}>
+        <View style={{ marginTop: 5 }} />
+        {!isEmpty(subcategoriesData) && subcategoriesData.length > 0 ? (
+          <ARow row wrap>
+            {menuListing(subcategoriesData)}
+          </ARow>
+        ) : (
+          <View>
+            <AText
               style={{
-                width: '48%',
-                height: 236,
-                // backgroundColor: 'green',
-                marginTop: 15,
-                borderRadius: 12,
-              }}
-              onPress={() => {
-                navigation.navigate('CateGories', {
-                  screen: 'SubCategories',
-                  initial: false,
-                  params: {
-                    singleCategory: item,
-                    withChildern: item.children,
-                  },
-                });
-                // setSelectedId(item._id);
+                fontSize: 16,
+                alignSelf: 'center',
+                color: 'grey',
+                marginTop: 20,
               }}>
-              {console.log(URL + item.image, 'urlll')}
-              <ImageBackground
-                source={{
-                  uri: !isEmpty(item.image)
-                    ? URL + item.image
-                    : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
-                  priority: FastImage.priority.normal,
-                }}
-                style={styles.itemImage}
-                imageStyle={{ borderRadius: 10 }}
-                resizeMode="cover"
-                // blurRadius={10}
-              >
-                <View style={styles.blurWrap}>
-                  <ImageBackground
-                    source={{
-                      uri: !isEmpty(item.image)
-                        ? URL + item.image
-                        : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
-                      priority: FastImage.priority.normal,
-                    }}
-                    blurRadius={Platform.OS === 'ios' ? 20 : 20}
-                    style={styles.blurImageStyle}
-                    imageStyle={{
-                      borderRadius: 10,
-                      resizeMode: 'cover',
-                    }}></ImageBackground>
-                </View>
-                <TouchableOpacity
-                  activeOpacity={0.9}
-                  onPress={() => {
-                    // navigatetonext(item);
-                  }}
-                  style={styles.overlay}></TouchableOpacity>
-                <View style={styles.textContainer}>
-                  <AText center mb="5px" medium fonts={FontStyle.fontBold}>
-                    {item.name.length > 14
-                      ? item.name.substring(0, 14) + '...'
-                      : item.name}
-                  </AText>
-                  {/* <AText medium fonts={FontStyle.fontBold}>
-                    $ {item.pricing.sellprice + '.00'}
-                  </AText> */}
-                  {/* <ProductPriceText fontsizesmall={true} Pricing={item.pricing} /> */}
-                </View>
-                {/* <View style={styles.textContainer2}>
-                  <TouchableOpacity style={styles.iconcontainer}>
-                    <Icon name="shopping-cart" color={'black'} size={14} />
-                  </TouchableOpacity>
-                  <StarRating
-                    disabled={true}
-                    maxStars={5}
-                    rating={3.5}
-                    fullStarColor={'#FFDB20'}
-                    emptyStarColor={'gray'}
-                    starSize={15}
-                  />
-                </View> */}
-              </ImageBackground>
-            </TouchableOpacity>
-            {/* <View
-              style={{
-                width: '48%',
-                height: 236,
-                backgroundColor: 'green',
-                marginTop: 15,
-              }}>
-              <AText>{item.name}</AText>
-            </View> */}
-          </>
-        ))}
-      </View>
-    </ScrollView>
+              No Records Found
+            </AText>
+          </View>
+        )}
+      </ScrollView>
+    </MainLayout>
   );
 };
+
+SubcategoryOption.propTypes = {
+  navigation: PropTypes.object,
+  route: PropTypes.object,
+};
+
+const CategoriesListingWrapper = styled.TouchableOpacity`
+  margin: 10px 0 20px 0;
+  height: 120px;
+  border-radius: 15px;
+  background-color: #f7f7f7;
+  elevation: 1;
+`;
+
+const CategoryImageWrapper = styled.View`
+  width: 150px;
+  height: 100px;
+  margin: -20px auto 10px auto;
+  border-radius: 15px;
+  overflow: hidden;
+  shadow-color: #000;
+  shadow-offset: 0 2px;
+  shadow-opacity: 0.8;
+  shadow-radius: 2px;
+  elevation: 10;
+`;
+
+const CategoryImage = styled.Image`
+  width: null;
+  height: null;
+  flex: 1;
+  resize-mode: cover;
+`;
 
 const styles = StyleSheet.create({
   container: {
@@ -136,13 +211,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  categorytextStyle: {
+    fontFamily: FontStyle.semiBold,
+    marginLeft: 20
+  },
+  catNameStyle: {
+    textTransform: "uppercase",
+    color: "#000",
+    textAlign: 'center'
+  },
   catcontainer: {
     marginHorizontal: 30,
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     flex: 1,
-    marginTop: 55,
+    marginTop: 15,
   },
   text: {
     fontSize: 24,
@@ -150,77 +234,15 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    position: 'absolute',
+    // position: 'absolute',
     width: '100%',
     justifyContent: 'flex-start',
     alignItems: 'center',
     left: 0,
     right: 0,
-    marginTop: 10,
+    marginTop: Platform.OS == 'ios' ? 0 : 10,
     paddingHorizontal: 30,
     zIndex: 10,
-  },
-  itemImage: {
-    height: 236,
-    resizeMode: 'cover',
-    borderRadius: 10,
-    // width: '40%',
-    // backgroundColor: 'green',
-    // marginHorizontal: (windowWidth * 0.1) / 2,
-  },
-  overlay: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    height: '25%',
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    // borderTopLeftRadius: 10,
-    // borderTopRightRadius: 10,
-  },
-  textContainer: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    // left: 35,
-    // justifyContent: 'center',
-    // alignItems: 'center',
-    // marginHorizontal: 10,
-    marginBottom: 15,
-  },
-  textContainer2: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    textAlign: 'right',
-    marginHorizontal: 5,
-    // justifyContent: 'flex-end',
-    alignItems: 'flex-end',
-    marginBottom: 10,
-  },
-  iconcontainer: {
-    marginBottom: 10,
-    width: 22,
-    height: 22,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  blurImageStyle: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-    bottom: 0,
-    justifyContent: 'flex-end',
-  },
-  blurWrap: {
-    height: '25%', //Here we need to specify the height of blurred part
-    overflow: 'hidden',
-    width: '100%',
-    position: 'absolute',
-    bottom: 0,
   },
 });
 

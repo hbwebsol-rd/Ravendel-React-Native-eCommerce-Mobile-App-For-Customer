@@ -8,6 +8,7 @@ import { isEmpty } from '../../../utils/helper';
 import { ProductPriceText } from '../../components';
 import { APP_PRIMARY_COLOR, APP_SECONDARY_COLOR } from '../../../utils/config';
 import LinearGradient from 'react-native-linear-gradient';
+import PropTypes from 'prop-types';
 
 const HomeComponentShowViews = ({ dataItems, navigatetonext }) => {
   const CategoryShowView = React.memo(() => {
@@ -72,6 +73,12 @@ const HomeComponentShowViews = ({ dataItems, navigatetonext }) => {
     </>
   );
 };
+
+HomeComponentShowViews.propTypes = {
+  dataItems: PropTypes.array,
+  navigatetonext: PropTypes.func,
+};
+
 const styles = StyleSheet.create({
   productImage: { width: 100, height: 100, resizeMode: 'contain' },
 });
@@ -89,19 +96,6 @@ const Card = styled.TouchableOpacity`
     shadow-opacity: 0.25px;
     shadow-radius: 3.84px;
     elevation: 5;
-`;
-
-const CardImageWrapper = styled.View`
-  width: 100%;
-  height: 146px;
-  border-radius: 10px;
-  background-color: ${APP_PRIMARY_COLOR};
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-`;
-const CardBody = styled.View`
-  padding: 15px 5px;
 `;
 
 export default HomeComponentShowViews;

@@ -1,74 +1,193 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
-import { ADD_CHECKOUT, ADD_ORDER } from '../../queries/orderQuery';
+import {
+  ADD_ORDER,
+  ADD_TOCART,
+  CHECK_ZIPCODE,
+  GET_ORDER,
+  SHIPPING_METHODS,
+  UPDATE_PAYMENT_STATUS,
+} from '../../queries/orderQuery';
 import { getValue, isEmpty } from '../../utils/helper';
 import { mutation, query } from '../../utils/service';
 import { ALERT_ERROR } from '../reducers/alert';
-import { updateCartAction } from './cartAction';
+import { CART_FAIL, updateCartAction } from './cartAction';
+import NavigationConstants from '../../navigation/NavigationConstants';
+import _ from 'lodash';
+import RazorpayCheckout from 'react-native-razorpay';
+import { APP_NAME, APP_PRIMARY_COLOR } from '../../utils/config';
 
 export const checkoutDetailsAction =
-  (checoutDetailsData, cartId, navigation) => async (dispatch) => {
-    dispatch({
-      type: CHECKOUT_LOADING,
-    });
-    console.log(JSON.stringify(checoutDetailsData));
-    const response = await mutation(ADD_ORDER, checoutDetailsData);
-    console.log(JSON.stringify(response));
-    // .then(async (response) => {
-    try {
-      if (response) {
+  (
+    checkoutDetailsData,
+    cartId,
+    navigation,
+    navParams,
+    paymentSetting,
+    totalAmt,
+  ) =>
+    async (dispatch) => {
+      dispatch({ type: CHECKOUT_LOADING });
+      try {
+        const response = await mutation(ADD_ORDER, checkoutDetailsData);
+        console.log(response,' logign checkout',checkoutDetailsData)
         if (
+          !isEmpty(response) &&
           !isEmpty(response.data.addOrder) &&
           response.data.addOrder.success
         ) {
-          dispatch({
-            type: REMOVE_ALL_CART_PRODUCT,
-          });
+          dispatch({ type: REMOVE_ALL_CART_PRODUCT });
           await AsyncStorage.removeItem('cartproducts');
-          dispatch({
-            type: CHEKOUT_DETAILS,
-            payload: checoutDetailsData,
-          });
-          const cartData = {
-            id: cartId,
-            products: [],
-          };
-          dispatch(updateCartAction(cartData, checoutDetailsData.customer_id));
-          Alert.alert(
-            'Success',
-            'Congratulations! Your order has been placed successfully.',
-            [
-              {
-                text: 'Ok',
-                onPress: () => {
-                  // navigation.reset({
-                  //   index: 0,
-                  //   routes: [{ name: 'Home' }],
-                  // });
-                  navigation.navigate('Home', {
-                    checoutDetailsData,
-                  });
-                },
-                style: 'cancel',
+          // dispatch({ type: CHEKOUT_DETAILS, payload: checkoutDetailsData });
+
+          // const cartData = { id: cartId, products: [] };
+          // dispatch(updateCartAction(cartData, checkoutDetailsData.customer_id));
+          const cartData = { id: cartId, products: [] };
+          dispatch(updateCartAction(cartData, checkoutDetailsData.customer_id));
+          checkoutDetailsData.billing.paymentMethod === 'stripe'
+            ? navigation.navigate(NavigationConstants.STRIPE_PAYMENT, {
+              url: response.data.addOrder.redirectUrl,
+              navParams: navParams,
+            })
+            : checkoutDetailsData.billing.paymentMethod === 'cashondelivery' ||
+              checkoutDetailsData.billing.paymentMethod === 'banktransfer'
+              ? navigation.navigate(NavigationConstants.THANK_YOU_SCREEN, {
+                ...navParams,
+                orderId: response.data.addOrder.id,
+              })
+              : '';
+          if (checkoutDetailsData.billing.paymentMethod === 'razorpay') {
+            var options = {
+              description: `Credits towards ${APP_NAME}`,
+              image: 'https://i.imgur.com/3g7nmJC.png',
+              currency: 'INR',
+              key: paymentSetting.razorpay.live_client_id, // Your api key
+              amount: totalAmt * 100, //cartSummary?.grandTotal * 100,
+              name: APP_NAME,
+              prefill: {
+                email: 'void@razorpay.com',
+                contact: '9191919191',
+                name: 'Razorpay Software',
               },
-            ],
-            { cancelable: false },
-          );
+              theme: { color: APP_PRIMARY_COLOR },
+            };
+            RazorpayCheckout.open(options)
+              .then((data) => {
+                // handle success
+                const payload = {
+                  id: response.data.addOrder.id,
+                  paymentStatus: 'success',
+                };
+                dispatch(paymentStatus(payload, navigation, navParams));
+              })
+              .catch((error) => {
+                // handle failure
+                dispatch({ type: CHECKOUT_LOADING_STOP });
+              });
+          }
         } else {
-          dispatch({
-            type: CHECKOUT_LOADING_STOP,
-          });
+          dispatch({ type: CHECKOUT_LOADING_STOP });
           dispatch({
             type: ALERT_ERROR,
-            payload: 'Something went wrong. Please try again later.',
+            payload: 'Something went wrong. Please try again later. in order',
           });
         }
+      } catch (error) {
+        dispatch({ type: CHECKOUT_LOADING_STOP });
+        dispatch({
+          type: ALERT_ERROR,
+          payload: 'Something went wrong. Please try again later. in add order',
+        });
+      }
+    };
+
+export const checkPincodeValid =
+  (payload, navigation, navParams) => async (dispatch) => {
+    dispatch({ type: CHECKOUT_LOADING });
+
+    try {
+      const response = await query(CHECK_ZIPCODE, payload);
+      if (!isEmpty(response) && _.get(response, 'data.checkZipcode.success')) {
+        if (!isEmpty(navParams)) {
+          dispatch({
+            type: 'ADD_ADDRESS',
+            payload: {
+              shippingAddress: navParams.shippingAddress,
+              billingAddress: navParams.billingAddress,
+            },
+          });
+          navigation.navigate('CheckoutDetails');
+        } else {
+          return true;
+        }
+      } else {
+        if (!isEmpty(navParams)) {
+          dispatch({
+            type: ALERT_ERROR,
+            payload: _.get(
+              response,
+              'data.checkZipcode.message',
+              'Invalid zipcode.',
+            ),
+          });
+        }
+        return false;
       }
     } catch (error) {
-      // console.log('error', error);
+      dispatch({ type: CART_FAIL });
+    }
+  };
+export const getOrder = (payload) => async (dispatch) => {
+  dispatch({ type: CHECKOUT_LOADING });
+
+  try {
+    const response = await query(GET_ORDER, payload);
+    if (!isEmpty(response) && _.get(response, 'data.order.message.success')) {
+      return response.data.order.data;
+    } else {
+      return [];
+    }
+  } catch (error) {
+    dispatch({ type: CART_FAIL });
+  }
+};
+export const getShippingMethods = () => async (dispatch) => {
+  dispatch({ type: CHECKOUT_LOADING });
+  try {
+    const response = await query(SHIPPING_METHODS);
+    if (
+      !isEmpty(response) &&
+      _.get(response, 'data.shipping.message.success')
+    ) {
       dispatch({
-        type: CHECKOUT_LOADING_STOP,
+        type: 'SHIPPING_LIST',
+        payload: _.get(response, 'data.shipping.data.shippingClass', []),
       });
+    } else {
+      dispatch({ type: CHECKOUT_LOADING_STOP });
+    }
+  } catch (error) {
+    dispatch({ type: CART_FAIL });
+  }
+};
+
+export const paymentStatus =
+  (paymentStatusData, navigation, navParams) => async (dispatch) => {
+    dispatch({ type: CHECKOUT_LOADING });
+
+    try {
+      const response = await mutation(UPDATE_PAYMENT_STATUS, paymentStatusData);
+      if (!isEmpty(response)) {
+        navigation.navigate(NavigationConstants.THANK_YOU_SCREEN, navParams);
+      } else {
+        dispatch({ type: CHECKOUT_LOADING_STOP });
+        dispatch({
+          type: ALERT_ERROR,
+          payload: 'Something went wrong. Please try again later.',
+        });
+      }
+    } catch (error) {
+      dispatch({ type: CHECKOUT_LOADING_STOP });
       dispatch({
         type: ALERT_ERROR,
         payload: 'Something went wrong. Please try again later.',

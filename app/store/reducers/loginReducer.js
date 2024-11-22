@@ -66,9 +66,10 @@ export const LogOut = (navigation) => async (dispatch) => {
     type: 'USER_LOGOUT',
   });
   await APclient.resetStore();
-
-  navigation.reset({
-    index: 0,
-    routes: [{ name: 'Home' }],
-  });
+  navigation
+    ? navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      })
+    : null;
 };

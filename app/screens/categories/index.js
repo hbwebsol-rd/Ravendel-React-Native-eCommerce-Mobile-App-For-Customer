@@ -1,140 +1,145 @@
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components/native';
-import {
-  AText,
-  AContainer,
-  AHeader,
-  ARow,
-  ACol,
-  AppLoader,
-} from '../../theme-components';
+import { AText, AppLoader, } from '../../theme-components';
 import { useSelector, useDispatch } from 'react-redux';
-import { categoriesAction } from '../../store/action';
-import URL from '../../utils/baseurl';
-import { isEmpty, unflatten } from '../../utils/helper';
+import { isEmpty } from '../../utils/helper';
+import NavigationConstants from '../../navigation/NavigationConstants';
+import Header from '../components/Header';
+import {
+  SafeAreaView,
+  StyleSheet,
+  View,
+} from 'react-native';
+import Colors from '../../constants/Colors';
+import { getSubcategories } from '../../store/action/productAction';
+import { query } from '../../utils/service';
+import { GET_FILTEREDPRODUCTS_WITH_PAGINATION } from '../../queries/productQuery';
+import MenuListing from './Components/menuListing';
 
 const CategoriesScreen = ({ navigation }) => {
-  const loading = useSelector((state) => state.products.loading);
-  const categories = useDispatch();
-  // const allCategoriesWithChild = useSelector(
-  //   state => state.products.allCategories,
-  // );
+  const mainLoading = useSelector((state) => state.products.loading);
+  const dispatch = useDispatch();
   const allCategoriesWithChild = useSelector(
-    (state) => state.products.categories.data,
+    (state) => state.products.categories,
   );
+  const { subcategories, loading } = useSelector((state) => state.products);
+  const [subcategoriesData, setSubcategoriesData] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState();
   const [allCategoriesWithChildData, setAllCategoriesWithChildData] = useState(
     [],
   );
 
   useEffect(() => {
-    categories(categoriesAction());
-  }, [categories]);
-  useEffect(() => {
     if (allCategoriesWithChild) {
-      const data = unflatten(allCategoriesWithChild);
-      setAllCategoriesWithChildData(data);
+      setAllCategoriesWithChildData(allCategoriesWithChild);
+      getSubcategory(allCategoriesWithChild[0]);
     }
   }, [allCategoriesWithChild]);
 
-  const navigateNextScreen = (category) => {
-    var navigateTo = '';
-    var nestedCategory = [];
-    if (category.children.length < 1) {
-      navigateTo = 'Category';
-    } else {
-      navigateTo = 'SubCategories';
+  useEffect(() => {
+    if (subcategories?.getCategoryPageData) {
+      setSubcategoriesData(
+        subcategories.getCategoryPageData.mostParentCategoryData.subCategories,
+      );
     }
+  }, [subcategories]);
 
-    // var nestedCategory = allCategoriesWithChildData.filter(
-    //   cat =>
-    //   cat.parentId === category.id,
-    // );
-    var nestedCategory = [];
-
-    if (!isEmpty(category.children)) {
-      nestedCategory = category.children;
+  const handleGetSubcategory = async (url) => {
+    const subcatPayload = {
+      mainFilter: {
+        categoryUrl: url,
+      },
+      filters: [],
+      pageNo: 1,
+      limit: 3,
+    };
+    const res = await query(
+      GET_FILTEREDPRODUCTS_WITH_PAGINATION,
+      subcatPayload,
+    );
+    if (!res.data.getCategoryPageData.isMostParentCategory) {
+      navigation.navigate(NavigationConstants.SUBCATEGORIES_SCREEN, {
+        singleCategory: res.data.getCategoryPageData.categoryTree.subCategories,
+        withChildern:
+          res.data.getCategoryPageData.categoryTree.subCategories.subCategories,
+      });
     }
-
-    navigation.navigate(navigateTo, {
-      singleCategory: category,
-      withChildern: nestedCategory,
-    });
+  };
+  const getSubcategory = (singleCat) => {
+    // setSelectedCategory(singleCat.id);
+    const subcat = {
+      mainFilter: {
+        categoryUrl: singleCat?.url,
+      },
+      pageNo: 1,
+      limit: 3,
+    };
+    dispatch(getSubcategories(subcat));
   };
 
-  const menuListing = (Categories) => {
-    return Categories.map((category) => {
-      if (category.parentId === null) {
-        return (
-          <ACol col={2} key={category.id}>
-            <CategoriesListingWrapper
-              onPress={() => navigateNextScreen(category)}>
-              <ARow height="100%" padding={0}>
-                <ACol col={1}>
-                  <CategoryImageWrapper>
-                    <CategoryImage
-                      source={{
-                        uri: !isEmpty(category.image)
-                          ? URL + category.image
-                          : 'https://www.hbwebsol.com/wp-content/uploads/2020/07/category_dummy.png',
-                      }}
-                    />
-                  </CategoryImageWrapper>
-                </ACol>
-                <ACol col={1}>
-                  <AText small uppercase color="#000" center>
-                    {category.name}
-                  </AText>
-                </ACol>
-              </ARow>
-            </CategoriesListingWrapper>
-          </ACol>
-        );
-      }
-    });
-  };
+
+  const noRecordView = () => {
+    return (
+      <View style={styles.emptyViewStyle}>
+        <AText
+          style={styles.emptyTextStyle}>
+          No Records Found
+        </AText>
+      </View>
+    )
+  }
 
   return (
-    <>
-      {loading ? <AppLoader /> : null}
-      <AHeader title="Categories" />
-      <AContainer>
-        {!isEmpty(allCategoriesWithChildData) &&
-        allCategoriesWithChildData.length > 0 ? (
-          <ARow row wrap>
-            {menuListing(allCategoriesWithChildData)}
-          </ARow>
-        ) : null}
-      </AContainer>
-    </>
+    <SafeAreaView style={styles.safeAreaViewStyle}>
+      {mainLoading || loading ? <AppLoader /> : null}
+      <Header navigation={navigation} title="Categories" />
+      {!isEmpty(allCategoriesWithChildData) &&
+        allCategoriesWithChildData.length > 0 ?
+        <View style={styles.contentContainerView}>
+          <MenuListing
+            data={allCategoriesWithChildData}
+            type={'mainCategory'}
+            onPress={(category) => getSubcategory(category)}
+            selectedItem={selectedCategory}
+          />
+          {!isEmpty(subcategoriesData) && subcategoriesData.length > 0 ? (
+            <MenuListing
+              data={subcategoriesData}
+              type={'subCategory'}
+              onPress={(category) => handleGetSubcategory(category.url)}
+            />
+          ) : (
+            noRecordView()
+          )}
+        </View>
+        :
+        noRecordView()
+      }
+    </SafeAreaView>
   );
 };
 
-const CategoriesListingWrapper = styled.TouchableOpacity`
-  margin: 10px 0 20px 0;
-  height: 140px;
-  border-radius: 15px;
-  background-color: #f7f7f7;
-  elevation: 1;
-`;
-
-const CategoryImageWrapper = styled.View`
-  width: 150px;
-  height: 100px;
-  margin: -20px auto 10px auto;
-  border-radius: 15px;
-  overflow: hidden;
-  shadow-color: #000;
-  shadow-offset: 0 2px;
-  shadow-opacity: 0.8;
-  shadow-radius: 2px;
-  elevation: 10;
-`;
-
-const CategoryImage = styled.Image`
-  width: null;
-  height: null;
-  flex: 1;
-  resize-mode: cover;
-`;
-
 export default CategoriesScreen;
+const styles = StyleSheet.create({
+  safeAreaViewStyle: {
+    flex: 1,
+    backgroundColor: '#fff'
+  },
+  contentContainerView: {
+    flex: 1,
+    backgroundColor: Colors.whiteColor,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  emptyViewStyle: {
+    width: '75%',
+    marginTop: 30,
+    flexWrap: 'wrap',
+    padding: 15,
+
+  },
+  emptyTextStyle: {
+    fontSize: 16,
+    alignSelf: 'center',
+    color: 'grey',
+  }
+});

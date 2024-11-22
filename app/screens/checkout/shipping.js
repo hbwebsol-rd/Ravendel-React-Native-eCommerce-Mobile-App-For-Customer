@@ -1,22 +1,30 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { AText, AButton, AppLoader, ZHeader } from '../../theme-components';
-import { Formik } from 'formik';
-import { validationSchema } from './validationSchema';
+import {
+  AText,
+  AButton,
+  AppLoader,
+  BackHeader,
+  MainLayout,
+} from '../../theme-components';
 import styled from 'styled-components/native';
-import { RadioButton, TextInput } from 'react-native-paper';
-import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { formatCurrency, isEmpty } from '../../utils/helper';
+import { isEmpty } from '../../utils/helper';
 import { useIsFocused } from '@react-navigation/native';
 import {
   addAddressAction,
   updateAddressAction,
   userDetailsfetch,
 } from '../../store/action';
-import DropDownPicker from 'react-native-dropdown-picker';
-import { countryArray } from '../../utils/CountryData';
 import { AdressForm } from '../components';
 import AIcon from 'react-native-vector-icons/AntDesign';
+import MIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
   APP_PRIMARY_COLOR,
   APP_SECONDARY_COLOR,
@@ -24,22 +32,25 @@ import {
   GREYTEXT,
 } from '../../utils/config';
 import Colors from '../../constants/Colors';
-const CheckoutScreen = ({ navigation, route }) => {
+import PropTypes from 'prop-types';
+import { checkPincodeValid } from '../../store/action/checkoutAction';
+import IonIcon from 'react-native-vector-icons/Ionicons';
+import AddressCard from '../../theme-components/addressCard';
+
+const ShippingScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
-  const [openCountryModal, setOpenCountryModal] = useState(false);
   const [scrollenable, setScrollEnable] = useState(true);
-  const [openStateModal, setOpenStateModal] = useState(false);
-  const [countrySelectIndex, setCountrySelectIndex] = useState(0);
   const { userDetails, loading } = useSelector((state) => state.customer);
-  const [addressBook, setAddressBook] = useState();
   const [addressForm, setAddressForm] = useState(false);
-  const { couponDiscount } = useSelector((state) => state.cart);
+  const [sameShipingAdress, setSameShippingAdress] = useState(true);
+  const [formSubmit, setFormSubmit] = useState(false);
   const [addressDefault, setaddressDefault] = useState(0);
+  const [shippingAddress, setShippingAddress] = useState({});
   const [initialFormValues, setInitialFormValues] = useState({
-    firstname: '',
-    lastname: '',
-    phone: '',
+    firstname: userDetails.firstName,
+    lastname: userDetails.lastName,
+    phone: userDetails.phone,
     address: '',
     landmark: '',
     city: '',
@@ -47,34 +58,13 @@ const CheckoutScreen = ({ navigation, route }) => {
     country: '',
     pincode: '',
     _id: '',
+    defaultAddress: true,
+    addressType: '',
   });
-  var cartAmount = route?.params?.cartAmount;
-  var cartProducts = route?.params?.cartProducts;
-  var couponCode = route?.params?.couponCode;
-  const { currencyOptions, currencySymbol } = useSelector(
-    (state) => state.settings,
-  );
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      title: 'Shipping',
-      headerTransparent: false,
-      headerTintColor: '#000',
-      headerRight: () => (
-        <AText bold pr="10px">
-          {formatCurrency(
-            cartAmount - couponDiscount,
-            currencyOptions,
-            currencySymbol,
-          )}
-        </AText>
-      ),
-    });
-  }, [navigation]);
 
   useEffect(() => {
-    if (!isEmpty(userDetails.address_book)) {
-      let address = userDetails.address_book;
-      setAddressBook(address);
+    if (!isEmpty(userDetails.addressBook)) {
+      let address = userDetails.addressBook;
       setAddressForm(false);
       var found = address.find((item) => {
         return item.default_address == true;
@@ -95,40 +85,48 @@ const CheckoutScreen = ({ navigation, route }) => {
     }
   }, [isFocused]);
   const defaddress = !isEmpty(userDetails)
-    ? userDetails.address_book.filter(({ _id }) => _id === addressDefault)
+    ? userDetails.addressBook.filter(({ defaultAddress }) => defaultAddress)
     : [];
   const onSubmit = (values) => {
     if (isEmpty(initialFormValues._id)) {
       const payload = {
         id: userDetails._id,
-        first_name: values.firstname,
-        last_name: values.lastname,
+        firstName: values.firstname,
+        lastName: values.lastname,
         phone: values.phone,
-        address_line1: values.address,
-        address_line2: values.landmark,
+        company: '',
+        addressLine1: values.address,
+        addressLine2: values.landmark,
         city: values.city,
         country: values.country,
         state: values.state,
         pincode: values.pincode,
-        default_address: true,
+        defaultAddress: values.defaultAddress,
+        addressType: values.addressType,
       };
-
-      setAddressForm(false);
-      dispatch(addAddressAction(payload));
+      if (!sameShipingAdress && !addressForm) {
+        setShippingAddress(payload);
+        handleShipping(payload);
+      } else {
+        setAddressForm(false);
+        dispatch(addAddressAction(payload));
+      }
     } else {
       const payload = {
         id: userDetails._id,
         _id: initialFormValues._id,
-        first_name: values.firstname,
-        last_name: values.lastname,
+        firstName: values.firstname,
+        lastName: values.lastname,
         phone: values.phone,
-        address_line1: values.address,
-        address_line2: values.landmark,
+        company: '',
+        addressLine1: values.address,
+        addressLine2: values.landmark,
         city: values.city,
         country: values.country,
         state: values.state,
         pincode: values.pincode,
-        default_address: true,
+        defaultAddress: values.defaultAddress,
+        addressType: values.addressType,
       };
       setInitialFormValues({
         firstname: '',
@@ -140,260 +138,190 @@ const CheckoutScreen = ({ navigation, route }) => {
         state: '',
         country: '',
         pincode: '',
+        defaultAddress: true,
+        addressType: '',
       });
       setAddressForm(false);
       dispatch(updateAddressAction(payload));
     }
-    // navigation.navigate('PaymentMethod', { shippingValue: values, cartAmount: cartAmount, cartProducts: cartProducts });
   };
   const editFormValues = (values) => {
     setInitialFormValues({
-      firstname: values.first_name,
-      lastname: values.last_name,
+      firstname: values.firstName,
+      lastname: values.lastName,
       phone: values.phone,
-      address: values.address_line1,
-      landmark: values.address_line2,
+      address: values.addressLine1,
+      landmark: values.addressLine2,
       city: values.city,
       state: values.state,
       country: values.country,
       pincode: values.pincode,
       _id: values._id,
+      defaultAddress: values.defaultAddress ?? false,
+      addressType: values.addressType ?? '',
     });
     setAddressForm(true);
   };
+
+  const handleShipping = (shipAddresspayload) => {
+    const billAddress =
+      userDetails.addressBook &&
+      userDetails.addressBook.find((item) => item._id == addressDefault);
+    const payload = {
+      zipcode:
+        !sameShipingAdress && shipAddresspayload
+          ? shipAddresspayload.pincode
+          : !sameShipingAdress && shippingAddress
+            ? shippingAddress.pincode
+            : billAddress.pincode,
+    };
+    const navigationParams = {
+      screen: 'CheckoutDetails',
+      shippingAddress:
+        !sameShipingAdress && shipAddresspayload
+          ? shipAddresspayload
+          : !sameShipingAdress && shippingAddress
+            ? shippingAddress
+            : billAddress,
+      billingAddress: billAddress,
+    };
+    dispatch(checkPincodeValid(payload, navigation, navigationParams));
+  };
+
   return (
-    <>
+    <MainLayout hideScroll style={styles.container}>
       {loading ? <AppLoader /> : null}
-      {(isEmpty(userDetails) && isEmpty(userDetails.address_book)) ||
-      addressForm ? (
-        <>
-          <AdressForm
-            navigation={navigation}
-            addForm={onSubmit}
-            onStopScroll={() => {
-              setScrollEnable(!scrollenable);
-            }}
-            cancelAddForm={() => {
-              setAddressForm(false);
-            }}
-            initialFormValues={initialFormValues}
-          />
-        </>
+      {(isEmpty(userDetails) && isEmpty(userDetails.addressBook)) ||
+        addressForm ? (
+        <AdressForm
+          navigation={navigation}
+          addForm={onSubmit}
+          onStopScroll={() => setScrollEnable(!scrollenable)}
+          showBottomPanel={true}
+          showHeader={true}
+          cancelAddForm={() => setAddressForm(false)}
+          initialFormValues={initialFormValues}
+        />
       ) : (
         <>
-          <View style={styles.container}>
-            <ZHeader navigation={navigation} name="Checkout" />
-            <View style={styles.container2}>
-              <View style={styles.step}>
-                <View style={styles.circle} />
-                <View
-                  style={{
-                    top: 5,
-                    left: 5,
-                    position: 'absolute',
-                    width: 10,
-                    height: 10,
-                    borderRadius: 10,
-                    backgroundColor: APP_PRIMARY_COLOR,
-                  }}
-                />
-                <View style={styles.line} />
-                <View
-                  style={{
-                    ...styles.label,
-                    alignItems: 'flex-start',
-                  }}>
-                  <AText fonts={FontStyle.semiBold} color="black">
-                    Address
-                  </AText>
-                </View>
-              </View>
-              <View style={styles.step}>
-                <View style={styles.line} />
-                <View style={styles.circle} />
-                <View style={styles.line} />
-                <View style={styles.label}>
-                  <AText fonts={FontStyle.semiBold} color="black">
-                    Shipping
-                  </AText>
-                </View>
-              </View>
-              <View style={styles.step}>
-                <View style={styles.line} />
+          <BackHeader navigation={navigation} name="Checkout" />
+          <ScrollView
+            style={styles.scrollStyle}
+            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled={true}
+            scrollEnabled={scrollenable}>
+            <AText medium fonts={FontStyle.semiBold} color="black">
+              Billing Address
+            </AText>
+            <AddressWrapper>
+              {userDetails.addressBook.map((item) => (
+                <AddressCard
+                  addressDefault={addressDefault}
+                  item={item}
+                  editDefaultAdress={true}
+                  setaddressDefault={() => { setaddressDefault(item._id) }}
+                  editForm={() => { editFormValues(item) }} />
+              ))}
+            </AddressWrapper>
 
-                <View style={styles.circle} />
-                <View style={{ ...styles.label, alignItems: 'flex-end' }}>
-                  <AText fonts={FontStyle.semiBold} color="black">
-                    Order Detail
-                  </AText>
-                </View>
-              </View>
-            </View>
-            <ScrollView
-              style={{ marginHorizontal: 30, flex: 1 }}
-              showsVerticalScrollIndicator={false}
-              nestedScrollEnabled={true}
-              scrollEnabled={scrollenable}>
-              <AddressWrapper>
-                {userDetails.address_book.map((item, index) => (
-                  <View style={styles.addresscard}>
-                    <RadioButtonWrapper>
-                      <AText
-                        mr="8px"
-                        color="black"
-                        fonts={FontStyle.semiBold}
-                        large>
-                        {item.first_name}
-                      </AText>
-                      {item._id === addressDefault ? (
-                        <AIcon
-                          name="checkcircleo"
-                          size={18}
-                          color={APP_PRIMARY_COLOR}
-                        />
-                      ) : null}
-                    </RadioButtonWrapper>
-                    <AText color={GREYTEXT} fonts={FontStyle.semiBold}>
-                      {item.phone}
-                    </AText>
-                    <AText color={GREYTEXT}>
-                      {item.address_line1}, {item.address_line2}, {item.city}
-                    </AText>
-                    <AText mb="10px" color={GREYTEXT}>
-                      {item.state}, {item.pincode}
-                    </AText>
-
-                    <AIcon
-                      onPress={() => {
-                        editFormValues(item);
-                      }}
-                      style={{ alignSelf: 'flex-end' }}
-                      name="edit"
-                      size={15}
-                      color={'grey'}
-                    />
-                  </View>
-                ))}
-              </AddressWrapper>
-              <AText large fonts={FontStyle.semiBold} color="black">
-                Select Delivery Address
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => setAddressForm(true)}
+              style={styles.addaddresscard}>
+              <AIcon style={styles.iconStyle} name="pluscircleo" size={25} color={'black'} />
+              <AText style={styles.textStyle} >
+                Add a new address
               </AText>
-              <View style={styles.addaddresscard}>
-                <AIcon
-                  onPress={() => {
-                    setAddressForm(true);
-                  }}
-                  style={{
-                    height: 26,
-                    width: 26,
-                    borderRadius: 30,
-                    backgroundColor: '#DCF0EF',
-                  }}
-                  name="pluscircleo"
-                  size={25}
-                  color={'black'}
-                />
-                <AText ml="20px" color="black" fonts={FontStyle.semiBold}>
-                  Add a new address
-                </AText>
-              </View>
-              <AButton
-                ml="50px"
-                mr="50px"
-                onPress={() => {
-                  navigation.navigate('ShippingMethod', {
-                    screen: 'ShippingMethod',
-                    shippingValue: defaddress,
-                    cartAmount: cartAmount,
-                    cartProducts: cartProducts,
-                    couponCode: couponCode,
-                  });
-                }}
-                round
-                title="Next"
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              activeOpacity={0.5}
+              style={styles.billingAddressBtnStyle}
+              onPress={() => setSameShippingAdress(!sameShipingAdress)}>
+              <IonIcon
+                color={APP_PRIMARY_COLOR}
+                name={sameShipingAdress ? 'checkbox-outline' : 'square-outline'}
+                style={{ marginHorizontal: 5 }}
+                size={20}
               />
-            </ScrollView>
-          </View>
+              <Text>Same as Billing address</Text>
+            </TouchableOpacity>
+
+            <AddressWrapper>
+              {!sameShipingAdress && (
+                <AdressForm
+                  navigation={navigation}
+                  handleSubmit={formSubmit}
+                  addForm={onSubmit}
+                  onStopScroll={() => setScrollEnable(!scrollenable)}
+                  cancelAddForm={() => setAddressForm(false)}
+                  initialFormValues={initialFormValues}
+                />
+              )}
+            </AddressWrapper>
+            <AButton
+              style={styles.nextBtnStyle}
+              onPress={() => {
+                sameShipingAdress ? handleShipping() : setFormSubmit(true);
+                setTimeout(() => {
+                  setFormSubmit(false);
+                }, 700);
+              }}
+              title="Next"
+            />
+          </ScrollView>
         </>
       )}
-    </>
+    </MainLayout>
   );
+};
+
+ShippingScreen.propTypes = {
+  navigation: PropTypes.object,
+  route: PropTypes.object,
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // paddingTop: 40,
     paddingBottom: 20,
     backgroundColor: Colors.whiteColor,
-    // paddingHorizontal: 30,
   },
-  container2: {
-    marginHorizontal: 30,
+  textStyle: {
+    marginLeft: 20, color: "black", fontFamily: FontStyle.semiBold
+  },
+  scrollStyle: { marginHorizontal: 20, marginTop: 10, flex: 1 },
+  billingAddressBtnStyle: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingBottom: 20,
+    marginStart: 5,
   },
-  step: {
-    position: 'relative',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    width: '33%',
+  iconStyle: {
+    height: 26,
+    width: 26,
+    borderRadius: 30,
+    backgroundColor: '#DCF0EF',
   },
-
-  circle: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: APP_PRIMARY_COLOR,
-  },
-  line: {
-    flex: 1,
-    height: 1,
-    backgroundColor: GREYTEXT,
-    marginHorizontal: 5,
-  },
-  label: {
-    fontFamily: 'SegoeUI-SemiBold',
-    width: '100%',
-    alignItems: 'center',
-  },
-  textinputstyle: {
-    marginTop: 5,
-    marginBottom: 5,
-  },
-  dropDownStyle: {
-    backgroundColor: '#E7E7E7',
-    marginVertical: 7,
-    borderWidth: 0,
-    zIndex: 1,
-  },
-  addresscard: {
-    paddingHorizontal: 20,
-    paddingVertical: 9,
-    marginVertical: 10,
-    backgroundColor: '#fff',
-    // borderWidth: 1,
-    // borderColor: '#f7f7f7',
-    // boxShadow: 0 0 5px #eee,
-    borderRadius: 8,
-    elevation: 3,
-  },
+  nextBtnStyle: { width: '80%', alignItems: 'center', alignSelf: 'center', borderRadius: 25 },
   addaddresscard: {
+    marginHorizontal: 2,
     marginBottom: 30,
     paddingHorizontal: 20,
     paddingVertical: 9,
     marginVertical: 10,
-    backgroundColor: '#fff',
-    // borderWidth: 1,
-    // borderColor: '#f7f7f7',
-    // boxShadow: 0 0 5px #eee,
+    backgroundColor: Colors.whiteColor,
     borderRadius: 8,
-    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+    elevation: 4,
     flexDirection: 'row',
+    borderWidth: 1,
+    borderColor: '#c8c8c8',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -401,15 +329,7 @@ const styles = StyleSheet.create({
 
 const AddressWrapper = styled.View`
   margin-bottom: 10px;
+  margin-horizontal: 2px;
 `;
 
-const RadioButtonWrapper = styled.TouchableOpacity`
-  // justify-content: space-between;
-  margin-bottom: 10px;
-  align-items: center;
-  align-self: flex-end;
-  flex-direction: row;
-  width: 98%;
-`;
-
-export default CheckoutScreen;
+export default ShippingScreen;

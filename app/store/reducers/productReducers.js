@@ -15,6 +15,9 @@ import {
   CAT_PRODUCTS_CLEAR,
   PRODUCT_CLEAR,
   RELATED_CAT_PRODUCTS,
+  SUB_CATS_SUCCESS,
+  CLEAR_SUBCATEGORY,
+  CLEAR_SEARCH_PRODUCT,
 } from '../action/productAction';
 
 const initialState = {
@@ -54,6 +57,7 @@ const initialState = {
   },
   relatedProducts: [],
   categories: [],
+  subcategories: [],
   category: {},
   loading: false,
   success: false,
@@ -61,6 +65,9 @@ const initialState = {
   productReviews: [],
   allCategories: [],
   singleCategory: [],
+  totalCount: 0,
+  filterData: [],
+  additionalProduct: [],
 };
 
 export default (state = initialState, action) => {
@@ -75,6 +82,20 @@ export default (state = initialState, action) => {
       return {
         ...state,
         categories: action.payload,
+        loading: false,
+        success: true,
+      };
+    case SUB_CATS_SUCCESS:
+      return {
+        ...state,
+        subcategories: action.payload,
+        loading: false,
+        success: true,
+      };
+    case CLEAR_SUBCATEGORY:
+      return {
+        ...state,
+        subcategories: [],
         loading: false,
         success: true,
       };
@@ -135,7 +156,9 @@ export default (state = initialState, action) => {
     case CAT_PRODUCTS:
       return {
         ...state,
-        singleCategoryDetails: action.payload,
+        singleCategoryDetails: action.payload.products,
+        totalCount: action.payload.counts,
+        filterData: action.payload.filterData,
         loading: false,
         success: true,
       };
@@ -146,8 +169,14 @@ export default (state = initialState, action) => {
         loading: false,
         success: true,
       };
+    case 'RELATED_CART_PRODUCTS':
+      return {
+        ...state,
+        additionalProduct: action.payload,
+        loading: false,
+        success: true,
+      };
     case CAT_PRODUCTS_CLEAR:
-      console.log('clear products');
       return {
         ...state,
         singleCategoryDetails: [],
@@ -160,6 +189,11 @@ export default (state = initialState, action) => {
         productReviews: action.payload,
         loading: false,
         success: true,
+      };
+    case CLEAR_SEARCH_PRODUCT:
+      return {
+        ...state,
+        singleCategoryDetails: [],
       };
     case ADD_PRODUCT_REVIEWS:
       return {

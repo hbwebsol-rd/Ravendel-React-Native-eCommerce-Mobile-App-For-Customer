@@ -1,13 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import Styles from '../../Theme';
 import { AText } from '../../theme-components';
 import { FontStyle } from '../../utils/config';
 import { Image } from 'react-native';
+import NavigationConstants from '../../navigation/NavigationConstants';
+import PropTypes from 'prop-types';
 
-const Header = ({ navigation, title, showProfileIcon }) => {
+const Header = ({ navigation, title, showProfileIcon, titleColor }) => {
   function handlePress() {
-    navigation.openDrawer();
+    // navigation.openDrawer();
   }
   return (
     <View
@@ -15,23 +16,14 @@ const Header = ({ navigation, title, showProfileIcon }) => {
         ...styles.header,
         justifyContent: showProfileIcon ? 'space-between' : 'flex-start',
       }}>
-      {/* <AIcon
-            onPress={() => navigation.navigate('Home')}
-            name="arrowleft"
-            size={22}
-          /> */}
-      <TouchableOpacity style={{ marginTop: 10 }} onPress={handlePress}>
-        <View style={Styles.bar1}></View>
-        <View style={Styles.bar2}></View>
-      </TouchableOpacity>
-      <AText fonts={FontStyle.semiBold} ml="20px">
+      <AText large color={titleColor ?? '#000'} fonts={FontStyle.fontBold}>
         {title}
       </AText>
       {showProfileIcon ? (
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={() =>
-            navigation.navigate('AccountWrapper', { screen: 'Accounts' })
+            navigation.navigate(NavigationConstants.ACCOUNT_SCREEN)
           }
           style={{ ...styles.profileimgstyle, elevation: 5 }}>
           <Image
@@ -44,6 +36,12 @@ const Header = ({ navigation, title, showProfileIcon }) => {
   );
 };
 
+Header.propTypes = {
+  navigation: PropTypes.object,
+  title: PropTypes.string,
+  showProfileIcon: PropTypes.bool,
+};
+
 const styles = StyleSheet.create({
   text: {
     fontSize: 24,
@@ -51,14 +49,12 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    position: 'absolute',
+    // position: 'absolute',
     width: '100%',
     justifyContent: 'flex-start',
     alignItems: 'center',
-    left: 0,
-    right: 0,
-    marginTop: 10,
-    paddingHorizontal: 30,
+    marginTop: 5,
+    paddingHorizontal: 17,
     zIndex: 10,
     // backgroundColor: Colors.whiteColor,
   },

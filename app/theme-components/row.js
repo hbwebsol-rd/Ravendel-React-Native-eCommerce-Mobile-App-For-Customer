@@ -9,15 +9,6 @@ const ARow = styled.View`
   flex-direction: ${(props) => (props.row ? 'row' : 'column')};
   flex-wrap: ${(props) => (props.wrap ? 'wrap' : 'nowrap')};
   height: ${(props) => props.height ?? 'auto'};
-  margin-bottom: ${(props) => props.mb ?? '0px'};
-  margin-top: ${(props) => props.mt ?? '0px'};
-  margin-left: ${(props) => props.ml ?? '0px'};
-  margin-right: ${(props) => props.mr ?? '0px'};
-  padding-bottom: ${(props) => props.pb ?? '0px'};
-  padding-top: ${(props) => props.pt ?? '0px'};
-  padding-left: ${(props) => props.pl ?? '0px'};
-  padding-right: ${(props) => props.pr ?? '0px'};
-  border-bottom-width: ${(props) => props.bbw ?? '0px'};
 
   border-top-right-radius: ${(props) => props.btrr ?? '0px'};
   border-top-left-radius: ${(props) => props.btlr ?? '0px'};
@@ -28,7 +19,7 @@ const ARow = styled.View`
   bottom: ${(props) => props.bottom ?? 0};
   left: ${(props) => props.left ?? 0};
   z-index: ${(props) => props.zindex ?? 1};
-  ${({ justifyContent }) => {
+${({ justifyContent }) => {
     switch (justifyContent) {
       case 'space-between':
         return `justify-content: space-between`;
@@ -43,9 +34,8 @@ const ARow = styled.View`
       default:
         return `justify-content: flex-start`;
     }
-  }}
-
-  ${({ alignItems }) => {
+  }};
+${({ alignItems }) => {
     switch (alignItems) {
       case 'center':
         return `align-items: center`;
@@ -54,7 +44,8 @@ const ARow = styled.View`
       default:
         return `align-items: flex-start`;
     }
-  }}
+  }};
+  ${(props) => props.rowStyle}
 `;
 
 const ContainerStyle = ({ ...props }) => {

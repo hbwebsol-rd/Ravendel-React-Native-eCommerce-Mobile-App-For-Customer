@@ -5,7 +5,7 @@ import { FontStyle } from '../utils/config';
 const Header = ({ name, navigation }) => (
   <View style={styles.header}>
     <AIcon name="arrowleft" onPress={() => navigation.goBack()} size={22} />
-    <AText fonts={FontStyle.semiBold} ml="20px">
+    <AText style={styles.textStyle} large>
       {name}
     </AText>
   </View>
@@ -25,5 +25,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     zIndex: 10,
   },
+  textStyle: {
+    marginLeft: 20,
+    fontFamily: FontStyle.semiBold,
+  }
 });
 export default Header;

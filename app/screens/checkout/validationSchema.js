@@ -1,15 +1,24 @@
 import * as yup from 'yup';
 
+const regularExpression =
+  /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+const regexEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+
+const regexsmallet = /[a-z]/;
+const regexcaps = /[A-Z]/;
+const regexdigi = /[0-9]/;
+const regexspeChar = /[!@#\$%\^&\*_]/;
 const phoneReg =
   /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
 const pincodeReg = '^[0-9]{5,10}$';
-
+const PASSWORD_MSG =
+  'Password Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character';
 export const validationSchema = yup.object().shape({
   firstname: yup.string().label('First Name').min(4).required(),
   lastname: yup.string().label('Last Name').min(2).required(),
   phone: yup
     .string()
-    .matches(phoneReg, 'Phone number is not valid')
+    // .matches(phoneReg, 'Phone number is not valid')
     .label('Phone number')
     .required(),
   // landmark: yup
@@ -27,44 +36,58 @@ export const validationSchema = yup.object().shape({
   state: yup.string().label('State').required(),
 });
 export const signupValidationSchema = yup.object().shape({
-  firstname: yup.string().label('First Name').min(4).required(),
-  lastname: yup.string().label('Last Name').min(2).required(),
-  email: yup.string().label('Email').email().required(),
+  firstName: yup
+    .string()
+    .label('First Name')
+    .min(4)
+    .required('First Name is required'),
+  lastName: yup
+    .string()
+    .label('Last Name')
+    .min(2)
+    .required('Last Name is required'),
+  email: yup.string().label('Email').email().required('Email is required').matches(regexEmail, 'Enter valid email'),
   password: yup
+    .string('')
+    .required('Please enter password')
+    .min(8, PASSWORD_MSG)
+    .required('Password is required')
+    .matches(regexsmallet, PASSWORD_MSG)
+    .matches(regexcaps, PASSWORD_MSG)
+    .matches(regexdigi, PASSWORD_MSG)
+    .matches(regexspeChar, PASSWORD_MSG)
+    .matches(regularExpression, 'Password too weak'),
+  confirmPassword: yup
     .string()
-    .label('Password')
-    .required()
-    .min(2, 'Seems a bit short...')
-    .max(10, 'We prefer insecure system, try a shorter password.'),
-  confirm_password: yup
-    .string()
-    .required()
+    .required('Confirm password is required')
     .label('Confirm password')
     .test('passwords-match', 'Passwords must match', function (value) {
       return this.parent.password === value;
     }),
   mobile: yup
     .string()
-    .matches(phoneReg, 'Phone number is not valid')
+    // .matches(phoneReg, 'Phone number is not valid')
+    .min(8, 'Invalid mobile No.')
     .label('Mobile No.')
-    .required(),
+    .required('Mobile No. is required'),
   policy: yup
     .boolean()
     .oneOf([true], 'Please accept terms and policy')
     .required('Please accept terms and policy'),
 });
 export const editProfileValidationSchema = yup.object().shape({
-  first_name: yup.string().label('First Name').min(4).required(),
-  last_name: yup.string().label('Last Name').min(2).required(),
-  email: yup.string().label('Email').email().required(),
+  first_name: yup.string().label('First Name').min(4).required('First Name is required'),
+  last_name: yup.string().label('Last Name').min(2).required('Last Name is required'),
+  email: yup.string().label('Email').email().required('EmailD is required'),
   phone: yup
     .string()
-    .matches(phoneReg, 'Phone number is not valid')
+    // .matches(phoneReg, 'Phone number is not valid')
     .label('Phone No.')
-    .required(),
+    .required('Phone No. is required'),
 });
 export const loginValidationSchema = yup.object().shape({
-  email: yup.string().label('Email').email().required(),
+  email: yup.string().label('Email').email().required().matches(regexEmail, 'Enter valid email')
+  ,
   password: yup.string().label('Password').required(),
   // .min(2, 'Seems a bit short...'),
 });

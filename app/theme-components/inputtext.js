@@ -16,53 +16,66 @@ const Textinputs = ({
   onblur,
   mode,
   keyboardtype,
-  bgColor,
+  icon,
+  hookuse,
+  sideheading,
+  sideheadclick,
+  multi,
+  linenumbers,
+  afocus,
+  editable,
+  // Single Style Props
+  StylesHeadingText,
   StylesTextInput,
+  StylesView,
+  inputViewStyle,
+  //Style Props
+  bgColor,
   width,
   bc,
   bw,
   br,
   padding,
   color,
-  fw,
   bb,
-  icon,
   iconSize,
   iconColor,
-  hookuse,
   fs,
   height,
   inputBgColor,
-  sideheading,
-  sideheadclick,
   pl,
-  multi,
-  linenumbers,
   inputtextalign,
-  afocus,
-  hml,
-  pb,
-  editable,
   placeholdercolor,
-  pe,
-  pt,
-  mt,
+  hmt,
+  hmb,
+  hc,
+  hfs,
+  onSubmit,
+  onfocus,
+  textInputRef,
+
 }) => {
   const { passwordVisibility, rightIcon, handlePasswordVisibility } =
     useTogglePasswordVisibility();
   return (
     <View
-      style={[styles.textViewInputStyle, { backgroundColor: bgColor ?? null }]}>
+      style={[
+        styles.textViewInputStyle,
+        { backgroundColor: bgColor ?? null, ...StylesView },
+      ]}>
       <ARow row justifyContent={'space-between'}>
         {!isEmpty(heading) && (
-          <AText
-            ml={hml ?? '0px'}
-            mb={'5.5px'}
-            fonts={FontStyle.fontRegular}
-            color={'#9F9F9F'}
-            xtrasmall>
+          <Text
+            style={{
+              color: hc ?? LINE_COLOR,
+              marginTop: hmt ?? 20,
+              marginBottom: hmb ?? 5,
+              fontFamily: FontStyle.fontRegular,
+              fontSize: hfs ?? 14,
+              ...StylesHeadingText,
+            }}>
             {heading}
-          </AText>
+          </Text>
         )}
         {!isEmpty(sideheading) && (
           <TouchableWithoutFeedback
@@ -75,15 +88,18 @@ const Textinputs = ({
               fonts={FontStyle.fontRegular}
               color={'#156ABF'}
               xtrasmall
-              lineThrough>
+              underLine>
               {sideheading}
             </AText>
           </TouchableWithoutFeedback>
         )}
       </ARow>
-      <View style={styles.inputviewstyle}>
+      <View style={[styles.inputviewstyle, inputViewStyle]}>
         <TextInput
-          pointerEvents={pe ?? 'auto'}
+          ref={textInputRef}
+          onFocus={onfocus}
+          onSubmitEditing={onSubmit}
+          pointerEvents={'auto'}
           editable={editable ?? true}
           autoFocus={afocus ?? false}
           theme={{ roundness: 10 }}
@@ -109,12 +125,9 @@ const Textinputs = ({
               borderRadius: br ?? 8,
               padding: padding ?? 5,
               paddingLeft: pl ?? 12,
-              paddingBottom: pb ?? 0,
-              paddingTop: pt ?? 0,
               color: color ?? '#ABA7A7',
-              fontFamily: FontStyle.fontBoldItalic,
+              fontFamily: FontStyle.fontBold,
               fontSize: fs ?? 12,
-              marginTop: mt ?? 0,
             },
             StylesTextInput,
           ]}
